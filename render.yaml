@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: hiveagent
+    runtime: node
+    plan: free
+    buildCommand: npm install && node src/seed-expanded.js
+    startCommand: node src/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HIVEAGENT_HOST
+        value: https://hiveagent.onrender.com
