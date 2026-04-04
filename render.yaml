@@ -9,4 +9,4 @@ services:
       - key: NODE_ENV
         value: production
       - key: HIVEAGENT_HOST
-        value: https://hiveagentiq.onrender.com
+        value: https://hiveagentiq.com
