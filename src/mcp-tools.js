@@ -1,7 +1,7 @@
 /**
- * HiveIQ MCP Tool Definitions
+ * HiveAgent MCP Tool Definitions
  *
- * These are the tools that AI agents see when they connect to HiveIQ
+ * These are the tools that AI agents see when they connect to HiveAgent
  * via Model Context Protocol. Each tool maps to a marketplace action.
  *
  * An agent using Claude/GPT/etc. would see these as available tools
@@ -13,9 +13,9 @@ import * as mkt from "./services/marketplace.js";
 // MCP tool definitions (JSON Schema format)
 export const tools = [
   {
-    name: "hiveiq_search",
+    name: "hiveagent_search",
     description:
-      "Search the HiveIQ marketplace for services. Find APIs, datasets, AI tools, human services, and more. Returns a list of available services with pricing.",
+      "Search the HiveAgent marketplace for services. Find APIs, datasets, AI tools, human services, and more. Returns a list of available services with pricing.",
     inputSchema: {
       type: "object",
       properties: {
@@ -27,9 +27,9 @@ export const tools = [
     },
   },
   {
-    name: "hiveiq_buy",
+    name: "hiveagent_buy",
     description:
-      "Purchase a service from HiveIQ. Pay the listed price in USDC and receive the service endpoint or result. 15% marketplace commission is included in the price.",
+      "Purchase a service from HiveAgent. Pay the listed price in USDC and receive the service endpoint or result. 15% marketplace commission is included in the price.",
     inputSchema: {
       type: "object",
       properties: {
@@ -40,7 +40,7 @@ export const tools = [
     },
   },
   {
-    name: "hiveiq_auction_create",
+    name: "hiveagent_auction_create",
     description:
       "Create a micro-auction. Describe what you need, set a budget, and providers will bid to serve you. Lowest bid wins. Auctions expire in 5 minutes by default.",
     inputSchema: {
@@ -56,7 +56,7 @@ export const tools = [
     },
   },
   {
-    name: "hiveiq_auction_bids",
+    name: "hiveagent_auction_bids",
     description: "View bids on your auction. Returns all bids sorted by price (lowest first).",
     inputSchema: {
       type: "object",
@@ -67,7 +67,7 @@ export const tools = [
     },
   },
   {
-    name: "hiveiq_auction_accept",
+    name: "hiveagent_auction_accept",
     description: "Accept a bid on your auction. The winning provider will be paid upon delivery.",
     inputSchema: {
       type: "object",
@@ -80,7 +80,7 @@ export const tools = [
     },
   },
   {
-    name: "hiveiq_browse_auctions",
+    name: "hiveagent_browse_auctions",
     description: "Browse open auctions where agents are looking for services. Providers can bid on these.",
     inputSchema: {
       type: "object",
@@ -91,13 +91,13 @@ export const tools = [
     },
   },
   {
-    name: "hiveiq_categories",
-    description: "List all available service categories on HiveIQ.",
+    name: "hiveagent_categories",
+    description: "List all available service categories on HiveAgent.",
     inputSchema: { type: "object", properties: {} },
   },
   {
-    name: "hiveiq_stats",
-    description: "Get HiveIQ marketplace statistics — total services, providers, transactions, and volume.",
+    name: "hiveagent_stats",
+    description: "Get HiveAgent marketplace statistics — total services, providers, transactions, and volume.",
     inputSchema: { type: "object", properties: {} },
   },
 ];
@@ -105,28 +105,28 @@ export const tools = [
 // Tool handler — called when an agent invokes a tool
 export function handleTool(name, args) {
   switch (name) {
-    case "hiveiq_search":
+    case "hiveagent_search":
       return mkt.searchServices(args);
 
-    case "hiveiq_buy":
+    case "hiveagent_buy":
       return mkt.purchaseService(args);
 
-    case "hiveiq_auction_create":
+    case "hiveagent_auction_create":
       return mkt.createAuction(args);
 
-    case "hiveiq_auction_bids":
+    case "hiveagent_auction_bids":
       return mkt.getAuctionBids(args.auction_id);
 
-    case "hiveiq_auction_accept":
+    case "hiveagent_auction_accept":
       return mkt.acceptBid(args.auction_id, args.bid_id, args.agent_id);
 
-    case "hiveiq_browse_auctions":
+    case "hiveagent_browse_auctions":
       return mkt.getOpenAuctions(args);
 
-    case "hiveiq_categories":
+    case "hiveagent_categories":
       return mkt.getCategories();
 
-    case "hiveiq_stats":
+    case "hiveagent_stats":
       return mkt.getMarketplaceStats();
 
     default:

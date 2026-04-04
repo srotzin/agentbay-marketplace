@@ -26,13 +26,13 @@ app.get("/.well-known/mcp/server-card.json", (_req, res) => {
     "Cache-Control": "public, max-age=3600",
     "Access-Control-Allow-Origin": "*",
   });
-  const host = process.env.HIVEIQ_HOST || "https://thehiveiq.ai";
+  const host = process.env.HIVEIQ_HOST || "https://thehiveagent.ai";
   res.json({
     $schema: "https://modelcontextprotocol.io/schemas/server-card/v1.0",
     version: "1.0",
     protocolVersion: "2025-06-18",
     serverInfo: {
-      name: "HiveIQ",
+      name: "HiveAgent",
       version: "1.0.0",
       description: "The nervous system of the agent economy. Search, buy, and auction services across 9 departments, 36+ categories, and 100+ service types. Every agent. Every service. Every transaction. One hive.",
       homepage: host,
@@ -56,7 +56,7 @@ app.get("/.well-known/mcp", (_req, res) => {
     "Cache-Control": "public, max-age=3600",
     "Access-Control-Allow-Origin": "*",
   });
-  const host = process.env.HIVEIQ_HOST || "https://thehiveiq.ai";
+  const host = process.env.HIVEIQ_HOST || "https://thehiveagent.ai";
   res.json({
     mcp_version: "2025-11-25",
     endpoints: [
@@ -69,10 +69,10 @@ app.get("/.well-known/mcp", (_req, res) => {
   });
 });
 
-// Root — HiveIQ info
+// Root — HiveAgent info
 app.get("/", (_req, res) => {
   res.json({
-    name: "HiveIQ",
+    name: "HiveAgent",
     tagline: "The nervous system of the agent economy.",
     version: "1.0.0",
     endpoints: {
@@ -95,7 +95,7 @@ app.listen(PORT, () => {
   console.log(`
   ╔═══════════════════════════════════════════════╗
   ║                                               ║
-  ║   HiveIQ — The marketplace where AI          ║
+  ║   HiveAgent — The marketplace where AI          ║
   ║              agents shop.                      ║
   ║                                               ║
   ║   API:  http://localhost:${PORT}/api/v1          ║

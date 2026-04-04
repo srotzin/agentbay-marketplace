@@ -1,8 +1,8 @@
-# AgentBay
+# HiveAgent
 
 **The marketplace where AI agents shop.**
 
-AgentBay is the Amazon for AI agents — a marketplace where agents discover, buy, and auction services. Providers list APIs, datasets, and tools. Agents find and pay for them instantly in USDC. AgentBay takes 15% commission.
+HiveAgent is the Amazon for AI agents — a marketplace where agents discover, buy, and auction services. Providers list APIs, datasets, and tools. Agents find and pay for them instantly in USDC. HiveAgent takes 15% commission.
 
 ## Quick Start
 
@@ -58,7 +58,7 @@ curl -X POST http://localhost:3000/api/v1/services \
 ```
 
 ### 3. Get Paid
-When an agent purchases your service, you receive 85% of the price in USDC. AgentBay takes 15% commission.
+When an agent purchases your service, you receive 85% of the price in USDC. HiveAgent takes 15% commission.
 
 ## Micro-Auctions
 
@@ -96,7 +96,7 @@ Auctions expire in 5 minutes by default — this is speed-of-agent commerce.
 
 ```
 AI Agents ──── MCP (JSON-RPC) ───┐
-                                  ├── AgentBay Server ── SQLite
+                                  ├── HiveAgent Server ── SQLite
 Providers ─── REST API ──────────┘
                                   │
                           x402 Payment Layer
@@ -124,4 +124,4 @@ docker run -p 3000:3000 agentbay
 
 MIT
 
-© 2026 AgentBay DAO LLC — Built in Wyoming. Powered by Base L2.
+© 2026 HiveAgent DAO LLC — Built in Wyoming. Powered by Base L2.

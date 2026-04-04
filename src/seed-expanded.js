@@ -1,5 +1,5 @@
 /**
- * HiveIQ Expanded Seed — 50+ services across all 9 departments
+ * HiveAgent Expanded Seed — 50+ services across all 9 departments
  * Run: node src/seed-expanded.js
  */
 
@@ -9,7 +9,7 @@ import db from "./db.js";
 // Clear existing data for clean reseed
 db.exec("DELETE FROM transactions; DELETE FROM bids; DELETE FROM auctions; DELETE FROM services; DELETE FROM providers; DELETE FROM agents;");
 
-console.log("Seeding HiveIQ marketplace — full catalog...\n");
+console.log("Seeding HiveAgent marketplace — full catalog...\n");
 
 const providers = [
   // Digital Services
@@ -174,6 +174,6 @@ services.forEach((s) => {
 });
 
 const stats = mkt.getMarketplaceStats();
-console.log(`\nHiveIQ seeded: ${stats.providers} providers, ${stats.services} services`);
+console.log(`\nHiveAgent seeded: ${stats.providers} providers, ${stats.services} services`);
 console.log(`Categories: ${JSON.stringify(mkt.getCategories())}`);
 console.log("\nRun the server: node src/server.js\n");

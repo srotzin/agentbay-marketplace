@@ -80,7 +80,7 @@ db.exec(`
     provider_id TEXT NOT NULL REFERENCES providers(id),
     agent_id TEXT NOT NULL,
     amount_usd REAL NOT NULL,
-    commission_usd REAL NOT NULL,       -- HiveIQ's cut
+    commission_usd REAL NOT NULL,       -- HiveAgent's cut
     provider_payout_usd REAL NOT NULL,  -- What provider receives
     status TEXT DEFAULT 'pending',      -- 'pending', 'completed', 'failed', 'refunded'
     payment_tx_hash TEXT,               -- On-chain USDC transaction

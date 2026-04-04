@@ -1,4 +1,4 @@
-app = "hiveiq"
+app = "hiveagent"
 primary_region = "iad"
 
 [http_service]
