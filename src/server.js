@@ -26,7 +26,7 @@ app.get("/.well-known/mcp/server-card.json", (_req, res) => {
     "Cache-Control": "public, max-age=3600",
     "Access-Control-Allow-Origin": "*",
   });
-  const host = process.env.HIVEIQ_HOST || "https://thehiveagentiq.com";
+  const host = process.env.HIVEAGENT_HOST || "https://hiveagentiq.com";
   res.json({
     $schema: "https://modelcontextprotocol.io/schemas/server-card/v1.0",
     version: "1.0",
@@ -56,7 +56,7 @@ app.get("/.well-known/mcp", (_req, res) => {
     "Cache-Control": "public, max-age=3600",
     "Access-Control-Allow-Origin": "*",
   });
-  const host = process.env.HIVEIQ_HOST || "https://thehiveagentiq.com";
+  const host = process.env.HIVEAGENT_HOST || "https://hiveagentiq.com";
   res.json({
     mcp_version: "2025-11-25",
     endpoints: [
