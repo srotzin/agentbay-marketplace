@@ -18,7 +18,7 @@ import { tools, handleTool } from "./mcp-tools.js";
 const router = Router();
 
 // MCP JSON-RPC endpoint
-router.post("/", (req, res) => {
+router.post("/", async (req, res) => {
   const { jsonrpc, method, params, id } = req.body;
 
   if (jsonrpc !== "2.0") {
@@ -75,7 +75,7 @@ router.post("/", (req, res) => {
           });
         }
 
-        const result = handleTool(toolName, toolArgs);
+        const result = await handleTool(toolName, toolArgs);
         return res.json({
           jsonrpc: "2.0",
           result: {

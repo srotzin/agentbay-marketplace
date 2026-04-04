@@ -113,7 +113,7 @@ async function fetchJSON(url, timeoutMs = 10000) {
   try {
     const res = await fetch(url, {
       signal: controller.signal,
-      headers: { "User-Agent": "HiveAgent-Crawler/1.0 (https://thehiveagent.ai)" },
+      headers: { "User-Agent": "HiveAgent-Crawler/1.0 (https://thehiveagentiq.com)" },
     });
     clearTimeout(timeout);
     const elapsed = Date.now() - start;

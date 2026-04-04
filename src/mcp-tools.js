@@ -9,6 +9,7 @@
  */
 
 import * as mkt from "./services/marketplace.js";
+import { executeService, isLiveService } from "./services/live/executor.js";
 
 // MCP tool definitions (JSON Schema format)
 export const tools = [
@@ -35,6 +36,7 @@ export const tools = [
       properties: {
         service_id: { type: "string", description: "The service ID to purchase (from search results)" },
         agent_id: { type: "string", description: "Your agent identifier" },
+        params: { type: "object", description: "Parameters for the service (e.g., {query: 'search term'}, {url: 'https://...'}, {text: 'analyze this'}, {email: 'check@this.com'}, {coin: 'bitcoin'})", default: {} },
       },
       required: ["service_id", "agent_id"],
     },
@@ -103,13 +105,24 @@ export const tools = [
 ];
 
 // Tool handler — called when an agent invokes a tool
-export function handleTool(name, args) {
+export async function handleTool(name, args) {
   switch (name) {
     case "hiveagent_search":
       return mkt.searchServices(args);
 
-    case "hiveagent_buy":
-      return mkt.purchaseService(args);
+    case "hiveagent_buy": {
+      const purchase = mkt.purchaseService(args);
+      const service = mkt.getService(args.service_id);
+      if (service && isLiveService(service.name)) {
+        try {
+          const result = await executeService(service.name, args.params || {});
+          return { ...purchase, result };
+        } catch (e) {
+          return { ...purchase, result: { error: e.message } };
+        }
+      }
+      return purchase;
+    }
 
     case "hiveagent_auction_create":
       return mkt.createAuction(args);
