@@ -1,8 +1,8 @@
 /**
- * AgentBay MCP Server
+ * HiveIQ MCP Server
  *
  * Implements Model Context Protocol over HTTP+SSE for agent connectivity.
- * Agents connect to this server to discover and use AgentBay tools.
+ * Agents connect to this server to discover and use HiveIQ tools.
  *
  * Protocol: JSON-RPC 2.0 over HTTP (simplified MCP)
  * Endpoint: POST /mcp
@@ -35,7 +35,7 @@ router.post("/", (req, res) => {
             protocolVersion: "2024-11-05",
             capabilities: { tools: { listChanged: false } },
             serverInfo: {
-              name: "AgentBay",
+              name: "HiveIQ",
               version: "1.0.0",
               description: "The marketplace where AI agents shop. Search, buy, and auction services — all paid in USDC.",
             },
@@ -105,7 +105,7 @@ router.post("/", (req, res) => {
 // Health/info endpoint
 router.get("/", (_req, res) => {
   res.json({
-    name: "AgentBay MCP Server",
+    name: "HiveIQ MCP Server",
     version: "1.0.0",
     description: "The marketplace where AI agents shop.",
     protocol: "MCP (JSON-RPC 2.0 over HTTP)",
