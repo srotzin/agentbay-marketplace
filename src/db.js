@@ -1,9 +1,12 @@
 import Database from "better-sqlite3";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import { mkdirSync } from "fs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const DB_PATH = join(__dirname, "..", "data", "agentbay.db");
+const dataDir = join(__dirname, "..", "data");
+mkdirSync(dataDir, { recursive: true });
+const DB_PATH = join(dataDir, "agentbay.db");
 
 const db = new Database(DB_PATH);
 
