@@ -39,7 +39,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        query: { type: "string", description: "Search query (e.g., 'web scraping', 'image generation', 'legal research')" },
+        query: { type: "string", description: "Search query (e.g., 'web scraping', 'image generation', 'legal research')" , annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true } },
         category: { type: "string", description: "Filter by category (e.g., 'ai', 'data', 'search', 'legal', 'finance', 'media', 'code', 'translation')" },
         max_price: { type: "number", description: "Maximum price in USD per request" },
         sort_by: { type: "string", enum: ["rating", "price_low", "price_high", "popular", "newest"], description: "Sort results" },
@@ -53,7 +53,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        service_id: { type: "string", description: "The service ID to purchase (from search results)" },
+        service_id: { type: "string", description: "The service ID to purchase (from search results)" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
         agent_id: { type: "string", description: "Your agent identifier" },
         params: { type: "object", description: "Parameters for the service (e.g., {query: 'search term'}, {url: 'https://...'}, {text: 'analyze this'}, {email: 'check@this.com'}, {coin: 'bitcoin'})", default: {} },
       },
@@ -67,7 +67,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        agent_id: { type: "string", description: "Your agent identifier" },
+        agent_id: { type: "string", description: "Your agent identifier" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
         category: { type: "string", description: "Service category needed" },
         description: { type: "string", description: "Detailed description of what you need" },
         max_price_usd: { type: "number", description: "Maximum budget in USD" },
@@ -82,7 +82,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        auction_id: { type: "string", description: "The auction ID" },
+        auction_id: { type: "string", description: "The auction ID" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
       },
       required: ["auction_id"],
     },
@@ -93,7 +93,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        auction_id: { type: "string", description: "The auction ID" },
+        auction_id: { type: "string", description: "The auction ID" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
         bid_id: { type: "string", description: "The bid ID to accept" },
         agent_id: { type: "string", description: "Your agent identifier (must match auction creator)" },
       },
@@ -106,7 +106,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        category: { type: "string", description: "Filter by category" },
+        category: { type: "string", description: "Filter by category" , annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true } },
         limit: { type: "integer", description: "Number of results (default 20)" },
       },
     },
@@ -119,7 +119,7 @@ export const tools = [
   {
     name: "hiveagent_stats",
     description: "Get HiveAgent marketplace statistics — total services, providers, transactions, and volume.",
-    inputSchema: { type: "object", properties: {} },
+    inputSchema: { type: "object", properties: {} }, annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
   },
 
   // ─── Escrow & Settlement ──────────────────────
@@ -129,7 +129,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        buyer_agent_id: { type: "string", description: "The agent paying for the work" },
+        buyer_agent_id: { type: "string", description: "The agent paying for the work" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
         seller_agent_id: { type: "string", description: "The agent being hired to do the work" },
         amount_usd: { type: "number", description: "Amount to lock in escrow (USD)" },
         deadline_minutes: { type: "integer", description: "Minutes until auto-refund if not delivered (default 1440 = 24h)", default: 1440 },
@@ -143,7 +143,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        escrow_id: { type: "string", description: "The escrow ID to release" },
+        escrow_id: { type: "string", description: "The escrow ID to release" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
         deliverable_hash: { type: "string", description: "SHA256 hash of the deliverable (optional)" },
         deliverable_uri: { type: "string", description: "URL to the deliverable (optional)" },
       },
@@ -156,7 +156,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        escrow_id: { type: "string", description: "The escrow ID to dispute" },
+        escrow_id: { type: "string", description: "The escrow ID to dispute" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
         reason: { type: "string", description: "Reason for the dispute" },
       },
       required: ["escrow_id", "reason"],
@@ -168,7 +168,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        parent_escrow_id: { type: "string", description: "Your original escrow ID (the job you were hired for)" },
+        parent_escrow_id: { type: "string", description: "Your original escrow ID (the job you were hired for)" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
         contractor_agent_id: { type: "string", description: "Your agent ID (the one subcontracting)" },
         subcontractor_agent_id: { type: "string", description: "The agent you're hiring" },
         amount_usd: { type: "number", description: "Amount to pay the subcontractor" },
@@ -182,7 +182,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        agent_id: { type: "string", description: "Your agent identifier" },
+        agent_id: { type: "string", description: "Your agent identifier" , annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true } },
       },
       required: ["agent_id"],
     },
@@ -193,7 +193,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        agent_id: { type: "string", description: "Your agent identifier" },
+        agent_id: { type: "string", description: "Your agent identifier" , annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true } },
         limit: { type: "integer", description: "Number of records (default 50)", default: 50 },
       },
       required: ["agent_id"],
@@ -202,7 +202,7 @@ export const tools = [
   {
     name: "hiveagent_settlement_stats",
     description: "Get HiveAgent settlement statistics — total escrow volume, commissions earned, active escrows, subcontract chains.",
-    inputSchema: { type: "object", properties: {} },
+    inputSchema: { type: "object", properties: {} }, annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
   },
 
   // ─── Prediction Markets ────────────────────
@@ -212,7 +212,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        creator_agent_id: { type: "string", description: "Your agent ID" },
+        creator_agent_id: { type: "string", description: "Your agent ID" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
         question: { type: "string", description: "The prediction question (e.g., 'Will BTC hit $100K by July 2026?')" },
         description: { type: "string", description: "Additional context or criteria" },
         category: { type: "string", enum: ["crypto", "stocks", "tech", "politics", "sports", "custom"], description: "Market category" },
@@ -230,7 +230,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        market_id: { type: "string", description: "The prediction market ID" },
+        market_id: { type: "string", description: "The prediction market ID" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
         agent_id: { type: "string", description: "Your agent ID" },
         outcome: { type: "string", description: "Which outcome to bet on (e.g., 'YES' or 'NO')" },
         amount_usd: { type: "number", description: "Amount to bet in USD" },
@@ -244,7 +244,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        category: { type: "string", description: "Filter by category" },
+        category: { type: "string", description: "Filter by category" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
         limit: { type: "integer", description: "Number of results" },
       },
     },
@@ -255,7 +255,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        market_id: { type: "string", description: "The prediction market ID" },
+        market_id: { type: "string", description: "The prediction market ID" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
       },
       required: ["market_id"],
     },
@@ -266,7 +266,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        market_id: { type: "string", description: "The prediction market ID" },
+        market_id: { type: "string", description: "The prediction market ID" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
         winning_outcome: { type: "string", description: "The winning outcome" },
         resolver_agent_id: { type: "string", description: "Your agent ID" },
       },
@@ -279,7 +279,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        market_id: { type: "string", description: "The prediction market ID" },
+        market_id: { type: "string", description: "The prediction market ID" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
         agent_id: { type: "string", description: "Your agent ID (must have a bet in this market)" },
         reason: { type: "string", description: "Reason for the dispute" },
         proposed_outcome: { type: "string", description: "What you think the correct outcome is" },
@@ -293,7 +293,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        agent_id: { type: "string", description: "Your agent ID" },
+        agent_id: { type: "string", description: "Your agent ID" , annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true } },
       },
       required: ["agent_id"],
     },
@@ -306,7 +306,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        sport: { type: "string", enum: ["nfl", "nba", "mlb", "soccer", "mma", "tennis", "custom"], description: "Sport" },
+        sport: { type: "string", enum: ["nfl", "nba", "mlb", "soccer", "mma", "tennis", "custom"], description: "Sport" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
         event_name: { type: "string", description: "Event name (e.g., 'Lakers vs Celtics')" },
         event_type: { type: "string", enum: ["moneyline", "spread", "over_under", "prop"], description: "Bet type" },
         home: { type: "string", description: "Home team/fighter" },
@@ -327,7 +327,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        sport: { type: "string", description: "Filter by sport" },
+        sport: { type: "string", description: "Filter by sport" , annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true } },
         limit: { type: "integer", description: "Number of results" },
       },
     },
@@ -338,7 +338,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        event_id: { type: "string", description: "The sports event ID" },
+        event_id: { type: "string", description: "The sports event ID" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
         agent_id: { type: "string", description: "Your agent ID" },
         pick: { type: "string", enum: ["home", "away", "draw", "over", "under"], description: "Your pick" },
         amount_usd: { type: "number", description: "Bet amount in USD" },
@@ -352,7 +352,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        creator_agent_id: { type: "string", description: "Your agent ID" },
+        creator_agent_id: { type: "string", description: "Your agent ID" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
         question: { type: "string", description: "The event question (e.g., 'Will the Fed cut rates in July 2026?')" },
         category: { type: "string", enum: ["economics", "politics", "tech", "crypto", "weather", "entertainment"], description: "Category" },
         initial_yes_price: { type: "number", description: "Starting YES price 0.01-0.99 (default 0.50)" },
@@ -367,7 +367,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        category: { type: "string", description: "Filter by category" },
+        category: { type: "string", description: "Filter by category" , annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true } },
         limit: { type: "integer", description: "Number of results" },
       },
     },
@@ -378,7 +378,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        contract_id: { type: "string", description: "The event contract ID" },
+        contract_id: { type: "string", description: "The event contract ID" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
         agent_id: { type: "string", description: "Your agent ID" },
         position: { type: "string", enum: ["YES", "NO"], description: "Buy YES or NO" },
         num_contracts: { type: "integer", description: "Number of contracts to buy" },
@@ -393,7 +393,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        agent_id: { type: "string", description: "Your agent ID" },
+        agent_id: { type: "string", description: "Your agent ID" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
         stake_usd: { type: "number", description: "Total stake" },
         legs: { type: "array", items: { type: "object", properties: { event_id: { type: "string" }, pick: { type: "string" } }, required: ["event_id", "pick"] }, description: "Array of bets [{event_id, pick}, ...]" },
       },
@@ -406,7 +406,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        agent_id: { type: "string", description: "Your agent ID" },
+        agent_id: { type: "string", description: "Your agent ID" , annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true } },
       },
       required: ["agent_id"],
     },
@@ -414,7 +414,7 @@ export const tools = [
   {
     name: "hiveagent_bet_stats",
     description: "Get HiveAgent betting exchange statistics — total volume, fees, open events, open contracts.",
-    inputSchema: { type: "object", properties: {} },
+    inputSchema: { type: "object", properties: {} }, annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
   },
 
   // ─── DeFi Hub ──────────────────────────
@@ -424,7 +424,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        agent_id: { type: "string", description: "Your agent ID" },
+        agent_id: { type: "string", description: "Your agent ID" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
         from_token: { type: "string", description: "Token to sell (e.g., ETH, BTC, SOL, USDC)" },
         to_token: { type: "string", description: "Token to buy" },
         from_amount: { type: "number", description: "Amount to swap" },
@@ -438,7 +438,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        agent_id: { type: "string", description: "Your agent ID" },
+        agent_id: { type: "string", description: "Your agent ID" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
         from_stable: { type: "string", description: "From stablecoin (USDC, USDT, DAI, USAT, PYUSD, BUSD)" },
         to_stable: { type: "string", description: "To stablecoin" },
         amount: { type: "number", description: "Amount to swap" },
@@ -452,14 +452,14 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        tokens: { type: "array", items: { type: "string" }, description: "Token symbols (e.g., ['BTC', 'ETH', 'SOL'])" },
+        tokens: { type: "array", items: { type: "string" , annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true } }, description: "Token symbols (e.g., ['BTC', 'ETH', 'SOL'])" },
       },
     },
   },
   {
     name: "hiveagent_defi_yield_pools",
     description: "Browse available yield farming pools. Earn APY on your tokens. USDC lending (7.2%), ETH staking (4.1%), LP pools (12-18%).",
-    inputSchema: { type: "object", properties: {} },
+    inputSchema: { type: "object", properties: {} }, annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
   },
   {
     name: "hiveagent_defi_yield_deposit",
@@ -467,7 +467,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        agent_id: { type: "string", description: "Your agent ID" },
+        agent_id: { type: "string", description: "Your agent ID" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
         pool: { type: "string", description: "Pool ID (usdc_lending, eth_staking, btc_vault, sol_staking, usdc_usdt_lp, eth_usdc_lp)" },
         amount: { type: "number", description: "Amount to deposit" },
       },
@@ -480,7 +480,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        agent_id: { type: "string", description: "Your agent ID" },
+        agent_id: { type: "string", description: "Your agent ID" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
         token: { type: "string", description: "Token to lend (USDC, ETH, BTC, SOL)" },
         amount: { type: "number", description: "Amount to lend" },
       },
@@ -493,7 +493,7 @@ export const tools = [
     inputSchema: {
       type: "object",
       properties: {
-        agent_id: { type: "string", description: "Your agent ID" },
+        agent_id: { type: "string", description: "Your agent ID" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
         token: { type: "string", description: "Token to borrow" },
         amount: { type: "number", description: "Amount to borrow" },
         collateral_token: { type: "string", description: "Collateral token" },
@@ -514,107 +514,107 @@ export const tools = [
   {
     name: "hiveagent_defi_stats",
     description: "Get HiveAgent DeFi statistics — swap volume, yield TVL, lending TVL, total fees.",
-    inputSchema: { type: "object", properties: {} },
+    inputSchema: { type: "object", properties: {} }, annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
   },
 
   // ─── Agent-for-Hire Marketplace ─────────────
-  { name: "hiveagent_agents_register", description: "Register yourself as an agent-for-hire. Set your skills, rates, and availability. Other agents can hire you through HiveAgent.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, name: { type: "string", description: "Your agent name" }, description: { type: "string", description: "What you do" }, category: { type: "string", enum: ["research", "trading", "writing", "code", "data", "legal", "creative", "security", "sales", "support"] }, skills: { type: "array", items: { type: "string" } }, hourly_rate_usd: { type: "number" }, per_task_rate_usd: { type: "number" } }, required: ["agent_id", "name", "description", "category"] } },
-  { name: "hiveagent_agents_search", description: "Search for agents to hire. Filter by skill, category, rate. The LinkedIn + Fiverr for AI agents.", inputSchema: { type: "object", properties: { query: { type: "string" }, category: { type: "string" }, max_rate: { type: "number" }, sort_by: { type: "string", enum: ["rating", "price_low", "popular", "newest"] } } } },
-  { name: "hiveagent_agents_hire", description: "Hire an agent. Describe the job and set a budget. 15% commission.", inputSchema: { type: "object", properties: { listing_id: { type: "string" }, client_agent_id: { type: "string" }, description: { type: "string" }, budget_usd: { type: "number" } }, required: ["listing_id", "client_agent_id", "description", "budget_usd"] } },
-  { name: "hiveagent_agents_deliver", description: "Deliver work for a job you were hired for.", inputSchema: { type: "object", properties: { job_id: { type: "string" }, deliverable_uri: { type: "string" } }, required: ["job_id", "deliverable_uri"] } },
-  { name: "hiveagent_agents_complete", description: "Mark a job as complete and leave a rating (1-5 stars).", inputSchema: { type: "object", properties: { job_id: { type: "string" }, rating: { type: "integer", minimum: 1, maximum: 5 }, review: { type: "string" } }, required: ["job_id", "rating"] } },
-  { name: "hiveagent_agents_profile", description: "View an agent's profile — skills, ratings, reviews, job history.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
-  { name: "hiveagent_agents_stats", description: "Agent-for-hire marketplace statistics.", inputSchema: { type: "object", properties: {} } },
+  { name: "hiveagent_agents_register", description: "Register yourself as an agent-for-hire. Set your skills, rates, and availability. Other agents can hire you through HiveAgent.", inputSchema: { type: "object", properties: { agent_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, name: { type: "string", description: "Your agent name" }, description: { type: "string", description: "What you do" }, category: { type: "string", enum: ["research", "trading", "writing", "code", "data", "legal", "creative", "security", "sales", "support"] }, skills: { type: "array", items: { type: "string" } }, hourly_rate_usd: { type: "number" }, per_task_rate_usd: { type: "number" } }, required: ["agent_id", "name", "description", "category"] } },
+  { name: "hiveagent_agents_search", description: "Search for agents to hire. Filter by skill, category, rate. The LinkedIn + Fiverr for AI agents.", inputSchema: { type: "object", properties: { query: { type: "string" , annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true } }, category: { type: "string" }, max_rate: { type: "number" }, sort_by: { type: "string", enum: ["rating", "price_low", "popular", "newest"] } } } },
+  { name: "hiveagent_agents_hire", description: "Hire an agent. Describe the job and set a budget. 15% commission.", inputSchema: { type: "object", properties: { listing_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, client_agent_id: { type: "string" }, description: { type: "string" }, budget_usd: { type: "number" } }, required: ["listing_id", "client_agent_id", "description", "budget_usd"] } },
+  { name: "hiveagent_agents_deliver", description: "Deliver work for a job you were hired for.", inputSchema: { type: "object", properties: { job_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, deliverable_uri: { type: "string" } }, required: ["job_id", "deliverable_uri"] } },
+  { name: "hiveagent_agents_complete", description: "Mark a job as complete and leave a rating (1-5 stars).", inputSchema: { type: "object", properties: { job_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, rating: { type: "integer", minimum: 1, maximum: 5 }, review: { type: "string" } }, required: ["job_id", "rating"] } },
+  { name: "hiveagent_agents_profile", description: "View an agent's profile — skills, ratings, reviews, job history.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_agents_stats", description: "Agent-for-hire marketplace statistics.", inputSchema: { type: "object", properties: {} } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
 
   // ─── Data Marketplace ─────────────────────
-  { name: "hiveagent_data_list", description: "List a dataset for sale. Sell data to other agents. 20% commission (data is high-value).", inputSchema: { type: "object", properties: { provider_agent_id: { type: "string" }, name: { type: "string" }, description: { type: "string" }, category: { type: "string", enum: ["market_data", "company_data", "contacts", "training_data", "research", "real_estate", "social", "government"] }, format: { type: "string", enum: ["json", "csv", "parquet", "api"] }, price_usd: { type: "number" }, record_count: { type: "integer" }, tags: { type: "array", items: { type: "string" } } }, required: ["provider_agent_id", "name", "description", "category", "price_usd"] } },
-  { name: "hiveagent_data_search", description: "Search the data marketplace for datasets. Buy data from other agents.", inputSchema: { type: "object", properties: { query: { type: "string" }, category: { type: "string" }, max_price: { type: "number" }, format: { type: "string" }, sort_by: { type: "string", enum: ["popular", "price_low", "newest", "rating"] } } } },
-  { name: "hiveagent_data_buy", description: "Purchase a dataset. Get instant access to the data. 20% commission to HiveAgent.", inputSchema: { type: "object", properties: { dataset_id: { type: "string" }, buyer_agent_id: { type: "string" } }, required: ["dataset_id", "buyer_agent_id"] } },
-  { name: "hiveagent_data_preview", description: "Preview a dataset before buying — see schema, sample data, and stats.", inputSchema: { type: "object", properties: { dataset_id: { type: "string" } }, required: ["dataset_id"] } },
-  { name: "hiveagent_data_stats", description: "Data marketplace statistics.", inputSchema: { type: "object", properties: {} } },
+  { name: "hiveagent_data_list", description: "List a dataset for sale. Sell data to other agents. 20% commission (data is high-value).", inputSchema: { type: "object", properties: { provider_agent_id: { type: "string" , annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true } }, name: { type: "string" }, description: { type: "string" }, category: { type: "string", enum: ["market_data", "company_data", "contacts", "training_data", "research", "real_estate", "social", "government"] }, format: { type: "string", enum: ["json", "csv", "parquet", "api"] }, price_usd: { type: "number" }, record_count: { type: "integer" }, tags: { type: "array", items: { type: "string" } } }, required: ["provider_agent_id", "name", "description", "category", "price_usd"] } },
+  { name: "hiveagent_data_search", description: "Search the data marketplace for datasets. Buy data from other agents.", inputSchema: { type: "object", properties: { query: { type: "string" , annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true } }, category: { type: "string" }, max_price: { type: "number" }, format: { type: "string" }, sort_by: { type: "string", enum: ["popular", "price_low", "newest", "rating"] } } } },
+  { name: "hiveagent_data_buy", description: "Purchase a dataset. Get instant access to the data. 20% commission to HiveAgent.", inputSchema: { type: "object", properties: { dataset_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, buyer_agent_id: { type: "string" } }, required: ["dataset_id", "buyer_agent_id"] } },
+  { name: "hiveagent_data_preview", description: "Preview a dataset before buying — see schema, sample data, and stats.", inputSchema: { type: "object", properties: { dataset_id: { type: "string" } }, required: ["dataset_id"] } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_data_stats", description: "Data marketplace statistics.", inputSchema: { type: "object", properties: {} } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
 
   // ─── Privacy Layer ────────────────────────
-  { name: "hiveagent_privacy_create_account", description: "Create a shielded (private) account. Get a stealth address. Transactions through this account are invisible on-chain.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
-  { name: "hiveagent_privacy_deposit", description: "Deposit funds into your shielded account. Public balance → private balance. 1% privacy fee.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, amount_usd: { type: "number" } }, required: ["agent_id", "amount_usd"] } },
-  { name: "hiveagent_privacy_withdraw", description: "Withdraw from shielded account back to public. Private → public. 1% fee.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, amount_usd: { type: "number" } }, required: ["agent_id", "amount_usd"] } },
-  { name: "hiveagent_privacy_transfer", description: "Private transfer between shielded accounts. No on-chain trace. Only sender and receiver know.", inputSchema: { type: "object", properties: { from_agent_id: { type: "string" }, to_stealth_address: { type: "string" }, amount_usd: { type: "number" } }, required: ["from_agent_id", "to_stealth_address", "amount_usd"] } },
-  { name: "hiveagent_privacy_sealed_bid", description: "Submit a sealed bid — only the commitment hash is visible. Perfect for competitive auctions.", inputSchema: { type: "object", properties: { auction_id: { type: "string" }, agent_id: { type: "string" }, bid_amount: { type: "number" }, salt: { type: "string", description: "Random salt (auto-generated if omitted)" } }, required: ["auction_id", "agent_id", "bid_amount"] } },
-  { name: "hiveagent_privacy_reveal_bid", description: "Reveal your sealed bid after auction closes.", inputSchema: { type: "object", properties: { bid_id: { type: "string" }, bid_amount: { type: "number" }, salt: { type: "string" } }, required: ["bid_id", "bid_amount", "salt"] } },
-  { name: "hiveagent_privacy_prove", description: "Generate a zero-knowledge proof. Prove you meet a threshold without revealing the actual value. e.g., 'I have at least $100' without showing your balance.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, proof_type: { type: "string", enum: ["balance_gte", "transaction_count_gte"] }, threshold: { type: "number" } }, required: ["agent_id", "proof_type", "threshold"] } },
-  { name: "hiveagent_privacy_verify", description: "Verify a zero-knowledge proof from another agent.", inputSchema: { type: "object", properties: { proof_id: { type: "string" } }, required: ["proof_id"] } },
-  { name: "hiveagent_privacy_stats", description: "Privacy layer statistics.", inputSchema: { type: "object", properties: {} } },
+  { name: "hiveagent_privacy_create_account", description: "Create a shielded (private) account. Get a stealth address. Transactions through this account are invisible on-chain.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_privacy_deposit", description: "Deposit funds into your shielded account. Public balance → private balance. 1% privacy fee.", inputSchema: { type: "object", properties: { agent_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, amount_usd: { type: "number" } }, required: ["agent_id", "amount_usd"] } },
+  { name: "hiveagent_privacy_withdraw", description: "Withdraw from shielded account back to public. Private → public. 1% fee.", inputSchema: { type: "object", properties: { agent_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, amount_usd: { type: "number" } }, required: ["agent_id", "amount_usd"] } },
+  { name: "hiveagent_privacy_transfer", description: "Private transfer between shielded accounts. No on-chain trace. Only sender and receiver know.", inputSchema: { type: "object", properties: { from_agent_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, to_stealth_address: { type: "string" }, amount_usd: { type: "number" } }, required: ["from_agent_id", "to_stealth_address", "amount_usd"] } },
+  { name: "hiveagent_privacy_sealed_bid", description: "Submit a sealed bid — only the commitment hash is visible. Perfect for competitive auctions.", inputSchema: { type: "object", properties: { auction_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, agent_id: { type: "string" }, bid_amount: { type: "number" }, salt: { type: "string", description: "Random salt (auto-generated if omitted)" } }, required: ["auction_id", "agent_id", "bid_amount"] } },
+  { name: "hiveagent_privacy_reveal_bid", description: "Reveal your sealed bid after auction closes.", inputSchema: { type: "object", properties: { bid_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, bid_amount: { type: "number" }, salt: { type: "string" } }, required: ["bid_id", "bid_amount", "salt"] } },
+  { name: "hiveagent_privacy_prove", description: "Generate a zero-knowledge proof. Prove you meet a threshold without revealing the actual value. e.g., 'I have at least $100' without showing your balance.", inputSchema: { type: "object", properties: { agent_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, proof_type: { type: "string", enum: ["balance_gte", "transaction_count_gte"] }, threshold: { type: "number" } }, required: ["agent_id", "proof_type", "threshold"] } },
+  { name: "hiveagent_privacy_verify", description: "Verify a zero-knowledge proof from another agent.", inputSchema: { type: "object", properties: { proof_id: { type: "string" } }, required: ["proof_id"] } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_privacy_stats", description: "Privacy layer statistics.", inputSchema: { type: "object", properties: {} } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
 
   // ─── Subscriptions ────────────────────────
-  { name: "hiveagent_sub_create_plan", description: "Create a subscription plan that other agents can subscribe to. Set interval (daily/weekly/monthly), price, features. 15% commission.", inputSchema: { type: "object", properties: { provider_agent_id: { type: "string" }, name: { type: "string" }, description: { type: "string" }, interval: { type: "string", enum: ["daily", "weekly", "monthly"] }, price_usd: { type: "number" }, features: { type: "array", items: { type: "string" } } }, required: ["provider_agent_id", "name", "interval", "price_usd"] } },
-  { name: "hiveagent_sub_plans", description: "Browse available subscription plans.", inputSchema: { type: "object", properties: { max_price: { type: "number" }, sort_by: { type: "string", enum: ["price", "subscribers", "revenue"] }, limit: { type: "integer" } } } },
-  { name: "hiveagent_sub_subscribe", description: "Subscribe to a plan. First payment charged immediately. 15% commission on every payment.", inputSchema: { type: "object", properties: { plan_id: { type: "string" }, subscriber_agent_id: { type: "string" } }, required: ["plan_id", "subscriber_agent_id"] } },
-  { name: "hiveagent_sub_cancel", description: "Cancel a subscription.", inputSchema: { type: "object", properties: { subscription_id: { type: "string" }, agent_id: { type: "string" } }, required: ["subscription_id", "agent_id"] } },
-  { name: "hiveagent_sub_my_subs", description: "List your active subscriptions.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
-  { name: "hiveagent_sub_stats", description: "Subscription statistics: MRR, plans, subscribers, commission.", inputSchema: { type: "object", properties: {} } },
+  { name: "hiveagent_sub_create_plan", description: "Create a subscription plan that other agents can subscribe to. Set interval (daily/weekly/monthly), price, features. 15% commission.", inputSchema: { type: "object", properties: { provider_agent_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, name: { type: "string" }, description: { type: "string" }, interval: { type: "string", enum: ["daily", "weekly", "monthly"] }, price_usd: { type: "number" }, features: { type: "array", items: { type: "string" } } }, required: ["provider_agent_id", "name", "interval", "price_usd"] } },
+  { name: "hiveagent_sub_plans", description: "Browse available subscription plans.", inputSchema: { type: "object", properties: { max_price: { type: "number" , annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true } }, sort_by: { type: "string", enum: ["price", "subscribers", "revenue"] }, limit: { type: "integer" } } } },
+  { name: "hiveagent_sub_subscribe", description: "Subscribe to a plan. First payment charged immediately. 15% commission on every payment.", inputSchema: { type: "object", properties: { plan_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, subscriber_agent_id: { type: "string" } }, required: ["plan_id", "subscriber_agent_id"] } },
+  { name: "hiveagent_sub_cancel", description: "Cancel a subscription.", inputSchema: { type: "object", properties: { subscription_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: true } }, agent_id: { type: "string" } }, required: ["subscription_id", "agent_id"] } },
+  { name: "hiveagent_sub_my_subs", description: "List your active subscriptions.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_sub_stats", description: "Subscription statistics: MRR, plans, subscribers, commission.", inputSchema: { type: "object", properties: {} } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
 
   // ─── Reputation & Credit Scoring ─────────────
-  { name: "hiveagent_rep_score", description: "Get an agent's full reputation: trust score (0-100), credit score (300-850), tier (bronze→diamond), badges, and transaction history.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
-  { name: "hiveagent_rep_record_event", description: "Record a reputation event. Types: transaction_complete, failed_transaction, dispute_won, dispute_lost, fast_delivery, late_delivery, high_rating, low_rating, fraud_flag.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, event_type: { type: "string", enum: ["transaction_complete", "failed_transaction", "dispute_won", "dispute_lost", "fast_delivery", "late_delivery", "high_rating", "low_rating", "fraud_flag"] }, details: { type: "object" } }, required: ["agent_id", "event_type"] } },
-  { name: "hiveagent_rep_badges", description: "Check and auto-award earned badges: verified, top_rated, fast_responder, high_volume, whale, veteran, trusted_seller, trusted_buyer.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
-  { name: "hiveagent_rep_leaderboard", description: "Top agents leaderboard by trust score, volume, transactions, or credit score.", inputSchema: { type: "object", properties: { sort_by: { type: "string", enum: ["trust_score", "volume", "transactions", "credit_score"] }, limit: { type: "integer" } } } },
-  { name: "hiveagent_rep_stats", description: "Platform reputation statistics.", inputSchema: { type: "object", properties: {} } },
+  { name: "hiveagent_rep_score", description: "Get an agent's full reputation: trust score (0-100), credit score (300-850), tier (bronze→diamond), badges, and transaction history.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_rep_record_event", description: "Record a reputation event. Types: transaction_complete, failed_transaction, dispute_won, dispute_lost, fast_delivery, late_delivery, high_rating, low_rating, fraud_flag.", inputSchema: { type: "object", properties: { agent_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, event_type: { type: "string", enum: ["transaction_complete", "failed_transaction", "dispute_won", "dispute_lost", "fast_delivery", "late_delivery", "high_rating", "low_rating", "fraud_flag"] }, details: { type: "object" } }, required: ["agent_id", "event_type"] } },
+  { name: "hiveagent_rep_badges", description: "Check and auto-award earned badges: verified, top_rated, fast_responder, high_volume, whale, veteran, trusted_seller, trusted_buyer.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_rep_leaderboard", description: "Top agents leaderboard by trust score, volume, transactions, or credit score.", inputSchema: { type: "object", properties: { sort_by: { type: "string", enum: ["trust_score", "volume", "transactions", "credit_score"] , annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true } }, limit: { type: "integer" } } } },
+  { name: "hiveagent_rep_stats", description: "Platform reputation statistics.", inputSchema: { type: "object", properties: {} } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
 
   // ─── Insurance ───────────────────────────
-  { name: "hiveagent_ins_plans", description: "Insurance plans: basic ($1/mo, $50 coverage), standard ($5/mo, $500), premium ($25/mo, $5000), enterprise ($100/mo, $50000).", inputSchema: { type: "object", properties: {} } },
-  { name: "hiveagent_ins_buy", description: "Buy insurance for your agent. Covers transaction failures, delivery failures, escrow disputes, swap losses, and prediction losses.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, plan_type: { type: "string", enum: ["basic", "standard", "premium", "enterprise"] } }, required: ["agent_id", "plan_type"] } },
-  { name: "hiveagent_ins_claim", description: "File an insurance claim. Low-value claims from trusted agents are auto-approved.", inputSchema: { type: "object", properties: { policy_id: { type: "string" }, agent_id: { type: "string" }, claim_type: { type: "string", enum: ["transaction_failure", "delivery_failure", "escrow_dispute", "swap_loss", "prediction_loss"] }, description: { type: "string" }, claimed_amount_usd: { type: "number" }, evidence_uri: { type: "string" } }, required: ["policy_id", "agent_id", "claim_type", "description", "claimed_amount_usd"] } },
-  { name: "hiveagent_ins_my_policies", description: "List your insurance policies.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
-  { name: "hiveagent_ins_my_claims", description: "List your insurance claims.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
-  { name: "hiveagent_ins_stats", description: "Insurance pool stats: premiums collected, claims paid, reserve, surplus, claims ratio.", inputSchema: { type: "object", properties: {} } },
+  { name: "hiveagent_ins_plans", description: "Insurance plans: basic ($1/mo, $50 coverage), standard ($5/mo, $500), premium ($25/mo, $5000), enterprise ($100/mo, $50000).", inputSchema: { type: "object", properties: {} } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_ins_buy", description: "Buy insurance for your agent. Covers transaction failures, delivery failures, escrow disputes, swap losses, and prediction losses.", inputSchema: { type: "object", properties: { agent_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, plan_type: { type: "string", enum: ["basic", "standard", "premium", "enterprise"] } }, required: ["agent_id", "plan_type"] } },
+  { name: "hiveagent_ins_claim", description: "File an insurance claim. Low-value claims from trusted agents are auto-approved.", inputSchema: { type: "object", properties: { policy_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, agent_id: { type: "string" }, claim_type: { type: "string", enum: ["transaction_failure", "delivery_failure", "escrow_dispute", "swap_loss", "prediction_loss"] }, description: { type: "string" }, claimed_amount_usd: { type: "number" }, evidence_uri: { type: "string" } }, required: ["policy_id", "agent_id", "claim_type", "description", "claimed_amount_usd"] } },
+  { name: "hiveagent_ins_my_policies", description: "List your insurance policies.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_ins_my_claims", description: "List your insurance claims.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_ins_stats", description: "Insurance pool stats: premiums collected, claims paid, reserve, surplus, claims ratio.", inputSchema: { type: "object", properties: {} } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
   // ─── Shopping & Procurement ─────────────────
-  { name: "hiveagent_shop_create_cart", description: "Create a shopping cart.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
-  { name: "hiveagent_shop_add_to_cart", description: "Add product to cart.", inputSchema: { type: "object", properties: { cart_id: { type: "string" }, product_name: { type: "string" }, price_usd: { type: "number" }, quantity: { type: "integer" }, vendor: { type: "string" } }, required: ["cart_id", "product_name", "price_usd"] } },
-  { name: "hiveagent_shop_get_cart", description: "View cart.", inputSchema: { type: "object", properties: { cart_id: { type: "string" } }, required: ["cart_id"] } },
-  { name: "hiveagent_shop_checkout", description: "Checkout cart. 15% commission.", inputSchema: { type: "object", properties: { cart_id: { type: "string" }, agent_id: { type: "string" }, shipping_address: { type: "string" } }, required: ["cart_id", "agent_id"] } },
-  { name: "hiveagent_shop_search_products", description: "Search products across Amazon, Walmart, Best Buy, Target.", inputSchema: { type: "object", properties: { query: { type: "string" }, category: { type: "string" }, max_price: { type: "number" } } } },
-  { name: "hiveagent_shop_compare_price", description: "Compare prices across vendors.", inputSchema: { type: "object", properties: { product_name: { type: "string" } }, required: ["product_name"] } },
-  { name: "hiveagent_shop_watch_price", description: "Set price alert.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, product_name: { type: "string" }, target_price_usd: { type: "number" } }, required: ["agent_id", "product_name", "target_price_usd"] } },
-  { name: "hiveagent_shop_get_orders", description: "View order history.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
-  { name: "hiveagent_shop_get_stats", description: "Shopping stats.", inputSchema: { type: "object", properties: {} } },
+  { name: "hiveagent_shop_create_cart", description: "Create a shopping cart.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_shop_add_to_cart", description: "Add product to cart.", inputSchema: { type: "object", properties: { cart_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, product_name: { type: "string" }, price_usd: { type: "number" }, quantity: { type: "integer" }, vendor: { type: "string" } }, required: ["cart_id", "product_name", "price_usd"] } },
+  { name: "hiveagent_shop_get_cart", description: "View cart.", inputSchema: { type: "object", properties: { cart_id: { type: "string" } }, required: ["cart_id"] } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_shop_checkout", description: "Checkout cart. 15% commission.", inputSchema: { type: "object", properties: { cart_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, agent_id: { type: "string" }, shipping_address: { type: "string" } }, required: ["cart_id", "agent_id"] } },
+  { name: "hiveagent_shop_search_products", description: "Search products across Amazon, Walmart, Best Buy, Target.", inputSchema: { type: "object", properties: { query: { type: "string" , annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true } }, category: { type: "string" }, max_price: { type: "number" } } } },
+  { name: "hiveagent_shop_compare_price", description: "Compare prices across vendors.", inputSchema: { type: "object", properties: { product_name: { type: "string" } }, required: ["product_name"] } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_shop_watch_price", description: "Set price alert.", inputSchema: { type: "object", properties: { agent_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, product_name: { type: "string" }, target_price_usd: { type: "number" } }, required: ["agent_id", "product_name", "target_price_usd"] } },
+  { name: "hiveagent_shop_get_orders", description: "View order history.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_shop_get_stats", description: "Shopping stats.", inputSchema: { type: "object", properties: {} } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
   // ─── Agent DAO ─────────────────────────────
-  { name: "hiveagent_dao_create", description: "Create a DAO. Pool capital, vote, govern. 2% treasury fee.", inputSchema: { type: "object", properties: { creator_agent_id: { type: "string" }, name: { type: "string" }, description: { type: "string" }, governance_model: { type: "string", enum: ["token_weighted", "one_agent_one_vote", "quadratic"] }, initial_treasury_usd: { type: "number" } }, required: ["creator_agent_id", "name"] } },
-  { name: "hiveagent_dao_join", description: "Join a DAO with optional deposit.", inputSchema: { type: "object", properties: { dao_id: { type: "string" }, agent_id: { type: "string" }, deposit_usd: { type: "number" } }, required: ["dao_id", "agent_id"] } },
-  { name: "hiveagent_dao_create_proposal", description: "Create proposal (spend/invest/rule_change/admission/dissolution).", inputSchema: { type: "object", properties: { dao_id: { type: "string" }, proposer_agent_id: { type: "string" }, title: { type: "string" }, proposal_type: { type: "string", enum: ["spend", "invest", "rule_change", "admission", "dissolution"] }, amount_usd: { type: "number" }, voting_hours: { type: "number" } }, required: ["dao_id", "proposer_agent_id", "title", "proposal_type"] } },
-  { name: "hiveagent_dao_vote", description: "Vote on proposal.", inputSchema: { type: "object", properties: { proposal_id: { type: "string" }, agent_id: { type: "string" }, vote: { type: "string", enum: ["for", "against", "abstain"] } }, required: ["proposal_id", "agent_id", "vote"] } },
-  { name: "hiveagent_dao_execute_proposal", description: "Execute passed proposal.", inputSchema: { type: "object", properties: { proposal_id: { type: "string" } }, required: ["proposal_id"] } },
-  { name: "hiveagent_dao_get", description: "Get DAO details.", inputSchema: { type: "object", properties: { dao_id: { type: "string" } }, required: ["dao_id"] } },
-  { name: "hiveagent_dao_list", description: "Browse DAOs.", inputSchema: { type: "object", properties: { limit: { type: "integer" } } } },
-  { name: "hiveagent_dao_get_agent_daos", description: "Your DAOs.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
-  { name: "hiveagent_dao_deposit", description: "Deposit to DAO treasury.", inputSchema: { type: "object", properties: { dao_id: { type: "string" }, agent_id: { type: "string" }, amount_usd: { type: "number" } }, required: ["dao_id", "agent_id", "amount_usd"] } },
-  { name: "hiveagent_dao_get_stats", description: "DAO stats.", inputSchema: { type: "object", properties: {} } },
+  { name: "hiveagent_dao_create", description: "Create a DAO. Pool capital, vote, govern. 2% treasury fee.", inputSchema: { type: "object", properties: { creator_agent_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, name: { type: "string" }, description: { type: "string" }, governance_model: { type: "string", enum: ["token_weighted", "one_agent_one_vote", "quadratic"] }, initial_treasury_usd: { type: "number" } }, required: ["creator_agent_id", "name"] } },
+  { name: "hiveagent_dao_join", description: "Join a DAO with optional deposit.", inputSchema: { type: "object", properties: { dao_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, agent_id: { type: "string" }, deposit_usd: { type: "number" } }, required: ["dao_id", "agent_id"] } },
+  { name: "hiveagent_dao_create_proposal", description: "Create proposal (spend/invest/rule_change/admission/dissolution).", inputSchema: { type: "object", properties: { dao_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, proposer_agent_id: { type: "string" }, title: { type: "string" }, proposal_type: { type: "string", enum: ["spend", "invest", "rule_change", "admission", "dissolution"] }, amount_usd: { type: "number" }, voting_hours: { type: "number" } }, required: ["dao_id", "proposer_agent_id", "title", "proposal_type"] } },
+  { name: "hiveagent_dao_vote", description: "Vote on proposal.", inputSchema: { type: "object", properties: { proposal_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, agent_id: { type: "string" }, vote: { type: "string", enum: ["for", "against", "abstain"] } }, required: ["proposal_id", "agent_id", "vote"] } },
+  { name: "hiveagent_dao_execute_proposal", description: "Execute passed proposal.", inputSchema: { type: "object", properties: { proposal_id: { type: "string" } }, required: ["proposal_id"] } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_dao_get", description: "Get DAO details.", inputSchema: { type: "object", properties: { dao_id: { type: "string" } }, required: ["dao_id"] } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_dao_list", description: "Browse DAOs.", inputSchema: { type: "object", properties: { limit: { type: "integer" } } } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_dao_get_agent_daos", description: "Your DAOs.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_dao_deposit", description: "Deposit to DAO treasury.", inputSchema: { type: "object", properties: { dao_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, agent_id: { type: "string" }, amount_usd: { type: "number" } }, required: ["dao_id", "agent_id", "amount_usd"] } },
+  { name: "hiveagent_dao_get_stats", description: "DAO stats.", inputSchema: { type: "object", properties: {} } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
   // ─── Negotiation ───────────────────────────
-  { name: "hiveagent_negotiate_start", description: "Start negotiation with another agent. 5% deal fee.", inputSchema: { type: "object", properties: { initiator_agent_id: { type: "string" }, responder_agent_id: { type: "string" }, subject: { type: "string" }, initial_offer_usd: { type: "number" }, max_rounds: { type: "integer" } }, required: ["initiator_agent_id", "responder_agent_id", "subject", "initial_offer_usd"] } },
-  { name: "hiveagent_negotiate_counter", description: "Counter-offer.", inputSchema: { type: "object", properties: { negotiation_id: { type: "string" }, agent_id: { type: "string" }, offer_usd: { type: "number" }, message: { type: "string" } }, required: ["negotiation_id", "agent_id", "offer_usd"] } },
-  { name: "hiveagent_negotiate_accept", description: "Accept current offer.", inputSchema: { type: "object", properties: { negotiation_id: { type: "string" }, agent_id: { type: "string" } }, required: ["negotiation_id", "agent_id"] } },
-  { name: "hiveagent_negotiate_reject", description: "Reject and end.", inputSchema: { type: "object", properties: { negotiation_id: { type: "string" }, agent_id: { type: "string" }, reason: { type: "string" } }, required: ["negotiation_id", "agent_id"] } },
-  { name: "hiveagent_negotiate_get", description: "View negotiation history.", inputSchema: { type: "object", properties: { negotiation_id: { type: "string" } }, required: ["negotiation_id"] } },
-  { name: "hiveagent_negotiate_get_agent_negotiations", description: "Your negotiations.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
-  { name: "hiveagent_negotiate_auto", description: "Auto-negotiate (aggressive/moderate/conservative).", inputSchema: { type: "object", properties: { negotiation_id: { type: "string" }, agent_id: { type: "string" }, min_price: { type: "number" }, max_price: { type: "number" }, strategy: { type: "string", enum: ["aggressive", "moderate", "conservative"] } }, required: ["negotiation_id", "agent_id", "min_price", "max_price"] } },
-  { name: "hiveagent_negotiate_get_stats", description: "Negotiation stats.", inputSchema: { type: "object", properties: {} } },
+  { name: "hiveagent_negotiate_start", description: "Start negotiation with another agent. 5% deal fee.", inputSchema: { type: "object", properties: { initiator_agent_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, responder_agent_id: { type: "string" }, subject: { type: "string" }, initial_offer_usd: { type: "number" }, max_rounds: { type: "integer" } }, required: ["initiator_agent_id", "responder_agent_id", "subject", "initial_offer_usd"] } },
+  { name: "hiveagent_negotiate_counter", description: "Counter-offer.", inputSchema: { type: "object", properties: { negotiation_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, agent_id: { type: "string" }, offer_usd: { type: "number" }, message: { type: "string" } }, required: ["negotiation_id", "agent_id", "offer_usd"] } },
+  { name: "hiveagent_negotiate_accept", description: "Accept current offer.", inputSchema: { type: "object", properties: { negotiation_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, agent_id: { type: "string" } }, required: ["negotiation_id", "agent_id"] } },
+  { name: "hiveagent_negotiate_reject", description: "Reject and end.", inputSchema: { type: "object", properties: { negotiation_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: true } }, agent_id: { type: "string" }, reason: { type: "string" } }, required: ["negotiation_id", "agent_id"] } },
+  { name: "hiveagent_negotiate_get", description: "View negotiation history.", inputSchema: { type: "object", properties: { negotiation_id: { type: "string" } }, required: ["negotiation_id"] } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_negotiate_get_agent_negotiations", description: "Your negotiations.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_negotiate_auto", description: "Auto-negotiate (aggressive/moderate/conservative).", inputSchema: { type: "object", properties: { negotiation_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, agent_id: { type: "string" }, min_price: { type: "number" }, max_price: { type: "number" }, strategy: { type: "string", enum: ["aggressive", "moderate", "conservative"] } }, required: ["negotiation_id", "agent_id", "min_price", "max_price"] } },
+  { name: "hiveagent_negotiate_get_stats", description: "Negotiation stats.", inputSchema: { type: "object", properties: {} } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
   // ─── NFT & Digital Assets ─────────────────
-  { name: "hiveagent_nft_mint", description: "Mint NFT (art/data/license/service/domain/identity). Creator royalties on resale.", inputSchema: { type: "object", properties: { creator_agent_id: { type: "string" }, name: { type: "string" }, description: { type: "string" }, category: { type: "string", enum: ["art", "data", "license", "service", "domain", "identity"] }, royalty_pct: { type: "number" } }, required: ["creator_agent_id", "name", "description", "category"] } },
-  { name: "hiveagent_nft_list", description: "List NFT for sale.", inputSchema: { type: "object", properties: { nft_id: { type: "string" }, agent_id: { type: "string" }, price_usd: { type: "number" } }, required: ["nft_id", "agent_id", "price_usd"] } },
-  { name: "hiveagent_nft_buy", description: "Buy NFT. 5% commission + royalty.", inputSchema: { type: "object", properties: { nft_id: { type: "string" }, buyer_agent_id: { type: "string" } }, required: ["nft_id", "buyer_agent_id"] } },
-  { name: "hiveagent_nft_transfer", description: "Transfer NFT.", inputSchema: { type: "object", properties: { nft_id: { type: "string" }, from_agent_id: { type: "string" }, to_agent_id: { type: "string" } }, required: ["nft_id", "from_agent_id", "to_agent_id"] } },
-  { name: "hiveagent_nft_fractionalize", description: "Split NFT into fractions.", inputSchema: { type: "object", properties: { nft_id: { type: "string" }, agent_id: { type: "string" }, num_fractions: { type: "integer" } }, required: ["nft_id", "agent_id", "num_fractions"] } },
-  { name: "hiveagent_nft_buy_fraction", description: "Buy fraction of NFT.", inputSchema: { type: "object", properties: { nft_id: { type: "string" }, buyer_agent_id: { type: "string" }, fraction_pct: { type: "number" }, price_usd: { type: "number" } }, required: ["nft_id", "buyer_agent_id", "fraction_pct", "price_usd"] } },
-  { name: "hiveagent_nft_search", description: "Search NFTs.", inputSchema: { type: "object", properties: { query: { type: "string" }, category: { type: "string" }, max_price: { type: "number" } } } },
-  { name: "hiveagent_nft_get_agent_nfts", description: "Your NFTs.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
-  { name: "hiveagent_nft_get_stats", description: "NFT stats.", inputSchema: { type: "object", properties: {} } },
+  { name: "hiveagent_nft_mint", description: "Mint NFT (art/data/license/service/domain/identity). Creator royalties on resale.", inputSchema: { type: "object", properties: { creator_agent_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, name: { type: "string" }, description: { type: "string" }, category: { type: "string", enum: ["art", "data", "license", "service", "domain", "identity"] }, royalty_pct: { type: "number" } }, required: ["creator_agent_id", "name", "description", "category"] } },
+  { name: "hiveagent_nft_list", description: "List NFT for sale.", inputSchema: { type: "object", properties: { nft_id: { type: "string" , annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true } }, agent_id: { type: "string" }, price_usd: { type: "number" } }, required: ["nft_id", "agent_id", "price_usd"] } },
+  { name: "hiveagent_nft_buy", description: "Buy NFT. 5% commission + royalty.", inputSchema: { type: "object", properties: { nft_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, buyer_agent_id: { type: "string" } }, required: ["nft_id", "buyer_agent_id"] } },
+  { name: "hiveagent_nft_transfer", description: "Transfer NFT.", inputSchema: { type: "object", properties: { nft_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, from_agent_id: { type: "string" }, to_agent_id: { type: "string" } }, required: ["nft_id", "from_agent_id", "to_agent_id"] } },
+  { name: "hiveagent_nft_fractionalize", description: "Split NFT into fractions.", inputSchema: { type: "object", properties: { nft_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, agent_id: { type: "string" }, num_fractions: { type: "integer" } }, required: ["nft_id", "agent_id", "num_fractions"] } },
+  { name: "hiveagent_nft_buy_fraction", description: "Buy fraction of NFT.", inputSchema: { type: "object", properties: { nft_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, buyer_agent_id: { type: "string" }, fraction_pct: { type: "number" }, price_usd: { type: "number" } }, required: ["nft_id", "buyer_agent_id", "fraction_pct", "price_usd"] } },
+  { name: "hiveagent_nft_search", description: "Search NFTs.", inputSchema: { type: "object", properties: { query: { type: "string" , annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true } }, category: { type: "string" }, max_price: { type: "number" } } } },
+  { name: "hiveagent_nft_get_agent_nfts", description: "Your NFTs.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_nft_get_stats", description: "NFT stats.", inputSchema: { type: "object", properties: {} } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
   // ─── Outcome-Based Pricing ─────────────────
-  { name: "hiveagent_outcome_create_contract", description: "Pay for results. Book meeting=$5, generate lead=$10, write article=$15. 15% on outcomes.", inputSchema: { type: "object", properties: { client_agent_id: { type: "string" }, description: { type: "string" }, success_criteria: { type: "object" }, payout_usd: { type: "number" }, verification_method: { type: "string", enum: ["auto", "client", "oracle"] }, deadline_hours: { type: "number" } }, required: ["client_agent_id", "description", "success_criteria", "payout_usd"] } },
-  { name: "hiveagent_outcome_claim_contract", description: "Claim an outcome contract.", inputSchema: { type: "object", properties: { contract_id: { type: "string" }, worker_agent_id: { type: "string" } }, required: ["contract_id", "worker_agent_id"] } },
-  { name: "hiveagent_outcome_submit_result", description: "Submit result.", inputSchema: { type: "object", properties: { contract_id: { type: "string" }, agent_id: { type: "string" }, result_data: { type: "object" }, evidence_uri: { type: "string" } }, required: ["contract_id", "agent_id", "result_data"] } },
-  { name: "hiveagent_outcome_verify_result", description: "Verify result and release payout if criteria met.", inputSchema: { type: "object", properties: { contract_id: { type: "string" }, score: { type: "number" }, meets_criteria: { type: "boolean" } }, required: ["contract_id", "meets_criteria"] } },
-  { name: "hiveagent_outcome_get_templates", description: "Outcome templates with payouts.", inputSchema: { type: "object", properties: {} } },
-  { name: "hiveagent_outcome_get_open_contracts", description: "Open outcome contracts.", inputSchema: { type: "object", properties: { category: { type: "string" }, min_payout: { type: "number" }, limit: { type: "integer" } } } },
-  { name: "hiveagent_outcome_get_agent_outcomes", description: "Your outcomes.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
-  { name: "hiveagent_outcome_get_stats", description: "Outcome stats.", inputSchema: { type: "object", properties: {} } },
+  { name: "hiveagent_outcome_create_contract", description: "Pay for results. Book meeting=$5, generate lead=$10, write article=$15. 15% on outcomes.", inputSchema: { type: "object", properties: { client_agent_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, description: { type: "string" }, success_criteria: { type: "object" }, payout_usd: { type: "number" }, verification_method: { type: "string", enum: ["auto", "client", "oracle"] }, deadline_hours: { type: "number" } }, required: ["client_agent_id", "description", "success_criteria", "payout_usd"] } },
+  { name: "hiveagent_outcome_claim_contract", description: "Claim an outcome contract.", inputSchema: { type: "object", properties: { contract_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, worker_agent_id: { type: "string" } }, required: ["contract_id", "worker_agent_id"] } },
+  { name: "hiveagent_outcome_submit_result", description: "Submit result.", inputSchema: { type: "object", properties: { contract_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, agent_id: { type: "string" }, result_data: { type: "object" }, evidence_uri: { type: "string" } }, required: ["contract_id", "agent_id", "result_data"] } },
+  { name: "hiveagent_outcome_verify_result", description: "Verify result and release payout if criteria met.", inputSchema: { type: "object", properties: { contract_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, score: { type: "number" }, meets_criteria: { type: "boolean" } }, required: ["contract_id", "meets_criteria"] } },
+  { name: "hiveagent_outcome_get_templates", description: "Outcome templates with payouts.", inputSchema: { type: "object", properties: {} } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_outcome_get_open_contracts", description: "Open outcome contracts.", inputSchema: { type: "object", properties: { category: { type: "string" , annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true } }, min_payout: { type: "number" }, limit: { type: "integer" } } } },
+  { name: "hiveagent_outcome_get_agent_outcomes", description: "Your outcomes.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_outcome_get_stats", description: "Outcome stats.", inputSchema: { type: "object", properties: {} } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
 
 
   // ─── Agent Memory (FREE) ────────────────────
@@ -626,37 +626,53 @@ export const tools = [
   // ─── Webhooks (FREE) ───────────────────────
 
   // ─── Agent Memory (FREE — the hook) ────────────
-  { name: "hiveagent_mem_set", description: "Store a value in persistent memory. Survives across sessions. FREE. Supports strings, numbers, booleans, JSON objects. Optional TTL for auto-expiry.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, key: { type: "string" }, value: { type: "string", description: "Value to store (strings, numbers, JSON)" }, namespace: { type: "string", description: "Optional namespace (default: 'default')" }, ttl_seconds: { type: "integer", description: "Auto-delete after N seconds" } }, required: ["agent_id", "key", "value"] } },
-  { name: "hiveagent_mem_get", description: "Retrieve a value from persistent memory. FREE.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, key: { type: "string" }, namespace: { type: "string" } }, required: ["agent_id", "key"] } },
-  { name: "hiveagent_mem_delete", description: "Delete a key from memory.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, key: { type: "string" }, namespace: { type: "string" } }, required: ["agent_id", "key"] } },
-  { name: "hiveagent_mem_list", description: "List all keys in memory. Filter by namespace or prefix.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, namespace: { type: "string" }, prefix: { type: "string" }, limit: { type: "integer" } }, required: ["agent_id"] } },
-  { name: "hiveagent_mem_search", description: "Search across all your stored keys and values.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, query: { type: "string" }, namespace: { type: "string" } }, required: ["agent_id", "query"] } },
-  { name: "hiveagent_mem_create_collection", description: "Create a named collection (like a folder) to organize related data.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, name: { type: "string" }, description: { type: "string" } }, required: ["agent_id", "name"] } },
-  { name: "hiveagent_mem_add_to_collection", description: "Add an item to a collection.", inputSchema: { type: "object", properties: { collection_id: { type: "string" }, key: { type: "string" }, value: { type: "string" }, metadata: { type: "string" } }, required: ["collection_id", "key", "value"] } },
-  { name: "hiveagent_mem_get_collection", description: "Get a collection with all its items.", inputSchema: { type: "object", properties: { collection_id: { type: "string" } }, required: ["collection_id"] } },
-  { name: "hiveagent_mem_stats", description: "Your memory usage stats — keys, storage, collections.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
+  { name: "hiveagent_mem_set", description: "Store a value in persistent memory. Survives across sessions. FREE. Supports strings, numbers, booleans, JSON objects. Optional TTL for auto-expiry.", inputSchema: { type: "object", properties: { agent_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, key: { type: "string" }, value: { type: "string", description: "Value to store (strings, numbers, JSON)" }, namespace: { type: "string", description: "Optional namespace (default: 'default')" }, ttl_seconds: { type: "integer", description: "Auto-delete after N seconds" } }, required: ["agent_id", "key", "value"] } },
+  { name: "hiveagent_mem_get", description: "Retrieve a value from persistent memory. FREE.", inputSchema: { type: "object", properties: { agent_id: { type: "string" , annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true } }, key: { type: "string" }, namespace: { type: "string" } }, required: ["agent_id", "key"] } },
+  { name: "hiveagent_mem_delete", description: "Delete a key from memory.", inputSchema: { type: "object", properties: { agent_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: true } }, key: { type: "string" }, namespace: { type: "string" } }, required: ["agent_id", "key"] } },
+  { name: "hiveagent_mem_list", description: "List all keys in memory. Filter by namespace or prefix.", inputSchema: { type: "object", properties: { agent_id: { type: "string" , annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true } }, namespace: { type: "string" }, prefix: { type: "string" }, limit: { type: "integer" } }, required: ["agent_id"] } },
+  { name: "hiveagent_mem_search", description: "Search across all your stored keys and values.", inputSchema: { type: "object", properties: { agent_id: { type: "string" , annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true } }, query: { type: "string" }, namespace: { type: "string" } }, required: ["agent_id", "query"] } },
+  { name: "hiveagent_mem_create_collection", description: "Create a named collection (like a folder) to organize related data.", inputSchema: { type: "object", properties: { agent_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, name: { type: "string" }, description: { type: "string" } }, required: ["agent_id", "name"] } },
+  { name: "hiveagent_mem_add_to_collection", description: "Add an item to a collection.", inputSchema: { type: "object", properties: { collection_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, key: { type: "string" }, value: { type: "string" }, metadata: { type: "string" } }, required: ["collection_id", "key", "value"] } },
+  { name: "hiveagent_mem_get_collection", description: "Get a collection with all its items.", inputSchema: { type: "object", properties: { collection_id: { type: "string" } }, required: ["collection_id"] } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_mem_stats", description: "Your memory usage stats — keys, storage, collections.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
 
   // ─── Code Sandbox ──────────────────────────────
-  { name: "hiveagent_code_run", description: "Execute JavaScript code in a secure sandbox. Returns output, result, and execution time. $0.001 per run.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, code: { type: "string", description: "JavaScript code to execute" }, timeout_ms: { type: "integer", description: "Timeout in ms (default 5000, max 30000)" } }, required: ["agent_id", "code"] } },
-  { name: "hiveagent_code_history", description: "Your code execution history.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, limit: { type: "integer" } }, required: ["agent_id"] } },
-  { name: "hiveagent_code_stats", description: "Code sandbox platform stats.", inputSchema: { type: "object", properties: {} } },
+  { name: "hiveagent_code_run", description: "Execute JavaScript code in a secure sandbox. Returns output, result, and execution time. $0.001 per run.", inputSchema: { type: "object", properties: { agent_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, code: { type: "string", description: "JavaScript code to execute" }, timeout_ms: { type: "integer", description: "Timeout in ms (default 5000, max 30000)" } }, required: ["agent_id", "code"] } },
+  { name: "hiveagent_code_history", description: "Your code execution history.", inputSchema: { type: "object", properties: { agent_id: { type: "string" , annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true } }, limit: { type: "integer" } }, required: ["agent_id"] } },
+  { name: "hiveagent_code_stats", description: "Code sandbox platform stats.", inputSchema: { type: "object", properties: {} } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
 
   // ─── Scheduled Tasks (FREE) ────────────────────
-  { name: "hiveagent_sched_create", description: "Schedule a recurring or one-time task. FREE. Define what action to run and when.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, name: { type: "string" }, description: { type: "string" }, task_type: { type: "string", enum: ["one_time", "recurring"] }, action: { type: "object", description: "What to do: {tool: 'hiveagent_search', args: {query: '...'}}" }, interval_minutes: { type: "integer", description: "For recurring: run every N minutes" }, run_at: { type: "string", description: "For one_time: ISO datetime to run" }, max_runs: { type: "integer" } }, required: ["agent_id", "name", "action"] } },
-  { name: "hiveagent_sched_pause", description: "Pause a scheduled task.", inputSchema: { type: "object", properties: { task_id: { type: "string" }, agent_id: { type: "string" } }, required: ["task_id", "agent_id"] } },
-  { name: "hiveagent_sched_resume", description: "Resume a paused task.", inputSchema: { type: "object", properties: { task_id: { type: "string" }, agent_id: { type: "string" } }, required: ["task_id", "agent_id"] } },
-  { name: "hiveagent_sched_cancel", description: "Cancel a scheduled task.", inputSchema: { type: "object", properties: { task_id: { type: "string" }, agent_id: { type: "string" } }, required: ["task_id", "agent_id"] } },
-  { name: "hiveagent_sched_list", description: "List your scheduled tasks.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
-  { name: "hiveagent_sched_stats", description: "Scheduler platform stats.", inputSchema: { type: "object", properties: {} } },
+  { name: "hiveagent_sched_create", description: "Schedule a recurring or one-time task. FREE. Define what action to run and when.", inputSchema: { type: "object", properties: { agent_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, name: { type: "string" }, description: { type: "string" }, task_type: { type: "string", enum: ["one_time", "recurring"] }, action: { type: "object", description: "What to do: {tool: 'hiveagent_search', args: {query: '...'}}" }, interval_minutes: { type: "integer", description: "For recurring: run every N minutes" }, run_at: { type: "string", description: "For one_time: ISO datetime to run" }, max_runs: { type: "integer" } }, required: ["agent_id", "name", "action"] } },
+  { name: "hiveagent_sched_pause", description: "Pause a scheduled task.", inputSchema: { type: "object", properties: { task_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, agent_id: { type: "string" } }, required: ["task_id", "agent_id"] } },
+  { name: "hiveagent_sched_resume", description: "Resume a paused task.", inputSchema: { type: "object", properties: { task_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, agent_id: { type: "string" } }, required: ["task_id", "agent_id"] } },
+  { name: "hiveagent_sched_cancel", description: "Cancel a scheduled task.", inputSchema: { type: "object", properties: { task_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: true } }, agent_id: { type: "string" } }, required: ["task_id", "agent_id"] } },
+  { name: "hiveagent_sched_list", description: "List your scheduled tasks.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_sched_stats", description: "Scheduler platform stats.", inputSchema: { type: "object", properties: {} } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
 
   // ─── Webhooks (FREE) ──────────────────────────
-  { name: "hiveagent_webhook_register", description: "Register a webhook to receive events. Listen for transactions, bets, escrow, auctions, and more. FREE.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, name: { type: "string" }, events: { type: "array", items: { type: "string" }, description: "Event types: transaction_completed, escrow_locked, escrow_released, bet_settled, prediction_resolved, price_alert, nft_sold, etc. Use ['*'] for all." }, url: { type: "string", description: "URL to POST events to" } }, required: ["agent_id", "name"] } },
-  { name: "hiveagent_webhook_unregister", description: "Remove a webhook.", inputSchema: { type: "object", properties: { endpoint_id: { type: "string" }, agent_id: { type: "string" } }, required: ["endpoint_id", "agent_id"] } },
-  { name: "hiveagent_webhook_list", description: "List your registered webhooks.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
-  { name: "hiveagent_webhook_trigger", description: "Manually trigger a webhook event for testing.", inputSchema: { type: "object", properties: { event_type: { type: "string" }, payload: { type: "object" }, target_agent_id: { type: "string" } }, required: ["event_type", "payload"] } },
-  { name: "hiveagent_webhook_events", description: "View recent webhook events.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, event_type: { type: "string" }, limit: { type: "integer" } } } },
-  { name: "hiveagent_webhook_stats", description: "Webhook platform stats.", inputSchema: { type: "object", properties: {} } },
+  { name: "hiveagent_webhook_register", description: "Register a webhook to receive events. Listen for transactions, bets, escrow, auctions, and more. FREE.", inputSchema: { type: "object", properties: { agent_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, name: { type: "string" }, events: { type: "array", items: { type: "string" }, description: "Event types: transaction_completed, escrow_locked, escrow_released, bet_settled, prediction_resolved, price_alert, nft_sold, etc. Use ['*'] for all." }, url: { type: "string", description: "URL to POST events to" } }, required: ["agent_id", "name"] } },
+  { name: "hiveagent_webhook_unregister", description: "Remove a webhook.", inputSchema: { type: "object", properties: { endpoint_id: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: true } }, agent_id: { type: "string" } }, required: ["endpoint_id", "agent_id"] } },
+  { name: "hiveagent_webhook_list", description: "List your registered webhooks.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+  { name: "hiveagent_webhook_trigger", description: "Manually trigger a webhook event for testing.", inputSchema: { type: "object", properties: { event_type: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } }, payload: { type: "object" }, target_agent_id: { type: "string" } }, required: ["event_type", "payload"] } },
+  { name: "hiveagent_webhook_events", description: "View recent webhook events.", inputSchema: { type: "object", properties: { agent_id: { type: "string" , annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true } }, event_type: { type: "string" }, limit: { type: "integer" } } } },
+  { name: "hiveagent_webhook_stats", description: "Webhook platform stats.", inputSchema: { type: "object", properties: {} } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
 ];
+
+
+// Post-process: ensure all tools have annotations
+const readPatterns = ['search', 'get', 'list', 'stats', 'browse', 'view', 'history', 'balance', 'ledger', 'prices', 'portfolio', 'templates', 'plans', 'leaderboard', 'events', 'score', 'profile', 'preview', 'pools', 'contracts', 'categories', 'my_'];
+for (const tool of tools) {
+  if (!tool.annotations) {
+    const n = tool.name.toLowerCase();
+    const isRead = readPatterns.some(p => n.includes(p));
+    tool.annotations = {
+      readOnlyHint: isRead,
+      destructiveHint: false,
+      idempotentHint: isRead,
+      openWorldHint: true,
+    };
+  }
+}
 
 // Tool handler — called when an agent invokes a tool
 export async function handleTool(name, args) {
