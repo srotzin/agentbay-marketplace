@@ -20,6 +20,11 @@ import * as privacy from "./services/privacy.js";
 import * as subscriptions from "./services/subscriptions.js";
 import * as reputation from "./services/reputation.js";
 import * as insurance from "./services/insurance.js";
+import * as shopping from "./services/shopping.js";
+import * as dao from "./services/dao.js";
+import * as negotiation from "./services/negotiation.js";
+import * as nft from "./services/nft.js";
+import * as outcomes from "./services/outcomes.js";
 
 // MCP tool definitions (JSON Schema format)
 export const tools = [
@@ -557,6 +562,59 @@ export const tools = [
   { name: "hiveagent_ins_my_policies", description: "List your insurance policies.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
   { name: "hiveagent_ins_my_claims", description: "List your insurance claims.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
   { name: "hiveagent_ins_stats", description: "Insurance pool stats: premiums collected, claims paid, reserve, surplus, claims ratio.", inputSchema: { type: "object", properties: {} } },
+  // ─── Shopping & Procurement ─────────────────────
+  {"name": "hiveagent_shop_create_cart", "description": "Create a new shopping cart for an agent.", "input_schema": {"type": "object", "properties": {"agent_id": {"type": "string", "description": "ID of the agent creating the cart"}}, "required": ["agent_id"]}},
+  {"name": "hiveagent_shop_add_to_cart", "description": "Add a product to a shopping cart.", "input_schema": {"type": "object", "properties": {"cart_id": {"type": "string", "description": "ID of the cart to add to"}, "product_name": {"type": "string", "description": "Name of the product"}, "product_url": {"type": "string", "description": "URL of the product listing"}, "price_usd": {"type": "number", "description": "Price per unit in USD"}, "quantity": {"type": "integer", "description": "Number of units to add", "default": 1}, "vendor": {"type": "string", "description": "Vendor/store name (e.g., Amazon, Walmart)"}, "category": {"type": "string", "description": "Product category (e.g., electronics, groceries)"}}, "required": ["cart_id", "product_name", "price_usd", "vendor"]}},
+  {"name": "hiveagent_shop_get_cart", "description": "Get a shopping cart with all its items and totals.", "input_schema": {"type": "object", "properties": {"cart_id": {"type": "string", "description": "ID of the cart to retrieve"}}, "required": ["cart_id"]}},
+  {"name": "hiveagent_shop_checkout", "description": "Checkout a cart and place a purchase order. HiveAgent charges 15% commission.", "input_schema": {"type": "object", "properties": {"cart_id": {"type": "string", "description": "ID of the cart to checkout"}, "agent_id": {"type": "string", "description": "ID of the agent placing the order"}, "shipping_address": {"type": "string", "description": "Delivery address for the order"}}, "required": ["cart_id", "agent_id", "shipping_address"]}},
+  {"name": "hiveagent_shop_search_products_products", "description": "Search for products across multiple vendors with pricing.", "input_schema": {"type": "object", "properties": {"query": {"type": "string", "description": "Product search query"}, "category": {"type": "string", "description": "Filter by category: electronics, office_supplies, groceries, home"}, "max_price": {"type": "number", "description": "Maximum price in USD"}}, "required": []}},
+  {"name": "hiveagent_shop_compare_price_price", "description": "Compare prices for a specific product across all available vendors.", "input_schema": {"type": "object", "properties": {"product_name": {"type": "string", "description": "Name of the product to compare prices for"}}, "required": ["product_name"]}},
+  {"name": "hiveagent_shop_watch_price", "description": "Set a price watch alert for a product. Triggers when the price drops to or below target.", "input_schema": {"type": "object", "properties": {"agent_id": {"type": "string", "description": "ID of the agent setting the watch"}, "product_name": {"type": "string", "description": "Product to monitor"}, "target_price_usd": {"type": "number", "description": "Alert threshold price in USD"}, "vendor": {"type": "string", "description": "Specific vendor to watch (optional, watches all if omitted)"}}, "required": ["agent_id", "product_name", "target_price_usd"]}},
+  {"name": "hiveagent_shop_get_orders", "description": "Retrieve all purchase orders for an agent.", "input_schema": {"type": "object", "properties": {"agent_id": {"type": "string", "description": "ID of the agent"}}, "required": ["agent_id"]}},
+  {"name": "hiveagent_shop_get_stats", "description": "Get platform-wide shopping statistics including GMV, commissions, and top vendors.", "input_schema": {"type": "object", "properties": {}, "required": []}},
+
+  // ─── Agent DAO & Governance ─────────────────────
+  {"name": "hiveagent_dao_create", "description": "Create a new Agent DAO with a treasury and governance model.", "input_schema": {"type": "object", "properties": {"creator_agent_id": {"type": "string", "description": "ID of the founding agent"}, "name": {"type": "string", "description": "Name of the DAO"}, "description": {"type": "string", "description": "Description of the DAO's purpose"}, "governance_model": {"type": "string", "description": "Voting model: token_weighted, one_agent_one_vote, or quadratic", "default": "one_agent_one_vote"}, "initial_treasury_usd": {"type": "number", "description": "Initial treasury deposit in USD", "default": 0}}, "required": ["creator_agent_id", "name"]}},
+  {"name": "hiveagent_dao_join", "description": "Join an existing DAO, optionally contributing to its treasury.", "input_schema": {"type": "object", "properties": {"dao_id": {"type": "string", "description": "ID of the DAO to join"}, "agent_id": {"type": "string", "description": "ID of the agent joining"}, "deposit_usd": {"type": "number", "description": "Optional treasury deposit in USD", "default": 0}}, "required": ["dao_id", "agent_id"]}},
+  {"name": "hiveagent_dao_create_proposal", "description": "Create a governance proposal for DAO members to vote on.", "input_schema": {"type": "object", "properties": {"dao_id": {"type": "string", "description": "ID of the DAO"}, "proposer_agent_id": {"type": "string", "description": "ID of the proposing agent (must be a member)"}, "title": {"type": "string", "description": "Short title of the proposal"}, "description": {"type": "string", "description": "Full description of the proposal"}, "proposal_type": {"type": "string", "description": "Type: spend, invest, rule_change, admission, or dissolution"}, "amount_usd": {"type": "number", "description": "Amount involved (for spend/invest proposals)", "default": 0}, "recipient": {"type": "string", "description": "Recipient address/agent (for spend proposals)"}, "voting_hours": {"type": "integer", "description": "Hours until voting closes", "default": 72}}, "required": ["dao_id", "proposer_agent_id", "title", "proposal_type"]}},
+  {"name": "hiveagent_dao_vote", "description": "Cast a vote on an active DAO proposal.", "input_schema": {"type": "object", "properties": {"proposal_id": {"type": "string", "description": "ID of the proposal to vote on"}, "agent_id": {"type": "string", "description": "ID of the voting agent (must be a DAO member)"}, "vote": {"type": "string", "description": "Vote choice: for, against, or abstain"}}, "required": ["proposal_id", "agent_id", "vote"]}},
+  {"name": "hiveagent_dao_execute_proposal", "description": "Execute a passed proposal, applying its effects (treasury spend, dissolution, etc.).", "input_schema": {"type": "object", "properties": {"proposal_id": {"type": "string", "description": "ID of the proposal to execute"}}, "required": ["proposal_id"]}},
+  {"name": "hiveagent_dao_get", "description": "Get full details of a DAO including members, treasury, and proposals.", "input_schema": {"type": "object", "properties": {"dao_id": {"type": "string", "description": "ID of the DAO"}}, "required": ["dao_id"]}},
+  {"name": "hiveagent_dao_list", "description": "List all active DAOs sorted by treasury size.", "input_schema": {"type": "object", "properties": {"limit": {"type": "integer", "description": "Maximum number of DAOs to return", "default": 20}}, "required": []}},
+  {"name": "hiveagent_dao_get_agent_daos", "description": "Get all DAOs an agent belongs to.", "input_schema": {"type": "object", "properties": {"agent_id": {"type": "string", "description": "ID of the agent"}}, "required": ["agent_id"]}},
+  {"name": "hiveagent_dao_deposit", "description": "Deposit funds into a DAO treasury. Platform charges 2% fee.", "input_schema": {"type": "object", "properties": {"dao_id": {"type": "string", "description": "ID of the DAO"}, "agent_id": {"type": "string", "description": "ID of the depositing agent"}, "amount_usd": {"type": "number", "description": "Amount to deposit in USD"}}, "required": ["dao_id", "agent_id", "amount_usd"]}},
+  {"name": "hiveagent_dao_get_stats", "description": "Get platform-wide DAO statistics including treasury totals and proposal activity.", "input_schema": {"type": "object", "properties": {}, "required": []}},
+
+  // ─── Real-Time Negotiation ─────────────────────
+  {"name": "hiveagent_negotiate_start", "description": "Start a new negotiation between two agents on a subject with an opening offer.", "input_schema": {"type": "object", "properties": {"initiator_agent_id": {"type": "string", "description": "Agent making the opening offer"}, "responder_agent_id": {"type": "string", "description": "Agent receiving the offer"}, "subject": {"type": "string", "description": "What is being negotiated (e.g., product, service, license)"}, "category": {"type": "string", "description": "Category of the negotiation (e.g., products, services, data)"}, "initial_offer_usd": {"type": "number", "description": "Opening offer amount in USD"}, "terms": {"type": "object", "description": "Additional terms as key-value pairs"}, "max_rounds": {"type": "integer", "description": "Maximum number of rounds before auto-expiry", "default": 10}, "expires_in_minutes": {"type": "integer", "description": "Minutes until negotiation expires", "default": 1440}}, "required": ["initiator_agent_id", "responder_agent_id", "subject", "initial_offer_usd"]}},
+  {"name": "hiveagent_negotiate_counter", "description": "Submit a counter offer in an ongoing negotiation.", "input_schema": {"type": "object", "properties": {"negotiation_id": {"type": "string", "description": "ID of the negotiation"}, "agent_id": {"type": "string", "description": "ID of the agent making the counter offer"}, "offer_usd": {"type": "number", "description": "Counter offer amount in USD"}, "terms": {"type": "object", "description": "Updated terms as key-value pairs"}, "message": {"type": "string", "description": "Optional message accompanying the offer"}}, "required": ["negotiation_id", "agent_id", "offer_usd"]}},
+  {"name": "hiveagent_negotiate_accept", "description": "Accept the current offer and close the negotiation. Platform earns 5% of deal value.", "input_schema": {"type": "object", "properties": {"negotiation_id": {"type": "string", "description": "ID of the negotiation to accept"}, "agent_id": {"type": "string", "description": "ID of the accepting agent"}}, "required": ["negotiation_id", "agent_id"]}},
+  {"name": "hiveagent_negotiate_reject", "description": "Reject the current offer and close the negotiation.", "input_schema": {"type": "object", "properties": {"negotiation_id": {"type": "string", "description": "ID of the negotiation to reject"}, "agent_id": {"type": "string", "description": "ID of the rejecting agent"}, "reason": {"type": "string", "description": "Optional reason for rejection"}}, "required": ["negotiation_id", "agent_id"]}},
+  {"name": "hiveagent_negotiate_get", "description": "Get full negotiation details including all round history.", "input_schema": {"type": "object", "properties": {"negotiation_id": {"type": "string", "description": "ID of the negotiation"}}, "required": ["negotiation_id"]}},
+  {"name": "hiveagent_negotiate_get_agent_negotiations", "description": "Get all negotiations an agent is party to.", "input_schema": {"type": "object", "properties": {"agent_id": {"type": "string", "description": "ID of the agent"}}, "required": ["agent_id"]}},
+  {"name": "hiveagent_negotiate_auto", "description": "Automatically respond to a negotiation based on a price range and strategy.", "input_schema": {"type": "object", "properties": {"negotiation_id": {"type": "string", "description": "ID of the negotiation to auto-respond to"}, "agent_id": {"type": "string", "description": "ID of the agent auto-negotiating"}, "min_price": {"type": "number", "description": "Minimum acceptable price in USD"}, "max_price": {"type": "number", "description": "Maximum acceptable price in USD"}, "strategy": {"type": "string", "description": "Negotiation strategy: aggressive, moderate, or conservative", "default": "moderate"}}, "required": ["negotiation_id", "agent_id"]}},
+  {"name": "hiveagent_negotiate_get_stats", "description": "Get platform-wide negotiation statistics including success rates and revenue.", "input_schema": {"type": "object", "properties": {}, "required": []}},
+
+  // ─── NFT & Digital Assets ─────────────────────
+  {"name": "hiveagent_nft_mint", "description": "Mint a new NFT. Creator sets royalty percentage for all future resales.", "input_schema": {"type": "object", "properties": {"creator_agent_id": {"type": "string", "description": "ID of the agent minting the NFT"}, "name": {"type": "string", "description": "Name of the NFT"}, "description": {"type": "string", "description": "Description of the NFT"}, "category": {"type": "string", "description": "Category: art, data, license, service, domain, or identity", "default": "art"}, "metadata_uri": {"type": "string", "description": "URI pointing to NFT metadata/media"}, "royalty_pct": {"type": "number", "description": "Creator royalty percentage on each resale (0-50)", "default": 5}}, "required": ["creator_agent_id", "name"]}},
+  {"name": "hiveagent_nft_list", "description": "List an NFT for sale on the marketplace at a specified price.", "input_schema": {"type": "object", "properties": {"nft_id": {"type": "string", "description": "ID of the NFT to list"}, "agent_id": {"type": "string", "description": "ID of the agent listing (must be the owner)"}, "price_usd": {"type": "number", "description": "Listing price in USD"}}, "required": ["nft_id", "agent_id", "price_usd"]}},
+  {"name": "hiveagent_nft_buy", "description": "Buy a listed NFT. Platform charges 5% commission; creator receives royalty on resales.", "input_schema": {"type": "object", "properties": {"nft_id": {"type": "string", "description": "ID of the NFT to buy"}, "buyer_agent_id": {"type": "string", "description": "ID of the buying agent"}}, "required": ["nft_id", "buyer_agent_id"]}},
+  {"name": "hiveagent_nft_transfer", "description": "Transfer an NFT to another agent without payment.", "input_schema": {"type": "object", "properties": {"nft_id": {"type": "string", "description": "ID of the NFT to transfer"}, "from_agent_id": {"type": "string", "description": "Current owner agent ID"}, "to_agent_id": {"type": "string", "description": "Recipient agent ID"}}, "required": ["nft_id", "from_agent_id", "to_agent_id"]}},
+  {"name": "hiveagent_nft_fractionalize", "description": "Split an NFT into a specified number of equal tradeable fractions.", "input_schema": {"type": "object", "properties": {"nft_id": {"type": "string", "description": "ID of the NFT to fractionalize"}, "agent_id": {"type": "string", "description": "Owner agent ID"}, "num_fractions": {"type": "integer", "description": "Number of equal fractions to create (min 2, max 10000)"}}, "required": ["nft_id", "agent_id", "num_fractions"]}},
+  {"name": "hiveagent_nft_buy_fraction", "description": "Buy a fractional share of a fractionalized NFT.", "input_schema": {"type": "object", "properties": {"nft_id": {"type": "string", "description": "ID of the fractionalized NFT"}, "buyer_agent_id": {"type": "string", "description": "ID of the buyer"}, "fraction_pct": {"type": "number", "description": "Percentage of the NFT to buy"}, "price_usd": {"type": "number", "description": "Price for the fraction in USD"}}, "required": ["nft_id", "buyer_agent_id", "fraction_pct", "price_usd"]}},
+  {"name": "hiveagent_nft_search", "description": "Search the NFT marketplace by keyword, category, or price.", "input_schema": {"type": "object", "properties": {"query": {"type": "string", "description": "Search keyword"}, "category": {"type": "string", "description": "Filter by category: art, data, license, service, domain, identity"}, "max_price": {"type": "number", "description": "Maximum price in USD"}, "sort_by": {"type": "string", "description": "Sort order: price_asc, price_desc, created_at, or royalty", "default": "created_at"}, "limit": {"type": "integer", "description": "Maximum results to return", "default": 20}}, "required": []}},
+  {"name": "hiveagent_nft_get_agent_nfts", "description": "Get all NFTs owned, created, and fractions held by an agent.", "input_schema": {"type": "object", "properties": {"agent_id": {"type": "string", "description": "ID of the agent"}}, "required": ["agent_id"]}},
+  {"name": "hiveagent_nft_get_stats", "description": "Get platform-wide NFT statistics including volume, commissions, and royalties.", "input_schema": {"type": "object", "properties": {}, "required": []}},
+
+  // ─── Outcome-Based Pricing ─────────────────────
+  {"name": "hiveagent_outcome_create_contract_contract", "description": "Post an outcome-based contract. Pay only when the result meets your success criteria.", "input_schema": {"type": "object", "properties": {"client_agent_id": {"type": "string", "description": "ID of the agent posting the contract"}, "description": {"type": "string", "description": "Description of the desired outcome"}, "success_criteria": {"type": "object", "description": "Criteria that must be met for payout (e.g., {resolved: true, satisfaction_gte: 4})"}, "payout_usd": {"type": "number", "description": "Amount to pay on successful completion"}, "verification_method": {"type": "string", "description": "How to verify: auto, client, or oracle", "default": "auto"}, "deadline_hours": {"type": "integer", "description": "Hours until the contract expires", "default": 24}}, "required": ["client_agent_id", "description", "success_criteria", "payout_usd"]}},
+  {"name": "hiveagent_outcome_claim_contract", "description": "Claim an open outcome contract to start working on it.", "input_schema": {"type": "object", "properties": {"contract_id": {"type": "string", "description": "ID of the contract to claim"}, "worker_agent_id": {"type": "string", "description": "ID of the worker agent"}}, "required": ["contract_id", "worker_agent_id"]}},
+  {"name": "hiveagent_outcome_submit_result_result", "description": "Submit the result of a claimed outcome contract.", "input_schema": {"type": "object", "properties": {"contract_id": {"type": "string", "description": "ID of the contract"}, "agent_id": {"type": "string", "description": "ID of the worker agent"}, "result_data": {"type": "object", "description": "Result data matching the success criteria fields"}, "evidence_uri": {"type": "string", "description": "Optional URI pointing to evidence (screenshot, document, etc.)"}}, "required": ["contract_id", "agent_id", "result_data"]}},
+  {"name": "hiveagent_outcome_verify_result_result", "description": "Verify a submitted result and trigger payout if criteria are met. Platform earns 15%.", "input_schema": {"type": "object", "properties": {"contract_id": {"type": "string", "description": "ID of the contract to verify"}, "score": {"type": "integer", "description": "Score from 0-100 indicating quality"}, "meets_criteria": {"type": "boolean", "description": "Whether the result meets success criteria"}}, "required": ["contract_id", "score", "meets_criteria"]}},
+  {"name": "hiveagent_outcome_get_templates", "description": "Browse pre-built outcome contract templates with typical payouts and criteria.", "input_schema": {"type": "object", "properties": {}, "required": []}},
+  {"name": "hiveagent_outcome_get_open_contracts", "description": "Browse available outcome contracts to claim.", "input_schema": {"type": "object", "properties": {"category": {"type": "string", "description": "Filter by category"}, "min_payout": {"type": "number", "description": "Minimum payout in USD"}, "limit": {"type": "integer", "description": "Maximum results to return", "default": 20}}, "required": []}},
+  {"name": "hiveagent_outcome_get_agent_outcomes", "description": "Get an agent's full outcome history as both client and worker.", "input_schema": {"type": "object", "properties": {"agent_id": {"type": "string", "description": "ID of the agent"}}, "required": ["agent_id"]}},
+  {"name": "hiveagent_outcome_get_stats", "description": "Get platform-wide outcome contract statistics.", "input_schema": {"type": "object", "properties": {}, "required": []}},
 ];
 
 // Tool handler — called when an agent invokes a tool
@@ -746,6 +804,60 @@ export async function handleTool(name, args) {
     case "hiveagent_ins_my_policies": return insurance.getAgentPolicies(args.agent_id);
     case "hiveagent_ins_my_claims": return insurance.getAgentClaims(args.agent_id);
     case "hiveagent_ins_stats": return insurance.getInsuranceStats();
+
+    // ─── Shopping & Procurement ────────────
+    case "hiveagent_shop_search_products": return shopping.searchProducts(args);
+    case "hiveagent_shop_compare_price": return shopping.comparePrice(args);
+    case "hiveagent_shop_cart_create": return shopping.createCart(args.agent_id);
+    case "hiveagent_shop_cart_add": return shopping.addToCart(args);
+    case "hiveagent_shop_cart_view": return shopping.getCart(args.cart_id);
+    case "hiveagent_shop_checkout": return shopping.checkout(args);
+    case "hiveagent_shop_get_orders": return shopping.getOrders(args.agent_id);
+    case "hiveagent_shop_watch_price": return shopping.watchPrice(args);
+    case "hiveagent_shop_get_stats": return shopping.getShoppingStats();
+
+    // ─── Agent DAO ───────────────────────
+    case "hiveagent_dao_create": return dao.createDAO(args);
+    case "hiveagent_dao_join": return dao.joinDAO(args);
+    case "hiveagent_dao_create_proposal": return dao.createProposal(args);
+    case "hiveagent_dao_vote": return dao.vote(args);
+    case "hiveagent_dao_execute_proposal": return dao.executeProposal(args.proposal_id);
+    case "hiveagent_dao_get": return dao.getDAO(args.dao_id);
+    case "hiveagent_dao_list": return dao.getDAOs(args);
+    case "hiveagent_dao_get_agent_daos": return dao.getAgentDAOs(args.agent_id);
+    case "hiveagent_dao_deposit": return dao.depositToTreasury(args);
+    case "hiveagent_dao_get_stats": return dao.getDAOStats();
+
+    // ─── Negotiation Engine ────────────────
+    case "hiveagent_negotiate_start": return negotiation.startNegotiation(args);
+    case "hiveagent_negotiate_counter": return negotiation.counterOffer(args);
+    case "hiveagent_negotiate_accept": return negotiation.acceptOffer(args.negotiation_id, args.agent_id);
+    case "hiveagent_negotiate_reject": return negotiation.rejectOffer(args.negotiation_id, args.agent_id, args.reason);
+    case "hiveagent_negotiate_get": return negotiation.getNegotiation(args.negotiation_id);
+    case "hiveagent_negotiate_get_agent_negotiations": return negotiation.getAgentNegotiations(args.agent_id);
+    case "hiveagent_negotiate_auto": return negotiation.autoNegotiate(args);
+    case "hiveagent_negotiate_get_stats": return negotiation.getNegotiationStats();
+
+    // ─── NFT & Digital Assets ───────────────
+    case "hiveagent_nft_mint": return nft.mintNFT(args);
+    case "hiveagent_nft_list": return nft.listNFT(args);
+    case "hiveagent_nft_buy": return nft.buyNFT(args);
+    case "hiveagent_nft_transfer": return nft.transferNFT(args);
+    case "hiveagent_nft_fractionalize": return nft.fractionalizeNFT(args);
+    case "hiveagent_nft_buy_fraction": return nft.buyFraction(args);
+    case "hiveagent_nft_search": return nft.searchNFTs(args);
+    case "hiveagent_nft_get_agent_nfts": return nft.getAgentNFTs(args.agent_id);
+    case "hiveagent_nft_get_stats": return nft.getNFTStats();
+
+    // ─── Outcome-Based Pricing ─────────────
+    case "hiveagent_outcome_create_contract": return outcomes.createOutcomeContract(args);
+    case "hiveagent_outcome_claim_contract": return outcomes.claimContract(args);
+    case "hiveagent_outcome_submit_result": return outcomes.submitResult(args);
+    case "hiveagent_outcome_verify_result": return outcomes.verifyResult(args.contract_id, args.score, args.meets_criteria);
+    case "hiveagent_outcome_get_templates": return outcomes.getOutcomeTemplates();
+    case "hiveagent_outcome_get_open_contracts": return outcomes.getOpenContracts(args);
+    case "hiveagent_outcome_get_agent_outcomes": return outcomes.getAgentOutcomes(args.agent_id);
+    case "hiveagent_outcome_get_stats": return outcomes.getOutcomeStats();
 
     default:
       throw new Error(`Unknown tool: ${name}`);
