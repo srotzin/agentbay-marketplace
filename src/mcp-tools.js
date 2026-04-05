@@ -13,6 +13,7 @@ import { executeService, isLiveService } from "./services/live/executor.js";
 import * as settlement from "./services/settlement.js";
 import * as predictions from "./services/predictions.js";
 import * as betting from "./services/betting.js";
+import * as defi from "./services/defi.js";
 
 // MCP tool definitions (JSON Schema format)
 export const tools = [
@@ -400,6 +401,106 @@ export const tools = [
     description: "Get HiveAgent betting exchange statistics — total volume, fees, open events, open contracts.",
     inputSchema: { type: "object", properties: {} },
   },
+
+  // ─── DeFi Hub ──────────────────────────
+  {
+    name: "hiveagent_defi_swap",
+    description: "Swap any token for another. BTC→ETH, SOL→USDC, etc. Real-time prices from CoinGecko. 0.3% fee.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        agent_id: { type: "string", description: "Your agent ID" },
+        from_token: { type: "string", description: "Token to sell (e.g., ETH, BTC, SOL, USDC)" },
+        to_token: { type: "string", description: "Token to buy" },
+        from_amount: { type: "number", description: "Amount to swap" },
+      },
+      required: ["agent_id", "from_token", "to_token", "from_amount"],
+    },
+  },
+  {
+    name: "hiveagent_defi_stablecoin_swap",
+    description: "Swap stablecoins at near-zero slippage. USDC↔USDT↔DAI↔USAT↔PYUSD↔BUSD. 0.1% fee.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        agent_id: { type: "string", description: "Your agent ID" },
+        from_stable: { type: "string", description: "From stablecoin (USDC, USDT, DAI, USAT, PYUSD, BUSD)" },
+        to_stable: { type: "string", description: "To stablecoin" },
+        amount: { type: "number", description: "Amount to swap" },
+      },
+      required: ["agent_id", "from_stable", "to_stable", "amount"],
+    },
+  },
+  {
+    name: "hiveagent_defi_prices",
+    description: "Get real-time token prices. Supports 25+ tokens including BTC, ETH, SOL, USDC, USDT, DOGE, etc.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        tokens: { type: "array", items: { type: "string" }, description: "Token symbols (e.g., ['BTC', 'ETH', 'SOL'])" },
+      },
+    },
+  },
+  {
+    name: "hiveagent_defi_yield_pools",
+    description: "Browse available yield farming pools. Earn APY on your tokens. USDC lending (7.2%), ETH staking (4.1%), LP pools (12-18%).",
+    inputSchema: { type: "object", properties: {} },
+  },
+  {
+    name: "hiveagent_defi_yield_deposit",
+    description: "Deposit tokens into a yield farming pool. Earn APY automatically. HiveAgent takes 10% of yield earned.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        agent_id: { type: "string", description: "Your agent ID" },
+        pool: { type: "string", description: "Pool ID (usdc_lending, eth_staking, btc_vault, sol_staking, usdc_usdt_lp, eth_usdc_lp)" },
+        amount: { type: "number", description: "Amount to deposit" },
+      },
+      required: ["agent_id", "pool", "amount"],
+    },
+  },
+  {
+    name: "hiveagent_defi_lend",
+    description: "Lend tokens to earn interest. Available: USDC (6.8% APY), ETH (3.5%), BTC (2.1%), SOL (5.2%). Platform fee: 5% of interest.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        agent_id: { type: "string", description: "Your agent ID" },
+        token: { type: "string", description: "Token to lend (USDC, ETH, BTC, SOL)" },
+        amount: { type: "number", description: "Amount to lend" },
+      },
+      required: ["agent_id", "token", "amount"],
+    },
+  },
+  {
+    name: "hiveagent_defi_borrow",
+    description: "Borrow tokens against collateral. Overcollateralized (75% LTV max). Interest rates: USDC 9.2%, ETH 5.8%, BTC 4.5%.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        agent_id: { type: "string", description: "Your agent ID" },
+        token: { type: "string", description: "Token to borrow" },
+        amount: { type: "number", description: "Amount to borrow" },
+        collateral_token: { type: "string", description: "Collateral token" },
+        collateral_amount: { type: "number", description: "Collateral amount" },
+      },
+      required: ["agent_id", "token", "amount", "collateral_token", "collateral_amount"],
+    },
+  },
+  {
+    name: "hiveagent_defi_portfolio",
+    description: "View your DeFi portfolio — all token balances, values, and positions.",
+    inputSchema: {
+      type: "object",
+      properties: { agent_id: { type: "string", description: "Your agent ID" } },
+      required: ["agent_id"],
+    },
+  },
+  {
+    name: "hiveagent_defi_stats",
+    description: "Get HiveAgent DeFi statistics — swap volume, yield TVL, lending TVL, total fees.",
+    inputSchema: { type: "object", properties: {} },
+  },
 ];
 
 // Tool handler — called when an agent invokes a tool
@@ -511,6 +612,34 @@ export async function handleTool(name, args) {
 
     case "hiveagent_bet_stats":
       return betting.getBettingStats();
+
+    // ─── DeFi Hub ──────────────────────
+    case "hiveagent_defi_swap":
+      return defi.swapTokens(args);
+
+    case "hiveagent_defi_stablecoin_swap":
+      return defi.swapStablecoins(args);
+
+    case "hiveagent_defi_prices":
+      return defi.getPrices(args.tokens);
+
+    case "hiveagent_defi_yield_pools":
+      return defi.getYieldPools();
+
+    case "hiveagent_defi_yield_deposit":
+      return defi.depositYield(args);
+
+    case "hiveagent_defi_lend":
+      return defi.lend(args);
+
+    case "hiveagent_defi_borrow":
+      return defi.borrow(args);
+
+    case "hiveagent_defi_portfolio":
+      return defi.getPortfolio(args.agent_id);
+
+    case "hiveagent_defi_stats":
+      return defi.getDefiStats();
 
     default:
       throw new Error(`Unknown tool: ${name}`);
