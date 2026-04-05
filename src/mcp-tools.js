@@ -17,6 +17,9 @@ import * as defi from "./services/defi.js";
 import * as agentMkt from "./services/agent-marketplace.js";
 import * as dataMkt from "./services/data-marketplace.js";
 import * as privacy from "./services/privacy.js";
+import * as subscriptions from "./services/subscriptions.js";
+import * as reputation from "./services/reputation.js";
+import * as insurance from "./services/insurance.js";
 
 // MCP tool definitions (JSON Schema format)
 export const tools = [
@@ -531,6 +534,29 @@ export const tools = [
   { name: "hiveagent_privacy_prove", description: "Generate a zero-knowledge proof. Prove you meet a threshold without revealing the actual value. e.g., 'I have at least $100' without showing your balance.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, proof_type: { type: "string", enum: ["balance_gte", "transaction_count_gte"] }, threshold: { type: "number" } }, required: ["agent_id", "proof_type", "threshold"] } },
   { name: "hiveagent_privacy_verify", description: "Verify a zero-knowledge proof from another agent.", inputSchema: { type: "object", properties: { proof_id: { type: "string" } }, required: ["proof_id"] } },
   { name: "hiveagent_privacy_stats", description: "Privacy layer statistics.", inputSchema: { type: "object", properties: {} } },
+
+  // ─── Subscriptions ────────────────────────
+  { name: "hiveagent_sub_create_plan", description: "Create a subscription plan that other agents can subscribe to. Set interval (daily/weekly/monthly), price, features. 15% commission.", inputSchema: { type: "object", properties: { provider_agent_id: { type: "string" }, name: { type: "string" }, description: { type: "string" }, interval: { type: "string", enum: ["daily", "weekly", "monthly"] }, price_usd: { type: "number" }, features: { type: "array", items: { type: "string" } } }, required: ["provider_agent_id", "name", "interval", "price_usd"] } },
+  { name: "hiveagent_sub_plans", description: "Browse available subscription plans.", inputSchema: { type: "object", properties: { max_price: { type: "number" }, sort_by: { type: "string", enum: ["price", "subscribers", "revenue"] }, limit: { type: "integer" } } } },
+  { name: "hiveagent_sub_subscribe", description: "Subscribe to a plan. First payment charged immediately. 15% commission on every payment.", inputSchema: { type: "object", properties: { plan_id: { type: "string" }, subscriber_agent_id: { type: "string" } }, required: ["plan_id", "subscriber_agent_id"] } },
+  { name: "hiveagent_sub_cancel", description: "Cancel a subscription.", inputSchema: { type: "object", properties: { subscription_id: { type: "string" }, agent_id: { type: "string" } }, required: ["subscription_id", "agent_id"] } },
+  { name: "hiveagent_sub_my_subs", description: "List your active subscriptions.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
+  { name: "hiveagent_sub_stats", description: "Subscription statistics: MRR, plans, subscribers, commission.", inputSchema: { type: "object", properties: {} } },
+
+  // ─── Reputation & Credit Scoring ─────────────
+  { name: "hiveagent_rep_score", description: "Get an agent's full reputation: trust score (0-100), credit score (300-850), tier (bronze→diamond), badges, and transaction history.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
+  { name: "hiveagent_rep_record_event", description: "Record a reputation event. Types: transaction_complete, failed_transaction, dispute_won, dispute_lost, fast_delivery, late_delivery, high_rating, low_rating, fraud_flag.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, event_type: { type: "string", enum: ["transaction_complete", "failed_transaction", "dispute_won", "dispute_lost", "fast_delivery", "late_delivery", "high_rating", "low_rating", "fraud_flag"] }, details: { type: "object" } }, required: ["agent_id", "event_type"] } },
+  { name: "hiveagent_rep_badges", description: "Check and auto-award earned badges: verified, top_rated, fast_responder, high_volume, whale, veteran, trusted_seller, trusted_buyer.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
+  { name: "hiveagent_rep_leaderboard", description: "Top agents leaderboard by trust score, volume, transactions, or credit score.", inputSchema: { type: "object", properties: { sort_by: { type: "string", enum: ["trust_score", "volume", "transactions", "credit_score"] }, limit: { type: "integer" } } } },
+  { name: "hiveagent_rep_stats", description: "Platform reputation statistics.", inputSchema: { type: "object", properties: {} } },
+
+  // ─── Insurance ───────────────────────────
+  { name: "hiveagent_ins_plans", description: "Insurance plans: basic ($1/mo, $50 coverage), standard ($5/mo, $500), premium ($25/mo, $5000), enterprise ($100/mo, $50000).", inputSchema: { type: "object", properties: {} } },
+  { name: "hiveagent_ins_buy", description: "Buy insurance for your agent. Covers transaction failures, delivery failures, escrow disputes, swap losses, and prediction losses.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, plan_type: { type: "string", enum: ["basic", "standard", "premium", "enterprise"] } }, required: ["agent_id", "plan_type"] } },
+  { name: "hiveagent_ins_claim", description: "File an insurance claim. Low-value claims from trusted agents are auto-approved.", inputSchema: { type: "object", properties: { policy_id: { type: "string" }, agent_id: { type: "string" }, claim_type: { type: "string", enum: ["transaction_failure", "delivery_failure", "escrow_dispute", "swap_loss", "prediction_loss"] }, description: { type: "string" }, claimed_amount_usd: { type: "number" }, evidence_uri: { type: "string" } }, required: ["policy_id", "agent_id", "claim_type", "description", "claimed_amount_usd"] } },
+  { name: "hiveagent_ins_my_policies", description: "List your insurance policies.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
+  { name: "hiveagent_ins_my_claims", description: "List your insurance claims.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
+  { name: "hiveagent_ins_stats", description: "Insurance pool stats: premiums collected, claims paid, reserve, surplus, claims ratio.", inputSchema: { type: "object", properties: {} } },
 ];
 
 // Tool handler — called when an agent invokes a tool
@@ -697,6 +723,29 @@ export async function handleTool(name, args) {
     case "hiveagent_privacy_prove": return privacy.generateProof(args.agent_id, args.proof_type, args.threshold);
     case "hiveagent_privacy_verify": return privacy.verifyProof(args.proof_id);
     case "hiveagent_privacy_stats": return privacy.getPrivacyStats();
+
+    // ─── Subscriptions ──────────────────
+    case "hiveagent_sub_create_plan": return subscriptions.createPlan(args);
+    case "hiveagent_sub_plans": return subscriptions.getPlans(args);
+    case "hiveagent_sub_subscribe": return subscriptions.subscribe(args);
+    case "hiveagent_sub_cancel": return subscriptions.cancelSubscription(args.subscription_id, args.agent_id);
+    case "hiveagent_sub_my_subs": return subscriptions.getAgentSubscriptions(args.agent_id);
+    case "hiveagent_sub_stats": return subscriptions.getSubscriptionStats();
+
+    // ─── Reputation ────────────────────
+    case "hiveagent_rep_score": return reputation.getReputation(args.agent_id);
+    case "hiveagent_rep_record_event": return reputation.recordEvent(args);
+    case "hiveagent_rep_badges": return reputation.checkBadges(args.agent_id);
+    case "hiveagent_rep_leaderboard": return reputation.getLeaderboard(args);
+    case "hiveagent_rep_stats": return reputation.getReputationStats();
+
+    // ─── Insurance ─────────────────────
+    case "hiveagent_ins_plans": return insurance.getInsurancePlans();
+    case "hiveagent_ins_buy": return insurance.purchasePolicy(args);
+    case "hiveagent_ins_claim": return insurance.fileClaim(args);
+    case "hiveagent_ins_my_policies": return insurance.getAgentPolicies(args.agent_id);
+    case "hiveagent_ins_my_claims": return insurance.getAgentClaims(args.agent_id);
+    case "hiveagent_ins_stats": return insurance.getInsuranceStats();
 
     default:
       throw new Error(`Unknown tool: ${name}`);
