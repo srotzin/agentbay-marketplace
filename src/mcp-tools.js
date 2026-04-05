@@ -14,6 +14,9 @@ import * as settlement from "./services/settlement.js";
 import * as predictions from "./services/predictions.js";
 import * as betting from "./services/betting.js";
 import * as defi from "./services/defi.js";
+import * as agentMkt from "./services/agent-marketplace.js";
+import * as dataMkt from "./services/data-marketplace.js";
+import * as privacy from "./services/privacy.js";
 
 // MCP tool definitions (JSON Schema format)
 export const tools = [
@@ -501,6 +504,33 @@ export const tools = [
     description: "Get HiveAgent DeFi statistics — swap volume, yield TVL, lending TVL, total fees.",
     inputSchema: { type: "object", properties: {} },
   },
+
+  // ─── Agent-for-Hire Marketplace ─────────────
+  { name: "hiveagent_agents_register", description: "Register yourself as an agent-for-hire. Set your skills, rates, and availability. Other agents can hire you through HiveAgent.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, name: { type: "string", description: "Your agent name" }, description: { type: "string", description: "What you do" }, category: { type: "string", enum: ["research", "trading", "writing", "code", "data", "legal", "creative", "security", "sales", "support"] }, skills: { type: "array", items: { type: "string" } }, hourly_rate_usd: { type: "number" }, per_task_rate_usd: { type: "number" } }, required: ["agent_id", "name", "description", "category"] } },
+  { name: "hiveagent_agents_search", description: "Search for agents to hire. Filter by skill, category, rate. The LinkedIn + Fiverr for AI agents.", inputSchema: { type: "object", properties: { query: { type: "string" }, category: { type: "string" }, max_rate: { type: "number" }, sort_by: { type: "string", enum: ["rating", "price_low", "popular", "newest"] } } } },
+  { name: "hiveagent_agents_hire", description: "Hire an agent. Describe the job and set a budget. 15% commission.", inputSchema: { type: "object", properties: { listing_id: { type: "string" }, client_agent_id: { type: "string" }, description: { type: "string" }, budget_usd: { type: "number" } }, required: ["listing_id", "client_agent_id", "description", "budget_usd"] } },
+  { name: "hiveagent_agents_deliver", description: "Deliver work for a job you were hired for.", inputSchema: { type: "object", properties: { job_id: { type: "string" }, deliverable_uri: { type: "string" } }, required: ["job_id", "deliverable_uri"] } },
+  { name: "hiveagent_agents_complete", description: "Mark a job as complete and leave a rating (1-5 stars).", inputSchema: { type: "object", properties: { job_id: { type: "string" }, rating: { type: "integer", minimum: 1, maximum: 5 }, review: { type: "string" } }, required: ["job_id", "rating"] } },
+  { name: "hiveagent_agents_profile", description: "View an agent's profile — skills, ratings, reviews, job history.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
+  { name: "hiveagent_agents_stats", description: "Agent-for-hire marketplace statistics.", inputSchema: { type: "object", properties: {} } },
+
+  // ─── Data Marketplace ─────────────────────
+  { name: "hiveagent_data_list", description: "List a dataset for sale. Sell data to other agents. 20% commission (data is high-value).", inputSchema: { type: "object", properties: { provider_agent_id: { type: "string" }, name: { type: "string" }, description: { type: "string" }, category: { type: "string", enum: ["market_data", "company_data", "contacts", "training_data", "research", "real_estate", "social", "government"] }, format: { type: "string", enum: ["json", "csv", "parquet", "api"] }, price_usd: { type: "number" }, record_count: { type: "integer" }, tags: { type: "array", items: { type: "string" } } }, required: ["provider_agent_id", "name", "description", "category", "price_usd"] } },
+  { name: "hiveagent_data_search", description: "Search the data marketplace for datasets. Buy data from other agents.", inputSchema: { type: "object", properties: { query: { type: "string" }, category: { type: "string" }, max_price: { type: "number" }, format: { type: "string" }, sort_by: { type: "string", enum: ["popular", "price_low", "newest", "rating"] } } } },
+  { name: "hiveagent_data_buy", description: "Purchase a dataset. Get instant access to the data. 20% commission to HiveAgent.", inputSchema: { type: "object", properties: { dataset_id: { type: "string" }, buyer_agent_id: { type: "string" } }, required: ["dataset_id", "buyer_agent_id"] } },
+  { name: "hiveagent_data_preview", description: "Preview a dataset before buying — see schema, sample data, and stats.", inputSchema: { type: "object", properties: { dataset_id: { type: "string" } }, required: ["dataset_id"] } },
+  { name: "hiveagent_data_stats", description: "Data marketplace statistics.", inputSchema: { type: "object", properties: {} } },
+
+  // ─── Privacy Layer ────────────────────────
+  { name: "hiveagent_privacy_create_account", description: "Create a shielded (private) account. Get a stealth address. Transactions through this account are invisible on-chain.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
+  { name: "hiveagent_privacy_deposit", description: "Deposit funds into your shielded account. Public balance → private balance. 1% privacy fee.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, amount_usd: { type: "number" } }, required: ["agent_id", "amount_usd"] } },
+  { name: "hiveagent_privacy_withdraw", description: "Withdraw from shielded account back to public. Private → public. 1% fee.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, amount_usd: { type: "number" } }, required: ["agent_id", "amount_usd"] } },
+  { name: "hiveagent_privacy_transfer", description: "Private transfer between shielded accounts. No on-chain trace. Only sender and receiver know.", inputSchema: { type: "object", properties: { from_agent_id: { type: "string" }, to_stealth_address: { type: "string" }, amount_usd: { type: "number" } }, required: ["from_agent_id", "to_stealth_address", "amount_usd"] } },
+  { name: "hiveagent_privacy_sealed_bid", description: "Submit a sealed bid — only the commitment hash is visible. Perfect for competitive auctions.", inputSchema: { type: "object", properties: { auction_id: { type: "string" }, agent_id: { type: "string" }, bid_amount: { type: "number" }, salt: { type: "string", description: "Random salt (auto-generated if omitted)" } }, required: ["auction_id", "agent_id", "bid_amount"] } },
+  { name: "hiveagent_privacy_reveal_bid", description: "Reveal your sealed bid after auction closes.", inputSchema: { type: "object", properties: { bid_id: { type: "string" }, bid_amount: { type: "number" }, salt: { type: "string" } }, required: ["bid_id", "bid_amount", "salt"] } },
+  { name: "hiveagent_privacy_prove", description: "Generate a zero-knowledge proof. Prove you meet a threshold without revealing the actual value. e.g., 'I have at least $100' without showing your balance.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, proof_type: { type: "string", enum: ["balance_gte", "transaction_count_gte"] }, threshold: { type: "number" } }, required: ["agent_id", "proof_type", "threshold"] } },
+  { name: "hiveagent_privacy_verify", description: "Verify a zero-knowledge proof from another agent.", inputSchema: { type: "object", properties: { proof_id: { type: "string" } }, required: ["proof_id"] } },
+  { name: "hiveagent_privacy_stats", description: "Privacy layer statistics.", inputSchema: { type: "object", properties: {} } },
 ];
 
 // Tool handler — called when an agent invokes a tool
@@ -640,6 +670,33 @@ export async function handleTool(name, args) {
 
     case "hiveagent_defi_stats":
       return defi.getDefiStats();
+
+    // ─── Agent-for-Hire ──────────────────────
+    case "hiveagent_agents_register": return agentMkt.registerAgent(args);
+    case "hiveagent_agents_search": return agentMkt.searchAgents(args);
+    case "hiveagent_agents_hire": return agentMkt.hireAgent(args);
+    case "hiveagent_agents_deliver": return agentMkt.deliverJob(args.job_id, args.deliverable_uri);
+    case "hiveagent_agents_complete": return agentMkt.completeJob(args.job_id, args.rating, args.review);
+    case "hiveagent_agents_profile": return agentMkt.getAgentProfile(args.agent_id);
+    case "hiveagent_agents_stats": return agentMkt.getAgentMarketplaceStats();
+
+    // ─── Data Marketplace ────────────────────
+    case "hiveagent_data_list": return dataMkt.listDataset(args);
+    case "hiveagent_data_search": return dataMkt.searchDatasets(args);
+    case "hiveagent_data_buy": return dataMkt.purchaseDataset(args);
+    case "hiveagent_data_preview": return dataMkt.previewDataset(args.dataset_id);
+    case "hiveagent_data_stats": return dataMkt.getDataMarketplaceStats();
+
+    // ─── Privacy Layer ───────────────────────
+    case "hiveagent_privacy_create_account": return privacy.createShieldedAccount(args.agent_id);
+    case "hiveagent_privacy_deposit": return privacy.shieldDeposit(args.agent_id, args.amount_usd);
+    case "hiveagent_privacy_withdraw": return privacy.shieldWithdraw(args.agent_id, args.amount_usd);
+    case "hiveagent_privacy_transfer": return privacy.shieldedTransfer(args.from_agent_id, args.to_stealth_address, args.amount_usd);
+    case "hiveagent_privacy_sealed_bid": return privacy.submitSealedBid(args.auction_id, args.agent_id, args.bid_amount, args.salt);
+    case "hiveagent_privacy_reveal_bid": return privacy.revealSealedBid(args.bid_id, args.bid_amount, args.salt);
+    case "hiveagent_privacy_prove": return privacy.generateProof(args.agent_id, args.proof_type, args.threshold);
+    case "hiveagent_privacy_verify": return privacy.verifyProof(args.proof_id);
+    case "hiveagent_privacy_stats": return privacy.getPrivacyStats();
 
     default:
       throw new Error(`Unknown tool: ${name}`);
