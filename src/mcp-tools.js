@@ -12,6 +12,7 @@ import * as mkt from "./services/marketplace.js";
 import { executeService, isLiveService } from "./services/live/executor.js";
 import * as settlement from "./services/settlement.js";
 import * as predictions from "./services/predictions.js";
+import * as betting from "./services/betting.js";
 
 // MCP tool definitions (JSON Schema format)
 export const tools = [
@@ -281,6 +282,124 @@ export const tools = [
       required: ["agent_id"],
     },
   },
+
+  // ─── Betting Exchange ─────────────────────
+  {
+    name: "hiveagent_bet_create_event",
+    description: "Create a sports betting event with odds. NFL, NBA, MLB, Soccer, MMA, Tennis. Set moneyline, spread, or over/under.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        sport: { type: "string", enum: ["nfl", "nba", "mlb", "soccer", "mma", "tennis", "custom"], description: "Sport" },
+        event_name: { type: "string", description: "Event name (e.g., 'Lakers vs Celtics')" },
+        event_type: { type: "string", enum: ["moneyline", "spread", "over_under", "prop"], description: "Bet type" },
+        home: { type: "string", description: "Home team/fighter" },
+        away: { type: "string", description: "Away team/fighter" },
+        odds_home: { type: "number", description: "Decimal odds for home (e.g., 1.50 = -200)" },
+        odds_away: { type: "number", description: "Decimal odds for away (e.g., 2.80 = +180)" },
+        odds_draw: { type: "number", description: "Decimal odds for draw (soccer)" },
+        spread: { type: "number", description: "Point spread (e.g., -3.5)" },
+        total_line: { type: "number", description: "Over/under total (e.g., 220.5)" },
+        starts_at: { type: "string", description: "Event start time (ISO 8601)" },
+      },
+      required: ["sport", "event_name", "odds_home", "odds_away"],
+    },
+  },
+  {
+    name: "hiveagent_bet_sports_events",
+    description: "Browse open sports betting events. Filter by sport.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        sport: { type: "string", description: "Filter by sport" },
+        limit: { type: "integer", description: "Number of results" },
+      },
+    },
+  },
+  {
+    name: "hiveagent_bet_place",
+    description: "Place a sports bet. Pick home, away, draw, over, or under. 5% vig. Payout calculated from locked-in odds.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        event_id: { type: "string", description: "The sports event ID" },
+        agent_id: { type: "string", description: "Your agent ID" },
+        pick: { type: "string", enum: ["home", "away", "draw", "over", "under"], description: "Your pick" },
+        amount_usd: { type: "number", description: "Bet amount in USD" },
+      },
+      required: ["event_id", "agent_id", "pick", "amount_usd"],
+    },
+  },
+  {
+    name: "hiveagent_bet_create_contract",
+    description: "Create a Kalshi-style event contract. Binary yes/no markets on any real-world event. Contracts trade between $0.01-$0.99. Winner gets $1.00 per contract minus 5% fee.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        creator_agent_id: { type: "string", description: "Your agent ID" },
+        question: { type: "string", description: "The event question (e.g., 'Will the Fed cut rates in July 2026?')" },
+        category: { type: "string", enum: ["economics", "politics", "tech", "crypto", "weather", "entertainment"], description: "Category" },
+        initial_yes_price: { type: "number", description: "Starting YES price 0.01-0.99 (default 0.50)" },
+        expires_in_hours: { type: "number", description: "Hours until expiration (default 168 = 1 week)" },
+      },
+      required: ["creator_agent_id", "question"],
+    },
+  },
+  {
+    name: "hiveagent_bet_contracts",
+    description: "Browse open event contracts (Kalshi-style). See current YES/NO prices, volume, and expiration.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        category: { type: "string", description: "Filter by category" },
+        limit: { type: "integer", description: "Number of results" },
+      },
+    },
+  },
+  {
+    name: "hiveagent_bet_buy_contract",
+    description: "Buy YES or NO contracts. Price is $0.01-$0.99 per contract. If your position wins, each contract pays $1.00 minus 5% fee.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        contract_id: { type: "string", description: "The event contract ID" },
+        agent_id: { type: "string", description: "Your agent ID" },
+        position: { type: "string", enum: ["YES", "NO"], description: "Buy YES or NO" },
+        num_contracts: { type: "integer", description: "Number of contracts to buy" },
+        max_price: { type: "number", description: "Maximum price per contract (optional limit order)" },
+      },
+      required: ["contract_id", "agent_id", "position", "num_contracts"],
+    },
+  },
+  {
+    name: "hiveagent_bet_parlay",
+    description: "Create a parlay bet — chain 2-12 sports bets for multiplied odds. All legs must win. 5% fee. Higher risk, massive payout.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        agent_id: { type: "string", description: "Your agent ID" },
+        stake_usd: { type: "number", description: "Total stake" },
+        legs: { type: "array", items: { type: "object", properties: { event_id: { type: "string" }, pick: { type: "string" } }, required: ["event_id", "pick"] }, description: "Array of bets [{event_id, pick}, ...]" },
+      },
+      required: ["agent_id", "stake_usd", "legs"],
+    },
+  },
+  {
+    name: "hiveagent_bet_history",
+    description: "View your full betting history — sports bets, event contracts, and parlays.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        agent_id: { type: "string", description: "Your agent ID" },
+      },
+      required: ["agent_id"],
+    },
+  },
+  {
+    name: "hiveagent_bet_stats",
+    description: "Get HiveAgent betting exchange statistics — total volume, fees, open events, open contracts.",
+    inputSchema: { type: "object", properties: {} },
+  },
 ];
 
 // Tool handler — called when an agent invokes a tool
@@ -364,6 +483,34 @@ export async function handleTool(name, args) {
 
     case "hiveagent_predict_my_bets":
       return predictions.getAgentBets(args.agent_id);
+
+    // ─── Betting Exchange ──────────────────
+    case "hiveagent_bet_sports_events":
+      return betting.getOpenSportsEvents(args);
+
+    case "hiveagent_bet_place":
+      return betting.placeSportsBet(args);
+
+    case "hiveagent_bet_create_event":
+      return betting.createSportsEvent(args);
+
+    case "hiveagent_bet_contracts":
+      return betting.getOpenContracts(args);
+
+    case "hiveagent_bet_buy_contract":
+      return betting.buyContracts(args);
+
+    case "hiveagent_bet_create_contract":
+      return betting.createEventContract(args);
+
+    case "hiveagent_bet_parlay":
+      return betting.createParlay(args);
+
+    case "hiveagent_bet_history":
+      return betting.getAgentBettingHistory(args.agent_id);
+
+    case "hiveagent_bet_stats":
+      return betting.getBettingStats();
 
     default:
       throw new Error(`Unknown tool: ${name}`);
