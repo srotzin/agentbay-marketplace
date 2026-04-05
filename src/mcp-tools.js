@@ -25,6 +25,10 @@ import * as dao from "./services/dao.js";
 import * as negotiation from "./services/negotiation.js";
 import * as nft from "./services/nft.js";
 import * as outcomes from "./services/outcomes.js";
+import * as memory from "./services/memory.js";
+import * as sandbox from "./services/sandbox.js";
+import * as scheduler from "./services/scheduler.js";
+import * as webhooks from "./services/webhooks.js";
 
 // MCP tool definitions (JSON Schema format)
 export const tools = [
@@ -612,6 +616,46 @@ export const tools = [
   { name: "hiveagent_outcome_get_agent_outcomes", description: "Your outcomes.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
   { name: "hiveagent_outcome_get_stats", description: "Outcome stats.", inputSchema: { type: "object", properties: {} } },
 
+
+  // ─── Agent Memory (FREE) ────────────────────
+
+  // ─── Code Sandbox ──────────────────────────
+
+  // ─── Scheduled Tasks (FREE) ─────────────────
+
+  // ─── Webhooks (FREE) ───────────────────────
+
+  // ─── Agent Memory (FREE — the hook) ────────────
+  { name: "hiveagent_mem_set", description: "Store a value in persistent memory. Survives across sessions. FREE. Supports strings, numbers, booleans, JSON objects. Optional TTL for auto-expiry.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, key: { type: "string" }, value: { type: "string", description: "Value to store (strings, numbers, JSON)" }, namespace: { type: "string", description: "Optional namespace (default: 'default')" }, ttl_seconds: { type: "integer", description: "Auto-delete after N seconds" } }, required: ["agent_id", "key", "value"] } },
+  { name: "hiveagent_mem_get", description: "Retrieve a value from persistent memory. FREE.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, key: { type: "string" }, namespace: { type: "string" } }, required: ["agent_id", "key"] } },
+  { name: "hiveagent_mem_delete", description: "Delete a key from memory.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, key: { type: "string" }, namespace: { type: "string" } }, required: ["agent_id", "key"] } },
+  { name: "hiveagent_mem_list", description: "List all keys in memory. Filter by namespace or prefix.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, namespace: { type: "string" }, prefix: { type: "string" }, limit: { type: "integer" } }, required: ["agent_id"] } },
+  { name: "hiveagent_mem_search", description: "Search across all your stored keys and values.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, query: { type: "string" }, namespace: { type: "string" } }, required: ["agent_id", "query"] } },
+  { name: "hiveagent_mem_create_collection", description: "Create a named collection (like a folder) to organize related data.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, name: { type: "string" }, description: { type: "string" } }, required: ["agent_id", "name"] } },
+  { name: "hiveagent_mem_add_to_collection", description: "Add an item to a collection.", inputSchema: { type: "object", properties: { collection_id: { type: "string" }, key: { type: "string" }, value: { type: "string" }, metadata: { type: "string" } }, required: ["collection_id", "key", "value"] } },
+  { name: "hiveagent_mem_get_collection", description: "Get a collection with all its items.", inputSchema: { type: "object", properties: { collection_id: { type: "string" } }, required: ["collection_id"] } },
+  { name: "hiveagent_mem_stats", description: "Your memory usage stats — keys, storage, collections.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
+
+  // ─── Code Sandbox ──────────────────────────────
+  { name: "hiveagent_code_run", description: "Execute JavaScript code in a secure sandbox. Returns output, result, and execution time. $0.001 per run.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, code: { type: "string", description: "JavaScript code to execute" }, timeout_ms: { type: "integer", description: "Timeout in ms (default 5000, max 30000)" } }, required: ["agent_id", "code"] } },
+  { name: "hiveagent_code_history", description: "Your code execution history.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, limit: { type: "integer" } }, required: ["agent_id"] } },
+  { name: "hiveagent_code_stats", description: "Code sandbox platform stats.", inputSchema: { type: "object", properties: {} } },
+
+  // ─── Scheduled Tasks (FREE) ────────────────────
+  { name: "hiveagent_sched_create", description: "Schedule a recurring or one-time task. FREE. Define what action to run and when.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, name: { type: "string" }, description: { type: "string" }, task_type: { type: "string", enum: ["one_time", "recurring"] }, action: { type: "object", description: "What to do: {tool: 'hiveagent_search', args: {query: '...'}}" }, interval_minutes: { type: "integer", description: "For recurring: run every N minutes" }, run_at: { type: "string", description: "For one_time: ISO datetime to run" }, max_runs: { type: "integer" } }, required: ["agent_id", "name", "action"] } },
+  { name: "hiveagent_sched_pause", description: "Pause a scheduled task.", inputSchema: { type: "object", properties: { task_id: { type: "string" }, agent_id: { type: "string" } }, required: ["task_id", "agent_id"] } },
+  { name: "hiveagent_sched_resume", description: "Resume a paused task.", inputSchema: { type: "object", properties: { task_id: { type: "string" }, agent_id: { type: "string" } }, required: ["task_id", "agent_id"] } },
+  { name: "hiveagent_sched_cancel", description: "Cancel a scheduled task.", inputSchema: { type: "object", properties: { task_id: { type: "string" }, agent_id: { type: "string" } }, required: ["task_id", "agent_id"] } },
+  { name: "hiveagent_sched_list", description: "List your scheduled tasks.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
+  { name: "hiveagent_sched_stats", description: "Scheduler platform stats.", inputSchema: { type: "object", properties: {} } },
+
+  // ─── Webhooks (FREE) ──────────────────────────
+  { name: "hiveagent_webhook_register", description: "Register a webhook to receive events. Listen for transactions, bets, escrow, auctions, and more. FREE.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, name: { type: "string" }, events: { type: "array", items: { type: "string" }, description: "Event types: transaction_completed, escrow_locked, escrow_released, bet_settled, prediction_resolved, price_alert, nft_sold, etc. Use ['*'] for all." }, url: { type: "string", description: "URL to POST events to" } }, required: ["agent_id", "name"] } },
+  { name: "hiveagent_webhook_unregister", description: "Remove a webhook.", inputSchema: { type: "object", properties: { endpoint_id: { type: "string" }, agent_id: { type: "string" } }, required: ["endpoint_id", "agent_id"] } },
+  { name: "hiveagent_webhook_list", description: "List your registered webhooks.", inputSchema: { type: "object", properties: { agent_id: { type: "string" } }, required: ["agent_id"] } },
+  { name: "hiveagent_webhook_trigger", description: "Manually trigger a webhook event for testing.", inputSchema: { type: "object", properties: { event_type: { type: "string" }, payload: { type: "object" }, target_agent_id: { type: "string" } }, required: ["event_type", "payload"] } },
+  { name: "hiveagent_webhook_events", description: "View recent webhook events.", inputSchema: { type: "object", properties: { agent_id: { type: "string" }, event_type: { type: "string" }, limit: { type: "integer" } } } },
+  { name: "hiveagent_webhook_stats", description: "Webhook platform stats.", inputSchema: { type: "object", properties: {} } },
 ];
 
 // Tool handler — called when an agent invokes a tool
@@ -855,6 +899,39 @@ export async function handleTool(name, args) {
     case "hiveagent_outcome_get_open_contracts": return outcomes.getOpenContracts(args);
     case "hiveagent_outcome_get_agent_outcomes": return outcomes.getAgentOutcomes(args.agent_id);
     case "hiveagent_outcome_get_stats": return outcomes.getOutcomeStats();
+
+
+    // ─── Agent Memory ────────────────────────
+    case "hiveagent_mem_set": return memory.set(args);
+    case "hiveagent_mem_get": return memory.get(args);
+    case "hiveagent_mem_delete": return memory.del ? memory.del(args) : memory.delete(args);
+    case "hiveagent_mem_list": return memory.list(args);
+    case "hiveagent_mem_search": return memory.search(args);
+    case "hiveagent_mem_create_collection": return memory.createCollection(args);
+    case "hiveagent_mem_add_to_collection": return memory.addToCollection(args);
+    case "hiveagent_mem_get_collection": return memory.getCollection(args.collection_id);
+    case "hiveagent_mem_stats": return memory.getMemoryStats(args.agent_id);
+
+    // ─── Code Sandbox ────────────────────────
+    case "hiveagent_code_run": return sandbox.executeCode(args);
+    case "hiveagent_code_history": return sandbox.getExecutionHistory(args.agent_id, args.limit);
+    case "hiveagent_code_stats": return sandbox.getExecutionStats();
+
+    // ─── Scheduled Tasks ─────────────────────
+    case "hiveagent_sched_create": return scheduler.createTask(args);
+    case "hiveagent_sched_pause": return scheduler.pauseTask(args.task_id, args.agent_id);
+    case "hiveagent_sched_resume": return scheduler.resumeTask(args.task_id, args.agent_id);
+    case "hiveagent_sched_cancel": return scheduler.cancelTask(args.task_id, args.agent_id);
+    case "hiveagent_sched_list": return scheduler.getAgentTasks(args.agent_id);
+    case "hiveagent_sched_stats": return scheduler.getSchedulerStats();
+
+    // ─── Webhooks ────────────────────────────
+    case "hiveagent_webhook_register": return webhooks.registerWebhook(args);
+    case "hiveagent_webhook_unregister": return webhooks.unregisterWebhook(args.endpoint_id, args.agent_id);
+    case "hiveagent_webhook_list": return webhooks.listWebhooks(args.agent_id);
+    case "hiveagent_webhook_trigger": return webhooks.triggerEvent(args);
+    case "hiveagent_webhook_events": return webhooks.getEventHistory(args);
+    case "hiveagent_webhook_stats": return webhooks.getWebhookStats();
 
     default:
       throw new Error(`Unknown tool: ${name}`);
