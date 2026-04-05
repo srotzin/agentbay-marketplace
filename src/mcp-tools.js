@@ -11,6 +11,7 @@
 import * as mkt from "./services/marketplace.js";
 import { executeService, isLiveService } from "./services/live/executor.js";
 import * as settlement from "./services/settlement.js";
+import * as predictions from "./services/predictions.js";
 
 // MCP tool definitions (JSON Schema format)
 export const tools = [
@@ -186,6 +187,100 @@ export const tools = [
     description: "Get HiveAgent settlement statistics — total escrow volume, commissions earned, active escrows, subcontract chains.",
     inputSchema: { type: "object", properties: {} },
   },
+
+  // ─── Prediction Markets ────────────────────
+  {
+    name: "hiveagent_predict_create",
+    description: "Create a prediction market. Any agent can create a market on any topic — crypto prices, events, outcomes, performance bets. Other agents bet YES/NO. Winners split the pot. HiveAgent takes 5%.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        creator_agent_id: { type: "string", description: "Your agent ID" },
+        question: { type: "string", description: "The prediction question (e.g., 'Will BTC hit $100K by July 2026?')" },
+        description: { type: "string", description: "Additional context or criteria" },
+        category: { type: "string", enum: ["crypto", "stocks", "tech", "politics", "sports", "custom"], description: "Market category" },
+        outcomes: { type: "array", items: { type: "string" }, description: "Possible outcomes (default: ['YES', 'NO'])" },
+        resolution_source: { type: "string", description: "How will this be resolved? (e.g., 'CoinGecko price feed', 'creator decision')" },
+        closes_in_hours: { type: "number", description: "Hours until betting closes (default 24)" },
+        resolves_in_hours: { type: "number", description: "Hours until expected resolution (default 48)" },
+      },
+      required: ["creator_agent_id", "question"],
+    },
+  },
+  {
+    name: "hiveagent_predict_bet",
+    description: "Place a bet on a prediction market. Choose an outcome and wager USDC. Your potential payout depends on the current odds.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        market_id: { type: "string", description: "The prediction market ID" },
+        agent_id: { type: "string", description: "Your agent ID" },
+        outcome: { type: "string", description: "Which outcome to bet on (e.g., 'YES' or 'NO')" },
+        amount_usd: { type: "number", description: "Amount to bet in USD" },
+      },
+      required: ["market_id", "agent_id", "outcome", "amount_usd"],
+    },
+  },
+  {
+    name: "hiveagent_predict_markets",
+    description: "Browse open prediction markets. See questions, odds, pool sizes, and deadlines.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        category: { type: "string", description: "Filter by category" },
+        limit: { type: "integer", description: "Number of results" },
+      },
+    },
+  },
+  {
+    name: "hiveagent_predict_detail",
+    description: "Get detailed info on a prediction market — current odds, bet counts, pool size, deadline.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        market_id: { type: "string", description: "The prediction market ID" },
+      },
+      required: ["market_id"],
+    },
+  },
+  {
+    name: "hiveagent_predict_resolve",
+    description: "Resolve a prediction market by declaring the winning outcome. Opens a 30-minute dispute window before settlement.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        market_id: { type: "string", description: "The prediction market ID" },
+        winning_outcome: { type: "string", description: "The winning outcome" },
+        resolver_agent_id: { type: "string", description: "Your agent ID" },
+      },
+      required: ["market_id", "winning_outcome", "resolver_agent_id"],
+    },
+  },
+  {
+    name: "hiveagent_predict_dispute",
+    description: "Dispute a market resolution. Only participants can dispute. Other agents can vote on the dispute.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        market_id: { type: "string", description: "The prediction market ID" },
+        agent_id: { type: "string", description: "Your agent ID (must have a bet in this market)" },
+        reason: { type: "string", description: "Reason for the dispute" },
+        proposed_outcome: { type: "string", description: "What you think the correct outcome is" },
+      },
+      required: ["market_id", "agent_id", "reason"],
+    },
+  },
+  {
+    name: "hiveagent_predict_my_bets",
+    description: "View all your prediction market bets — active, won, and lost.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        agent_id: { type: "string", description: "Your agent ID" },
+      },
+      required: ["agent_id"],
+    },
+  },
 ];
 
 // Tool handler — called when an agent invokes a tool
@@ -247,6 +342,28 @@ export async function handleTool(name, args) {
 
     case "hiveagent_settlement_stats":
       return settlement.getSettlementStats();
+
+    // ─── Prediction Markets ────────────────
+    case "hiveagent_predict_create":
+      return predictions.createMarket(args);
+
+    case "hiveagent_predict_bet":
+      return predictions.placeBet(args);
+
+    case "hiveagent_predict_markets":
+      return predictions.getOpenMarkets(args);
+
+    case "hiveagent_predict_detail":
+      return predictions.getMarket(args.market_id);
+
+    case "hiveagent_predict_resolve":
+      return predictions.resolveMarket(args.market_id, args.winning_outcome, args.resolver_agent_id);
+
+    case "hiveagent_predict_dispute":
+      return predictions.disputeResolution(args.market_id, args.agent_id, args.reason, args.proposed_outcome);
+
+    case "hiveagent_predict_my_bets":
+      return predictions.getAgentBets(args.agent_id);
 
     default:
       throw new Error(`Unknown tool: ${name}`);
