@@ -11,7 +11,9 @@
   "description": "",
   "type": "module",
   "dependencies": {
+    "@coinbase/cdp-sdk": "^1.46.1",
     "better-sqlite3": "^12.8.0",
+    "bs58": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.0",
     "express": "^5.2.1",

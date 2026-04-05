@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import apiRoutes from "./routes/api.js";
 import mcpServer from "./mcp-server.js";
+import x402Services from "./routes/x402-services.js";
+import { initPayments } from "./services/payments.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,6 +18,9 @@ app.use("/api/v1", apiRoutes);
 
 // MCP Server for agent connectivity
 app.use("/mcp", mcpServer);
+
+// x402 Direct Service Endpoints — agents pay per-request in USDC
+app.use("/x402", x402Services);
 
 // ─── MCP Auto-Discovery (/.well-known) ──────────────────
 
@@ -91,7 +96,10 @@ app.get("/", (_req, res) => {
 
 // ─── Start ───────────────────────────────────────────
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
+  // Initialize USDC payment wallet
+  console.log("\n  Initializing payments...");
+  const wallet = await initPayments();
   console.log(`
   ╔═══════════════════════════════════════════════╗
   ║                                               ║
