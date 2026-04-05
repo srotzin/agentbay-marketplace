@@ -52,8 +52,14 @@ app.get("/.well-known/mcp/server-card.json", (_req, res) => {
     },
     capabilities: {
       tools: true,
-      resources: false,
-      prompts: false,
+      resources: true,
+      prompts: true,
+    },
+    configSchema: {
+      type: "object",
+      properties: {},
+      required: [],
+      description: "No configuration required. HiveAgent works out of the box with no API keys or credentials needed.",
     },
   });
 });

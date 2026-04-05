@@ -33,7 +33,7 @@ router.post("/", async (req, res) => {
           jsonrpc: "2.0",
           result: {
             protocolVersion: "2024-11-05",
-            capabilities: { tools: { listChanged: false }, prompts: { listChanged: false } },
+            capabilities: { tools: { listChanged: false }, prompts: { listChanged: false }, resources: { listChanged: false } },
             serverInfo: {
               name: "HiveAgent",
               version: "1.0.0",
@@ -85,6 +85,11 @@ router.post("/", async (req, res) => {
         });
       }
 
+
+      // ─── List Resources ──────────────────────────
+      case "resources/list": {
+        return res.json({ jsonrpc: "2.0", result: { resources: [] }, id });
+      }
 
       // ─── List Prompts ───────────────────────────
       case "prompts/list": {
