@@ -15,6 +15,7 @@
 
 import { v4 as uuid } from "uuid";
 import db from "../db.js";
+import { recordEscrowLock, recordEscrowRelease, recordEscrowRefund } from "./onchain-settlement.js";
 
 // ─── Schema ──────────────────────────────────────
 
@@ -95,7 +96,7 @@ export function getAgentBalance(agentId) {
 /**
  * Lock funds in escrow for an agent-to-agent transaction
  */
-export function lockEscrow({ buyer_agent_id, seller_agent_id, seller_provider_id, service_id, auction_id, amount_usd, deadline_minutes = 1440 }) {
+export async function lockEscrow({ buyer_agent_id, seller_agent_id, seller_provider_id, service_id, auction_id, amount_usd, deadline_minutes = 1440 }) {
   const commission = Math.round(amount_usd * COMMISSION_RATE * 100) / 100;
   const payout = Math.round((amount_usd - commission) * 100) / 100;
   const deadline = new Date(Date.now() + deadline_minutes * 60000).toISOString();
@@ -115,13 +116,17 @@ export function lockEscrow({ buyer_agent_id, seller_agent_id, seller_provider_id
     WHERE agent_id = ?
   `).run(amount_usd, amount_usd, buyer_agent_id);
 
-  return { escrow_id: id, amount_usd, commission_usd: commission, seller_payout_usd: payout, deadline, status: "locked" };
+  // Record on-chain
+  let onchain = null;
+  try { onchain = await recordEscrowLock(id, buyer_agent_id, amount_usd); } catch {}
+
+  return { escrow_id: id, amount_usd, commission_usd: commission, seller_payout_usd: payout, deadline, status: "locked", onchain };
 }
 
 /**
  * Release escrow — seller delivered, buyer approves
  */
-export function releaseEscrow(escrowId, { deliverable_hash, deliverable_uri } = {}) {
+export async function releaseEscrow(escrowId, { deliverable_hash, deliverable_uri } = {}) {
   const escrow = db.prepare("SELECT * FROM escrow WHERE id = ?").get(escrowId);
   if (!escrow) throw new Error("Escrow not found");
   if (escrow.status !== "locked") throw new Error(`Escrow is ${escrow.status}, not locked`);
@@ -151,13 +156,17 @@ export function releaseEscrow(escrowId, { deliverable_hash, deliverable_uri } = 
     `).run(escrow.seller_payout_usd, escrow.seller_payout_usd, escrow.seller_agent_id);
   }
 
-  return { escrow_id: escrowId, status: "released", settlement_id: settlementId, seller_payout_usd: escrow.seller_payout_usd, commission_usd: escrow.commission_usd };
+  // Record on-chain
+  let onchain = null;
+  try { onchain = await recordEscrowRelease(escrowId, sellerAgent, escrow.amount_usd, escrow.commission_usd); } catch {}
+
+  return { escrow_id: escrowId, status: "released", settlement_id: settlementId, seller_payout_usd: escrow.seller_payout_usd, commission_usd: escrow.commission_usd, onchain };
 }
 
 /**
  * Refund escrow — deadline passed or dispute resolved for buyer
  */
-export function refundEscrow(escrowId, reason = "deadline_expired") {
+export async function refundEscrow(escrowId, reason = "deadline_expired") {
   const escrow = db.prepare("SELECT * FROM escrow WHERE id = ?").get(escrowId);
   if (!escrow) throw new Error("Escrow not found");
   if (escrow.status !== "locked" && escrow.status !== "disputed") throw new Error(`Cannot refund: escrow is ${escrow.status}`);
@@ -173,7 +182,11 @@ export function refundEscrow(escrowId, reason = "deadline_expired") {
   db.prepare("UPDATE agent_balances SET locked_usd = MAX(0, locked_usd - ?), updated_at = datetime('now') WHERE agent_id = ?")
     .run(escrow.amount_usd, escrow.buyer_agent_id);
 
-  return { escrow_id: escrowId, status: "refunded", refund_usd: escrow.amount_usd, reason };
+  // Record on-chain
+  let onchain = null;
+  try { onchain = await recordEscrowRefund(escrowId, escrow.buyer_agent_id, escrow.amount_usd); } catch {}
+
+  return { escrow_id: escrowId, status: "refunded", refund_usd: escrow.amount_usd, reason, onchain };
 }
 
 /**

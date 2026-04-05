@@ -5,6 +5,7 @@
 
 import { Router } from "express";
 import * as settlement from "../services/settlement.js";
+import { getOrCreateAgentWallet, getOnChainStats, getAgentOnChainHistory, processBatch } from "../services/onchain-settlement.js";
 
 const router = Router();
 
@@ -89,6 +90,34 @@ router.get("/stats", (_req, res) => {
 router.post("/expire-overdue", (_req, res) => {
   const result = settlement.expireOverdueEscrows();
   res.json(result);
+});
+
+// ─── On-Chain Settlement ─────────────────────────
+
+router.get("/onchain/stats", (_req, res) => {
+  res.json(getOnChainStats());
+});
+
+router.post("/onchain/batch", async (_req, res) => {
+  try {
+    const result = await processBatch();
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.get("/agent/:id/wallet", async (req, res) => {
+  try {
+    const wallet = await getOrCreateAgentWallet(req.params.id);
+    res.json(wallet);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.get("/agent/:id/onchain", (req, res) => {
+  res.json(getAgentOnChainHistory(req.params.id));
 });
 
 export default router;
