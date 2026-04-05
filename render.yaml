@@ -3,8 +3,8 @@ services:
     name: hiveagent
     runtime: node
     plan: free
-    buildCommand: npm install && node src/seed-expanded.js
-    startCommand: node src/server.js
+    buildCommand: npm install
+    startCommand: node start.js
     envVars:
       - key: NODE_ENV
         value: production

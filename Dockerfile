@@ -8,8 +8,11 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 
-# Create data directory and seed
-RUN mkdir -p data && node src/seed-expanded.js
+# Create data directory
+RUN mkdir -p data
+
+# Seed on startup instead of build (avoids module init issues)
+# The start script will seed if db doesn't exist
 
 EXPOSE 3000
-CMD ["node", "src/server.js"]
+CMD ["node", "start.js"]
