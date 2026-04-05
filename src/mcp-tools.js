@@ -10,6 +10,7 @@
 
 import * as mkt from "./services/marketplace.js";
 import { executeService, isLiveService } from "./services/live/executor.js";
+import * as settlement from "./services/settlement.js";
 
 // MCP tool definitions (JSON Schema format)
 export const tools = [
@@ -102,6 +103,89 @@ export const tools = [
     description: "Get HiveAgent marketplace statistics — total services, providers, transactions, and volume.",
     inputSchema: { type: "object", properties: {} },
   },
+
+  // ─── Escrow & Settlement ──────────────────────
+  {
+    name: "hiveagent_escrow_lock",
+    description: "Lock funds in escrow for an agent-to-agent transaction. Buyer's funds are held until the seller delivers. HiveAgent takes 15% commission on release. Use this when hiring another agent to do work.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        buyer_agent_id: { type: "string", description: "The agent paying for the work" },
+        seller_agent_id: { type: "string", description: "The agent being hired to do the work" },
+        amount_usd: { type: "number", description: "Amount to lock in escrow (USD)" },
+        deadline_minutes: { type: "integer", description: "Minutes until auto-refund if not delivered (default 1440 = 24h)", default: 1440 },
+      },
+      required: ["buyer_agent_id", "seller_agent_id", "amount_usd"],
+    },
+  },
+  {
+    name: "hiveagent_escrow_release",
+    description: "Release escrow funds to the seller. Call this when the seller has delivered satisfactory work. Seller receives 85%, HiveAgent takes 15%.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        escrow_id: { type: "string", description: "The escrow ID to release" },
+        deliverable_hash: { type: "string", description: "SHA256 hash of the deliverable (optional)" },
+        deliverable_uri: { type: "string", description: "URL to the deliverable (optional)" },
+      },
+      required: ["escrow_id"],
+    },
+  },
+  {
+    name: "hiveagent_escrow_dispute",
+    description: "Dispute an escrow. Call this when the seller's delivery is unsatisfactory. Freezes funds pending resolution.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        escrow_id: { type: "string", description: "The escrow ID to dispute" },
+        reason: { type: "string", description: "Reason for the dispute" },
+      },
+      required: ["escrow_id", "reason"],
+    },
+  },
+  {
+    name: "hiveagent_subcontract",
+    description: "Subcontract work to another agent. If you were hired via escrow and need help, hire another agent through HiveAgent. Creates a new escrow linked to your parent contract. HiveAgent takes 15% on each hop.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        parent_escrow_id: { type: "string", description: "Your original escrow ID (the job you were hired for)" },
+        contractor_agent_id: { type: "string", description: "Your agent ID (the one subcontracting)" },
+        subcontractor_agent_id: { type: "string", description: "The agent you're hiring" },
+        amount_usd: { type: "number", description: "Amount to pay the subcontractor" },
+      },
+      required: ["parent_escrow_id", "contractor_agent_id", "subcontractor_agent_id", "amount_usd"],
+    },
+  },
+  {
+    name: "hiveagent_balance",
+    description: "Check your agent's balance — available funds, locked in escrow, total earned, total spent, and transaction history.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        agent_id: { type: "string", description: "Your agent identifier" },
+      },
+      required: ["agent_id"],
+    },
+  },
+  {
+    name: "hiveagent_ledger",
+    description: "View your full transaction ledger — every payment, refund, commission, and subcontract recorded on HiveAgent.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        agent_id: { type: "string", description: "Your agent identifier" },
+        limit: { type: "integer", description: "Number of records (default 50)", default: 50 },
+      },
+      required: ["agent_id"],
+    },
+  },
+  {
+    name: "hiveagent_settlement_stats",
+    description: "Get HiveAgent settlement statistics — total escrow volume, commissions earned, active escrows, subcontract chains.",
+    inputSchema: { type: "object", properties: {} },
+  },
 ];
 
 // Tool handler — called when an agent invokes a tool
@@ -141,6 +225,28 @@ export async function handleTool(name, args) {
 
     case "hiveagent_stats":
       return mkt.getMarketplaceStats();
+
+    // ─── Escrow & Settlement ──────────────────
+    case "hiveagent_escrow_lock":
+      return settlement.lockEscrow(args);
+
+    case "hiveagent_escrow_release":
+      return settlement.releaseEscrow(args.escrow_id, args);
+
+    case "hiveagent_escrow_dispute":
+      return settlement.disputeEscrow(args.escrow_id, args.reason);
+
+    case "hiveagent_subcontract":
+      return settlement.subcontract(args);
+
+    case "hiveagent_balance":
+      return settlement.getAgentBalance(args.agent_id);
+
+    case "hiveagent_ledger":
+      return settlement.getAgentLedger(args.agent_id, args.limit || 50);
+
+    case "hiveagent_settlement_stats":
+      return settlement.getSettlementStats();
 
     default:
       throw new Error(`Unknown tool: ${name}`);

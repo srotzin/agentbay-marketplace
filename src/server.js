@@ -3,6 +3,7 @@ import cors from "cors";
 import apiRoutes from "./routes/api.js";
 import mcpServer from "./mcp-server.js";
 import x402Services from "./routes/x402-services.js";
+import settlementApi from "./routes/settlement-api.js";
 import { initPayments } from "./services/payments.js";
 
 const app = express();
@@ -21,6 +22,9 @@ app.use("/mcp", mcpServer);
 
 // x402 Direct Service Endpoints — agents pay per-request in USDC
 app.use("/x402", x402Services);
+
+// Settlement & Escrow API — agent-to-agent transactions
+app.use("/api/v1/settlement", settlementApi);
 
 // ─── MCP Auto-Discovery (/.well-known) ──────────────────
 
