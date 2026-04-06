@@ -3,6 +3,12 @@
  *
  * Creates and manages the HiveAgent treasury wallet.
  * All agent payments settle here in USDC on Base L2.
+ *
+ * Required env vars:
+ *   CDP_API_KEY_ID      — API Key ID from CDP Portal
+ *   CDP_API_KEY_SECRET   — API Key Secret (Ed25519 base64 or ECDSA PEM)
+ *   CDP_WALLET_SECRET    — Wallet Secret from CDP Portal (required for signing)
+ *   CDP_PROJECT_ID       — Project ID from CDP Portal
  */
 
 import { CdpClient } from "@coinbase/cdp-sdk";
@@ -15,37 +21,86 @@ let treasuryAddress = null;
 const USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 
 /**
+ * Normalize the API key secret — handles Ed25519 (base64), ECDSA (PEM),
+ * single-line PEM, escaped newlines, and raw base64.
+ */
+function normalizeSecret(raw) {
+  if (!raw) return raw;
+  let s = raw.trim();
+
+  // Strip surrounding quotes if someone wrapped it
+  if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
+    s = s.slice(1, -1);
+  }
+
+  // Replace literal \n sequences with real newlines
+  if (s.includes("\\n")) s = s.replace(/\\n/g, "\n");
+
+  // If it's a PEM key on a single line, reconstruct newlines
+  if (s.includes("-----") && !s.includes("\n")) {
+    s = s
+      .replace(/-----BEGIN EC PRIVATE KEY-----/, "-----BEGIN EC PRIVATE KEY-----\n")
+      .replace(/-----END EC PRIVATE KEY-----/, "\n-----END EC PRIVATE KEY-----\n")
+      .replace(/([A-Za-z0-9+/=]{64})/g, "$1\n")
+      .replace(/\n\n/g, "\n");
+  }
+
+  return s;
+}
+
+/**
  * Initialize the CDP client and treasury wallet
  */
 export async function initPayments() {
+  const keyId = process.env.CDP_API_KEY_ID;
+  const keySecretRaw = process.env.CDP_API_KEY_SECRET;
+  const walletSecret = process.env.CDP_WALLET_SECRET;
+  const projectId = process.env.CDP_PROJECT_ID;
+
+  // Diagnostic logging (redacted)
+  console.log(`  CDP_API_KEY_ID:     ${keyId ? keyId.slice(0, 8) + "..." : "MISSING"}`  );
+  console.log(`  CDP_API_KEY_SECRET: ${keySecretRaw ? `set (${keySecretRaw.length} chars, ${keySecretRaw.includes("-----") ? "PEM" : "base64"})` : "MISSING"}`);
+  console.log(`  CDP_WALLET_SECRET:  ${walletSecret ? `set (${walletSecret.length} chars)` : "MISSING — create at https://portal.cdp.coinbase.com"}`);
+  console.log(`  CDP_PROJECT_ID:     ${projectId ? projectId.slice(0, 8) + "..." : "MISSING"}`);
+
+  if (!keyId || !keySecretRaw) {
+    console.log(`  ⚠  Missing CDP credentials — running in demo mode`);
+    return { address: null, mode: "demo" };
+  }
+
   try {
-    // Handle both multiline and \n-escaped secret formats
-    let secret = process.env.CDP_API_KEY_SECRET || "";
-    if (secret.includes("\\n")) secret = secret.replace(/\\n/g, "\n");
-    if (!secret.includes("\n") && secret.includes("-----")) {
-      // Single line with no newlines — add them back
-      secret = secret.replace(/-----BEGIN EC PRIVATE KEY-----/, "-----BEGIN EC PRIVATE KEY-----\n")
-        .replace(/-----END EC PRIVATE KEY-----/, "\n-----END EC PRIVATE KEY-----")
-        .replace(/(.{64})/g, "$1\n").replace(/\n\n/g, "\n");
+    const apiKeySecret = normalizeSecret(keySecretRaw);
+
+    // Build client config
+    const config = {
+      apiKeyId: keyId,
+      apiKeySecret: apiKeySecret,
+    };
+
+    // Add wallet secret if available (required for transaction signing)
+    if (walletSecret) {
+      config.walletSecret = walletSecret.trim();
     }
 
-    client = new CdpClient({
-      apiKeyId: process.env.CDP_API_KEY_ID,
-      apiKeySecret: secret,
-      projectId: process.env.CDP_PROJECT_ID,
-    });
+    client = new CdpClient(config);
 
-    // Create or load treasury wallet
-    // In production, store the wallet ID and reload it
-    const account = await client.evm.createAccount({ network: "base" });
+    // Create EVM account on Base
+    const account = await client.evm.createAccount({ name: `hiveagent-treasury-${Date.now()}` });
     treasuryAddress = account.address;
     treasuryWallet = account;
 
-    console.log(`  Treasury wallet: ${treasuryAddress}`);
-    console.log(`  Network: Base (USDC)`);
+    console.log(`  ✓ Treasury wallet: ${treasuryAddress}`);
+    console.log(`  ✓ Network: Base (USDC)`);
     return { address: treasuryAddress, network: "base" };
   } catch (e) {
-    console.log(`  Payment init warning: ${e.message}`);
+    console.log(`  ✗ Payment init failed: ${e.message}`);
+    if (e.message.includes("wallet secret") || e.message.includes("walletSecret")) {
+      console.log(`  → Fix: Add CDP_WALLET_SECRET env var. Create at https://portal.cdp.coinbase.com → Settings → Wallet Secret`);
+    }
+    if (e.message.includes("401") || e.message.includes("Unauthorized") || e.message.includes("invalid")) {
+      console.log(`  → Fix: Check CDP_API_KEY_SECRET format. Ed25519 keys are base64, ECDSA keys are PEM.`);
+    }
+    if (e.stack) console.log(`  Stack: ${e.stack.split("\n").slice(0, 3).join(" | ")}`);
     console.log(`  Running in demo mode (no live payments)`);
     return { address: null, mode: "demo" };
   }
