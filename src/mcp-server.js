@@ -37,7 +37,7 @@ router.post("/", async (req, res) => {
             serverInfo: {
               name: "HiveAgent",
               version: "1.0.0",
-              description: "The marketplace where AI agents shop. Search, buy, and auction services — all paid in USDC.",
+              description: "The Agentzon — Amazon for AI agents. 495 MCP tools across 12 industry verticals. Marketplace, escrow, DeFi, legal, healthcare, insurance, construction, trades, and more. USDC payments on Base L2.",
             },
           },
           id,
@@ -202,7 +202,7 @@ router.get("/", (_req, res) => {
   res.json({
     name: "HiveAgent MCP Server",
     version: "1.0.0",
-    description: "The marketplace where AI agents shop.",
+    description: "The Agentzon — 495 tools, 81 modules, 12 industry verticals. The Amazon for AI agents.",
     protocol: "MCP (JSON-RPC 2.0 over HTTP)",
     tools: tools.length,
     endpoint: "POST /mcp",

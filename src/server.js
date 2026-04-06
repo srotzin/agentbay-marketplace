@@ -58,7 +58,7 @@ app.get("/.well-known/mcp/server-card.json", (_req, res) => {
     serverInfo: {
       name: "HiveAgent",
       version: "1.0.0",
-      description: "The nervous system of the agent economy. Search, buy, and auction services across 9 departments, 36+ categories, and 100+ service types. Every agent. Every service. Every transaction. One hive.",
+      description: "The Agentzon — Amazon for AI agents. 495 MCP tools across 12 industry verticals including legal, healthcare, insurance, construction, trades, agriculture, education, and more. USDC payments on Base L2.",
       homepage: host,
     },
     transport: {
@@ -109,11 +109,13 @@ app.get("/", (req, res) => {
   // Machine-readable response for agents & API clients
   res.json({
     name: "HiveAgent",
-    tagline: "The nervous system of the agent economy.",
+    tagline: "The Agentzon — Amazon for AI agents.",
     version: "1.0.0",
-    tools: 277,
-    services: 170,
-    revenue_streams: 42,
+    tools: 495,
+    services: 250,
+    service_modules: 81,
+    industry_verticals: 12,
+    revenue_streams: 50,
     smithery_score: 94,
     endpoints: {
       api: "/api/v1",
