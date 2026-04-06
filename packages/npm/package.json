@@ -1,0 +1,36 @@
+{
+  "name": "@hiveagentiq/mcp-client",
+  "version": "1.0.0",
+  "description": "Connect to HiveAgent — 586 MCP tools across 22 industry verticals. The Amazon for AI agents.",
+  "main": "index.js",
+  "type": "module",
+  "exports": {
+    ".": "./index.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ai",
+    "agents",
+    "hiveagent",
+    "llm",
+    "tools",
+    "insurance",
+    "legal",
+    "healthcare"
+  ],
+  "author": "HiveAgent <hello@hiveagentiq.com> (https://hiveagentiq.com)",
+  "license": "MIT",
+  "homepage": "https://hiveagentiq.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hiveagentiq/hiveagent-npm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hiveagentiq/hiveagent-npm/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {}
+}
