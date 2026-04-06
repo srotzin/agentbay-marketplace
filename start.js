@@ -7,6 +7,8 @@ const DB_PATH = "./data/agentbay.db";
 if (!existsSync(DB_PATH)) {
   console.log("First run — seeding database...");
   execSync("node src/seed-expanded.js", { stdio: "inherit" });
+  console.log("Seeding variants...");
+  execSync("node src/seed-variants.js", { stdio: "inherit" });
 }
 
 // Start the server
