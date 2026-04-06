@@ -53,6 +53,10 @@ import { newTools, handleNewTool } from "./mcp-tools-new.js";
 import { verticalTools, handleVerticalTool } from "./mcp-tools-verticals.js";
 // Composite workflow tools (Phase 5)
 import { workflowTools, handleWorkflowTool } from "./mcp-tools-workflows.js";
+// Money, commerce & operations verticals (Phase 6)
+import { moneyTools, handleMoneyTool } from "./mcp-tools-money.js";
+// Internal QC audit + crawler tools (Phase 7)
+import { internalTools, handleInternalTool } from "./mcp-tools-internal.js";
 // Response middleware (Phase 5)
 import { enhanceResponse } from "./response-enhancer.js";
 // Discovery meta-tools (Phase 4)
@@ -905,8 +909,8 @@ const coreTools = [
   { name: "hiveagent_room_stats", description: "Use when you want data room platform stats — active rooms, documents, participant counts, NDA signings.", inputSchema: { type: "object", properties: {} } },
 ];
 
-// Merge core tools + Phase 2 (AI-requested) + Phase 3 (verticals) + Phase 5 (workflows)
-export const tools = [...coreTools, ...newTools, ...verticalTools, ...workflowTools];
+// Merge core tools + Phase 2 (AI-requested) + Phase 3 (verticals) + Phase 5 (workflows) + Phase 7 (internal)
+export const tools = [...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1383,14 +1387,22 @@ export async function handleTool(name, args) {
     case "hiveagent_room_stats":     return getDataRoomStats();
 
     default:
-      // Try Phase 2 (AI-requested) tools, then Phase 3 (verticals)
+      // Try Phase 2 (AI-requested) tools, then Phase 3 (verticals), then Phase 6 (money)
       try {
         return await handleNewTool(name, params);
       } catch (e) {
-        if (e.message?.startsWith('Unknown tool:')) {
-          return handleVerticalTool(name, params);
-        }
-        throw e;
+        if (!e.message?.startsWith('Unknown tool:')) throw e;
       }
+      try {
+        return handleVerticalTool(name, params);
+      } catch (e) {
+        if (!e.message?.startsWith('Unknown vertical tool:')) throw e;
+      }
+      try {
+        return handleMoneyTool(name, params);
+      } catch (e) {
+        if (!e.message?.startsWith('Unknown money tool:')) throw e;
+      }
+      return handleInternalTool(name, params);
   }
 }

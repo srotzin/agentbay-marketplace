@@ -19,6 +19,11 @@ import * as agentObservability   from "./agent-observability.js";
 import * as commerceTrust        from "./commerce-trust.js";
 import * as commerceOrchestration from "./commerce-orchestration.js";
 import * as agricultureServices  from "./agriculture-services.js";
+import * as travelBooking        from "./travel-booking.js";
+import * as procurement          from "./procurement.js";
+import * as salesCrm             from "./sales-crm.js";
+import * as hrRecruiting         from "./hr-recruiting.js";
+import * as fraudDetection       from "./fraud-detection.js";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -541,6 +546,271 @@ export function assessCropSeason(
       "Act on commodity alerts — set price floors with your broker.",
       "Apply soil amendment recommendations before the next planting cycle.",
       "File any required compliance reports before state deadlines.",
+    ],
+  };
+}
+
+// ─── 11. Book Full Trip ────────────────────────────────────────────────────────────────
+
+/**
+ * bookFullTrip
+ *
+ * End-to-end travel booking pipeline in one call:
+ *   flights + hotel + car rental + restaurants + itinerary + visa requirements
+ *
+ * @param {string} destination  - Trip destination (city or region)
+ * @param {string} startDate    - Trip start date (ISO 8601)
+ * @param {string} endDate      - Trip end date (ISO 8601)
+ * @param {number} budget       - Total trip budget in USD
+ * @param {number} travelers    - Number of travelers
+ * @returns {object} Complete travel package
+ */
+export function bookFullTrip(
+  destination = "",
+  startDate = "",
+  endDate = "",
+  budget = 3000,
+  travelers = 1
+) {
+  const flights      = safe(travelBooking.searchFlights,        "ANY", destination, startDate, endDate, travelers, "economy", false);
+  const hotels       = safe(travelBooking.searchHotels,         destination, startDate, endDate, travelers, 1, 3, Math.round(budget * 0.4 / Math.max(1, travelers)));
+  const carRentals   = safe(travelBooking.compareCarRentals,    destination, startDate, endDate, "economy");
+  const restaurants  = safe(travelBooking.searchRestaurants,    destination, null, travelers, null, null);
+  const itinerary    = safe(travelBooking.buildItinerary,       destination, startDate, endDate, budget, { travelers });
+  const visa         = safe(travelBooking.getVisaRequirements,  "US", destination, "tourism", 14);
+
+  const total_cost = sumFees(flights, hotels, carRentals);
+
+  return {
+    workflow: "book_full_trip",
+    summary: `Complete travel package to ${destination || "your destination"} for ${travelers} traveler${travelers !== 1 ? "s" : ""} (${startDate} – ${endDate}).`,
+    flights,
+    hotels,
+    car_rentals:        carRentals,
+    restaurant_options: restaurants,
+    itinerary,
+    visa_requirements:  visa,
+    total_cost_usd:     total_cost,
+    recommended_actions: [
+      "Review flight options and book your preferred choice with travel_book_flight.",
+      "Reserve your hotel room with travel_book_hotel before availability changes.",
+      "Check visa requirements and allow sufficient processing time.",
+      "Reserve restaurant tables in advance for popular dining spots.",
+      "Download your itinerary and share with all travelers.",
+    ],
+  };
+}
+
+// ─── 12. Run Procurement Cycle ────────────────────────────────────────────────────────
+
+/**
+ * runProcurementCycle
+ *
+ * Full sourcing-to-contract pipeline in one call:
+ *   supplier discovery + RFQ + bid evaluation + contract draft + invoice matching
+ *
+ * @param {string} category      - Category of goods or services to source
+ * @param {object} requirements  - Specification and compliance requirements
+ * @param {number} budget        - Maximum budget for the purchase in USD
+ * @returns {object} Complete procurement package
+ */
+export function runProcurementCycle(
+  category = "",
+  requirements = {},
+  budget = 0
+) {
+  const suppliers    = safe(procurement.discoverSuppliers,  category, requirements, null, []);
+  const topSupplierId = suppliers?.suppliers?.[0]?.id ?? suppliers?.results?.[0]?.id ?? "supplier-pending";
+
+  const rfqItems     = [{ description: category, quantity: requirements.quantity ?? 1, unit: requirements.unit ?? "unit", specifications: requirements }];
+  const rfq          = safe(procurement.createRfq,         category + " RFQ", rfqItems, requirements, null, []);
+  const rfqId        = rfq?.rfq_id ?? rfq?.id ?? "rfq-pending";
+
+  const bids         = safe(procurement.evaluateBids,      rfqId, {}, {});
+  const contract     = safe(procurement.draftContract,     topSupplierId, { budget_usd: budget, ...requirements }, rfqItems, {});
+  const invoiceMatch = safe(procurement.matchInvoice,      { vendor: category, total_amount: budget, line_items: rfqItems }, rfqId);
+
+  const total_cost = sumFees(rfq, bids, contract);
+
+  return {
+    workflow: "procurement_cycle",
+    summary: `Complete procurement cycle for "${category}" with a budget of $${budget.toLocaleString()}.`,
+    supplier_discovery: suppliers,
+    rfq,
+    bid_evaluation:    bids,
+    contract,
+    invoice_match:     invoiceMatch,
+    total_cost_usd:    total_cost,
+    recommended_actions: [
+      "Review the ranked supplier list and confirm you want to proceed with the top candidate.",
+      "Send the generated RFQ to invited suppliers and set a response deadline.",
+      "Use the bid scorecard to negotiate final terms before signing.",
+      "Collect e-signatures on the contract draft before placing the order.",
+      "Run invoice_three_way_match when the supplier invoice arrives.",
+    ],
+  };
+}
+
+// ─── 13. Process Full Sales Cycle ─────────────────────────────────────────────────────
+
+/**
+ * processFullSalesCycle
+ *
+ * Prospect-to-meeting pipeline in one call:
+ *   lead enrichment + scoring + outreach generation + meeting scheduling + pipeline forecast
+ *
+ * @param {string} companyName   - Target company name
+ * @param {string} contactName   - Primary contact's name
+ * @param {string} email         - Contact's email address
+ * @param {string} campaign      - Campaign name or objective
+ * @returns {object} Complete sales cycle package
+ */
+export function processFullSalesCycle(
+  companyName = "",
+  contactName = "",
+  email = "",
+  campaign = "outbound"
+) {
+  const enriched     = safe(salesCrm.enrichLead,         companyName, contactName, email);
+  const scored       = safe(salesCrm.scoreLead,          enriched ?? { company: companyName, contact: contactName, email }, {});
+  const outreach     = safe(salesCrm.generateOutreach,   enriched ?? { company: companyName }, campaign, "professional", []);
+  const meeting      = safe(salesCrm.scheduleMeeting,    email, {}, [], 30, `Discovery call re: ${campaign}`);
+  const forecast     = safe(salesCrm.forecastPipeline,   [{ deal_id: `deal-${companyName.replace(/\s+/g, "-").toLowerCase()}`, stage: "discovery", amount: scored?.estimated_deal_size ?? 0, close_date: "", probability: scored?.conversion_probability ?? 0.1 }], {});
+
+  const total_cost = sumFees(enriched, scored, outreach, meeting);
+
+  return {
+    workflow: "full_sales_cycle",
+    summary: `Complete sales cycle initiated for ${contactName || "contact"} at ${companyName || "company"} (campaign: ${campaign}).`,
+    lead_enrichment:   enriched,
+    lead_score:        scored,
+    outreach_sequence: outreach,
+    meeting_booking:   meeting,
+    pipeline_forecast: forecast,
+    total_cost_usd:    total_cost,
+    recommended_actions: [
+      "Send the generated outreach sequence and monitor open rates.",
+      "Confirm the meeting booking and review the pre-meeting briefing.",
+      "Tailor your pitch based on the enriched firmographic data.",
+      "Log call notes in your CRM after the discovery call.",
+      "Update deal stage to move the pipeline forecast forward.",
+    ],
+  };
+}
+
+// ─── 14. Screen and Hire ────────────────────────────────────────────────────────────
+
+/**
+ * screenAndHire
+ *
+ * Full recruiting pipeline in one call:
+ *   resume screening + candidate matching + interview questions + comp check + onboarding
+ *
+ * @param {object} jobRequirements  - Job requirements and must-have skills
+ * @param {Array}  resumeTexts      - Array of resume text strings to screen
+ * @param {object} compensation     - Compensation object with title, location, and experience
+ * @returns {object} Complete hiring package
+ */
+export function screenAndHire(
+  jobRequirements = {},
+  resumeTexts = [],
+  compensation = {}
+) {
+  const requirements  = Array.isArray(jobRequirements.skills) ? jobRequirements.skills : [jobRequirements.description ?? "qualified candidate"];
+  const mustHave      = Array.isArray(jobRequirements.must_have) ? jobRequirements.must_have : [];
+  const roleType      = jobRequirements.role ?? jobRequirements.title ?? "Open Role";
+
+  const screened      = resumeTexts.map((text, i) =>
+    safe(hrRecruiting.screenResume, text, requirements, mustHave)
+  );
+
+  const jobId         = jobRequirements.job_id ?? `job-${roleType.replace(/\s+/g, "-").toLowerCase()}`;
+  const candidatePool = screened.map((result, i) => ({ candidate_id: `candidate-${i + 1}`, screening: result }));
+  const matched       = safe(hrRecruiting.matchCandidates, jobId, candidatePool, {});
+
+  const interviewQs   = safe(hrRecruiting.generateInterviewQuestions, roleType, compensation.experience ?? "mid", requirements, ["behavioral", "technical"]);
+  const compCheck     = safe(hrRecruiting.checkCompensation, compensation.title ?? roleType, compensation.location ?? "US", compensation.experience ?? "mid", compensation.industry ?? "tech");
+
+  const topCandidate  = matched?.ranked_candidates?.[0] ?? matched?.shortlist?.[0] ?? {};
+  const onboarding    = Object.keys(topCandidate).length > 0
+    ? safe(hrRecruiting.automateOnboarding, { name: topCandidate.name ?? "Selected Candidate", role: roleType, ...topCandidate }, jobRequirements.department ?? "Engineering", new Date().toISOString().split("T")[0])
+    : { skipped: true, reason: "No top candidate identified yet" };
+
+  const total_cost = sumFees(...screened, matched, interviewQs, compCheck);
+
+  return {
+    workflow: "screen_and_hire",
+    summary: `Complete hiring pipeline for ${roleType}: screened ${resumeTexts.length} resume${resumeTexts.length !== 1 ? "s" : ""}, matched candidates, and prepared onboarding.`,
+    resume_screenings:    screened,
+    candidate_matches:    matched,
+    interview_questions:  interviewQs,
+    compensation_check:   compCheck,
+    onboarding_plan:      onboarding,
+    total_cost_usd:       total_cost,
+    recommended_actions: [
+      "Review the ranked candidate shortlist and select your top 3 for interviews.",
+      "Send the structured interview guide to your hiring panel.",
+      "Use the compensation benchmark to craft a competitive offer.",
+      "Kick off onboarding as soon as the offer is accepted.",
+      "Track time-to-fill and offer acceptance rate in hr_recruiting_dashboard.",
+    ],
+  };
+}
+
+// ─── 15. Full Fraud Check ───────────────────────────────────────────────────────────
+
+/**
+ * fullFraudCheck
+ *
+ * Comprehensive fraud assessment pipeline in one call:
+ *   transaction screening + anomaly detection + identity check + chargeback prediction + network analysis
+ *
+ * @param {object} transactionData  - Transaction details (amount, currency, merchant, payment_method, etc.)
+ * @param {object} userProfile      - User/account profile for behavioral context
+ * @returns {object} Complete fraud assessment package
+ */
+export function fullFraudCheck(
+  transactionData = {},
+  userProfile = {}
+) {
+  const screening     = safe(fraudDetection.screenTransaction,   transactionData, userProfile);
+  const anomalies     = safe(fraudDetection.detectAnomalies,     userProfile.account_id ?? transactionData.account_id ?? "unknown", [], "30d");
+  const identity      = safe(fraudDetection.checkIdentity,       { name: userProfile.name, email: userProfile.email, dob: userProfile.dob, address: userProfile.address }, "standard");
+  const chargeback    = safe(fraudDetection.predictChargeback,   transactionData, {});
+  const network       = safe(fraudDetection.analyzeNetwork,      userProfile.account_id ?? transactionData.account_id ?? transactionData.device_id ?? "unknown", 2);
+
+  const riskScores    = [
+    screening?.risk_score ?? 0,
+    anomalies?.anomaly_score  ?? 0,
+    identity?.confidence_inverse ?? (100 - (identity?.confidence ?? 100)),
+    chargeback?.chargeback_probability ? chargeback.chargeback_probability * 100 : 0,
+    network?.network_risk_score ?? 0,
+  ].filter(s => typeof s === "number");
+
+  const compositeRisk = riskScores.length > 0
+    ? Math.round(riskScores.reduce((a, b) => a + b, 0) / riskScores.length)
+    : 0;
+
+  const recommendation = compositeRisk >= 70 ? "DECLINE" : compositeRisk >= 40 ? "REVIEW" : "APPROVE";
+  const total_cost = sumFees(screening, anomalies, identity, chargeback, network);
+
+  return {
+    workflow: "full_fraud_check",
+    summary: `Comprehensive fraud assessment for transaction of ${transactionData.currency ?? "USD"} ${transactionData.amount ?? "unknown amount"} — composite risk: ${compositeRisk}/100 (${recommendation}).`,
+    transaction_screening: screening,
+    anomaly_detection:     anomalies,
+    identity_check:        identity,
+    chargeback_prediction: chargeback,
+    network_analysis:      network,
+    composite_risk_score:  compositeRisk,
+    recommendation,
+    total_cost_usd:        total_cost,
+    recommended_actions: [
+      compositeRisk >= 70 ? "Decline the transaction and notify the customer." : "Approve the transaction after manual review.",
+      "Flag the account for enhanced monitoring if anomalies were detected.",
+      "Run fraud_check_identity at a higher verification level if identity confidence is low.",
+      "Investigate any network clusters identified for coordinated fraud.",
+      "Update fraud rules based on the pattern signature returned.",
     ],
   };
 }
