@@ -19,9 +19,19 @@ const USDC_BASE = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
  */
 export async function initPayments() {
   try {
+    // Handle both multiline and \n-escaped secret formats
+    let secret = process.env.CDP_API_KEY_SECRET || "";
+    if (secret.includes("\\n")) secret = secret.replace(/\\n/g, "\n");
+    if (!secret.includes("\n") && secret.includes("-----")) {
+      // Single line with no newlines — add them back
+      secret = secret.replace(/-----BEGIN EC PRIVATE KEY-----/, "-----BEGIN EC PRIVATE KEY-----\n")
+        .replace(/-----END EC PRIVATE KEY-----/, "\n-----END EC PRIVATE KEY-----")
+        .replace(/(.{64})/g, "$1\n").replace(/\n\n/g, "\n");
+    }
+
     client = new CdpClient({
       apiKeyId: process.env.CDP_API_KEY_ID,
-      apiKeySecret: process.env.CDP_API_KEY_SECRET?.replace(/\\n/g, "\n"),
+      apiKeySecret: secret,
       projectId: process.env.CDP_PROJECT_ID,
     });
 
