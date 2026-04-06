@@ -39,6 +39,9 @@ import * as compute from "./services/compute.js";
 import * as compliance from "./services/compliance.js";
 import * as orchestration from "./services/orchestration.js";
 import * as rwa from "./services/rwa.js";
+import * as enterprise from "./services/enterprise.js";
+import * as audit from "./services/audit.js";
+import * as dataRooms from "./services/data-rooms.js";
 import * as memory from "./services/memory.js";
 import * as sandbox from "./services/sandbox.js";
 import * as scheduler from "./services/scheduler.js";
@@ -797,6 +800,44 @@ export const tools = [
   { name: "hiveagent_rwa_search", description: "Search tokenized real-world assets by type, yield, price.", inputSchema: { type: "object", properties: { asset_type: { type: "string", description: "Filter by asset type" }, min_yield: { type: "number", description: "Minimum yield %" }, max_price: { type: "number", description: "Max price per token" }, limit: { type: "integer", description: "Max results" } } } },
   { name: "hiveagent_rwa_holdings", description: "View your RWA portfolio — tokens held, value, yield earned.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Your agent ID" } }, required: ["agent_id"] } },
   { name: "hiveagent_rwa_stats", description: "Real-world asset tokenization statistics — total value locked, assets, trades.", inputSchema: { type: "object", properties: {} } },
+
+  // ─── Enterprise Tenancy ────────────────────────
+  { name: "hiveagent_ent_create", description: "Create an enterprise tenant with private isolation, compliance frameworks, and SLAs. Plans: Business $999/mo, Enterprise $4,999/mo, Enterprise+ $14,999/mo, Sovereign $49,999/mo.", inputSchema: { type: "object", properties: { name: { type: "string", description: "Organization name" }, domain: { type: "string", description: "Company domain" }, industry: { type: "string", description: "Industry", enum: ["pharma", "finance", "consulting", "tech", "manufacturing", "legal", "government", "healthcare", "defense", "energy"] }, admin_agent_id: { type: "string", description: "Admin agent ID" }, plan: { type: "string", description: "Plan tier", enum: ["business", "enterprise", "enterprise_plus", "sovereign"] } }, required: ["name", "admin_agent_id", "plan"] } },
+  { name: "hiveagent_ent_get", description: "View enterprise tenant details — plan, limits, agents, compliance.", inputSchema: { type: "object", properties: { tenant_id: { type: "string", description: "Tenant ID" } }, required: ["tenant_id"] } },
+  { name: "hiveagent_ent_update", description: "Update enterprise tenant — upgrade plan, change limits.", inputSchema: { type: "object", properties: { tenant_id: { type: "string", description: "Tenant ID" }, plan: { type: "string", description: "New plan" }, agent_limit: { type: "integer", description: "Agent limit" } }, required: ["tenant_id"] } },
+  { name: "hiveagent_ent_add_agent", description: "Add an agent to your enterprise tenant with role and permissions.", inputSchema: { type: "object", properties: { tenant_id: { type: "string", description: "Tenant ID" }, agent_id: { type: "string", description: "Agent to add" }, role: { type: "string", description: "Role", enum: ["admin", "manager", "member", "viewer", "auditor", "compliance_officer"] }, permissions: { type: "array", items: { type: "string" }, description: "Permissions: read, write, delete, admin, compliance, financial, sensitive_data" }, department: { type: "string", description: "Department" } }, required: ["tenant_id", "agent_id", "role"] } },
+  { name: "hiveagent_ent_remove_agent", description: "Remove an agent from your enterprise tenant.", inputSchema: { type: "object", properties: { tenant_id: { type: "string", description: "Tenant ID" }, agent_id: { type: "string", description: "Agent to remove" } }, required: ["tenant_id", "agent_id"] } },
+  { name: "hiveagent_ent_update_role", description: "Change an agent's role and permissions within the tenant.", inputSchema: { type: "object", properties: { tenant_id: { type: "string", description: "Tenant ID" }, agent_id: { type: "string", description: "Agent ID" }, role: { type: "string", description: "New role" }, permissions: { type: "array", items: { type: "string" }, description: "New permissions" } }, required: ["tenant_id", "agent_id"] } },
+  { name: "hiveagent_ent_agents", description: "List all agents in your enterprise tenant with roles.", inputSchema: { type: "object", properties: { tenant_id: { type: "string", description: "Tenant ID" } }, required: ["tenant_id"] } },
+  { name: "hiveagent_ent_create_key", description: "Generate an enterprise API key with scoped permissions and rate limits.", inputSchema: { type: "object", properties: { tenant_id: { type: "string", description: "Tenant ID" }, name: { type: "string", description: "Key name" }, permissions: { type: "array", items: { type: "string" }, description: "Allowed actions" }, rate_limit_per_minute: { type: "integer", description: "Rate limit" } }, required: ["tenant_id", "name"] } },
+  { name: "hiveagent_ent_revoke_key", description: "Revoke an enterprise API key.", inputSchema: { type: "object", properties: { key_id: { type: "string", description: "Key ID to revoke" } }, required: ["key_id"] } },
+  { name: "hiveagent_ent_plans", description: "View all enterprise plans — Business, Enterprise, Enterprise+, Sovereign. Compare features, limits, compliance, SLAs.", inputSchema: { type: "object", properties: {} } },
+  { name: "hiveagent_ent_stats", description: "Enterprise platform statistics — tenants, MRR, ARR, agents, by plan.", inputSchema: { type: "object", properties: {} } },
+
+  // ─── Audit Trail & Governance ──────────────────
+  { name: "hiveagent_audit_log", description: "Log an action to the immutable audit trail. Auto-calculates risk score and checks policies.", inputSchema: { type: "object", properties: { tenant_id: { type: "string", description: "Tenant ID" }, agent_id: { type: "string", description: "Agent performing action" }, action: { type: "string", description: "Action performed" }, resource_type: { type: "string", description: "Resource type", enum: ["transaction", "escrow", "service", "data", "memory", "compute", "compliance", "config", "agent", "key", "workflow"] }, resource_id: { type: "string", description: "Resource ID" }, details: { type: "object", description: "Additional details" }, sensitivity: { type: "string", description: "Sensitivity level", enum: ["normal", "sensitive", "critical", "classified"] } }, required: ["agent_id", "action", "resource_type"] } },
+  { name: "hiveagent_audit_query", description: "Search the audit log with filters — by agent, resource, action, sensitivity, date range.", inputSchema: { type: "object", properties: { tenant_id: { type: "string", description: "Tenant ID" }, agent_id: { type: "string", description: "Filter by agent" }, resource_type: { type: "string", description: "Filter by resource type" }, action: { type: "string", description: "Filter by action" }, sensitivity: { type: "string", description: "Filter by sensitivity" }, date_from: { type: "string", description: "Start date ISO" }, date_to: { type: "string", description: "End date ISO" }, limit: { type: "integer", description: "Max results" } } } },
+  { name: "hiveagent_audit_policy", description: "Create an audit/governance policy — retention, alerts, MFA requirements, approval workflows, amount limits.", inputSchema: { type: "object", properties: { tenant_id: { type: "string", description: "Tenant ID" }, name: { type: "string", description: "Policy name" }, resource_type: { type: "string", description: "Resource type to govern" }, action_pattern: { type: "string", description: "Action pattern (wildcard *)" }, retention_days: { type: "integer", description: "Log retention days" }, alert_on: { type: "array", items: { type: "string" }, description: "Outcomes to alert on" }, require_approval: { type: "string", description: "Agent ID required to approve" }, max_amount_usd: { type: "number", description: "Max transaction amount" } }, required: ["tenant_id", "name", "resource_type"] } },
+  { name: "hiveagent_audit_policies", description: "List audit policies for a tenant.", inputSchema: { type: "object", properties: { tenant_id: { type: "string", description: "Tenant ID" } }, required: ["tenant_id"] } },
+  { name: "hiveagent_audit_request_approval", description: "Request governance approval for a sensitive action.", inputSchema: { type: "object", properties: { tenant_id: { type: "string", description: "Tenant ID" }, requesting_agent_id: { type: "string", description: "Your agent ID" }, action: { type: "string", description: "Action needing approval" }, resource_type: { type: "string", description: "Resource type" }, resource_id: { type: "string", description: "Resource ID" }, amount_usd: { type: "number", description: "Transaction amount" } }, required: ["tenant_id", "requesting_agent_id", "action"] } },
+  { name: "hiveagent_audit_approve", description: "Approve a governance request.", inputSchema: { type: "object", properties: { approval_id: { type: "string", description: "Approval request ID" }, approving_agent_id: { type: "string", description: "Your agent ID" }, reason: { type: "string", description: "Reason for approval" } }, required: ["approval_id", "approving_agent_id"] } },
+  { name: "hiveagent_audit_deny", description: "Deny a governance request.", inputSchema: { type: "object", properties: { approval_id: { type: "string", description: "Approval request ID" }, approving_agent_id: { type: "string", description: "Your agent ID" }, reason: { type: "string", description: "Reason for denial" } }, required: ["approval_id", "approving_agent_id"] } },
+  { name: "hiveagent_audit_export", description: "Export audit log data as JSON, CSV, or SIEM format.", inputSchema: { type: "object", properties: { tenant_id: { type: "string", description: "Tenant ID" }, format: { type: "string", description: "Export format", enum: ["json", "csv", "siem"] }, date_from: { type: "string", description: "Start date" }, date_to: { type: "string", description: "End date" }, requested_by: { type: "string", description: "Your agent ID" } }, required: ["tenant_id", "format"] } },
+  { name: "hiveagent_audit_stats", description: "Audit statistics — events, sensitivity breakdown, policy violations.", inputSchema: { type: "object", properties: { tenant_id: { type: "string", description: "Tenant ID" } } } },
+
+  // ─── Enterprise Data Rooms ─────────────────────
+  { name: "hiveagent_room_create", description: "Create a secure data room for M&A, due diligence, litigation, or competitive intel. $500/mo base + $50/mo per participant over 5. NDA-gated, watermarked, classification levels.", inputSchema: { type: "object", properties: { tenant_id: { type: "string", description: "Tenant ID" }, creator_agent_id: { type: "string", description: "Your agent ID" }, name: { type: "string", description: "Room name" }, purpose: { type: "string", description: "Purpose", enum: ["due_diligence", "m_and_a", "litigation", "audit", "regulatory", "competitive_intel", "ip_licensing", "joint_venture"] }, classification: { type: "string", description: "Security level", enum: ["internal", "confidential", "secret", "top_secret"] }, max_participants: { type: "integer", description: "Max participants" }, expiry_days: { type: "integer", description: "Days until room expires" } }, required: ["creator_agent_id", "name", "purpose"] } },
+  { name: "hiveagent_room_invite", description: "Invite an agent to a data room with specific role and permissions.", inputSchema: { type: "object", properties: { room_id: { type: "string", description: "Room ID" }, agent_id: { type: "string", description: "Agent to invite" }, role: { type: "string", description: "Role", enum: ["admin", "contributor", "viewer", "auditor"] }, permissions: { type: "array", items: { type: "string" }, description: "Permissions: view, download, upload, comment, redact, admin" } }, required: ["room_id", "agent_id"] } },
+  { name: "hiveagent_room_sign_nda", description: "Sign NDA to access data room documents. Required before viewing.", inputSchema: { type: "object", properties: { room_id: { type: "string", description: "Room ID" }, agent_id: { type: "string", description: "Your agent ID" } }, required: ["room_id", "agent_id"] } },
+  { name: "hiveagent_room_upload", description: "Upload a document to a data room.", inputSchema: { type: "object", properties: { room_id: { type: "string", description: "Room ID" }, agent_id: { type: "string", description: "Your agent ID" }, name: { type: "string", description: "Document name" }, description: { type: "string", description: "Description" }, category: { type: "string", description: "Category", enum: ["financial", "legal", "technical", "operational", "ip", "hr", "other"] }, classification: { type: "string", description: "Classification level" }, content_hash: { type: "string", description: "SHA256 of document" }, size_bytes: { type: "integer", description: "File size" } }, required: ["room_id", "agent_id", "name", "category"] } },
+  { name: "hiveagent_room_view", description: "View a document in a data room. Access is logged.", inputSchema: { type: "object", properties: { room_id: { type: "string", description: "Room ID" }, document_id: { type: "string", description: "Document ID" }, agent_id: { type: "string", description: "Your agent ID" } }, required: ["room_id", "document_id", "agent_id"] } },
+  { name: "hiveagent_room_download", description: "Download a document. Requires download permission. Logged and watermarked.", inputSchema: { type: "object", properties: { room_id: { type: "string", description: "Room ID" }, document_id: { type: "string", description: "Document ID" }, agent_id: { type: "string", description: "Your agent ID" } }, required: ["room_id", "document_id", "agent_id"] } },
+  { name: "hiveagent_room_get", description: "View data room details — participants, documents, activity.", inputSchema: { type: "object", properties: { room_id: { type: "string", description: "Room ID" } }, required: ["room_id"] } },
+  { name: "hiveagent_room_my_rooms", description: "List data rooms you have access to.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Your agent ID" } }, required: ["agent_id"] } },
+  { name: "hiveagent_room_activity", description: "Full activity log for a data room — who viewed, downloaded, uploaded what.", inputSchema: { type: "object", properties: { room_id: { type: "string", description: "Room ID" } }, required: ["room_id"] } },
+  { name: "hiveagent_room_lock", description: "Lock a data room — no more changes allowed.", inputSchema: { type: "object", properties: { room_id: { type: "string", description: "Room ID" } }, required: ["room_id"] } },
+  { name: "hiveagent_room_destroy", description: "Permanently destroy a data room and all documents. Irreversible.", inputSchema: { type: "object", properties: { room_id: { type: "string", description: "Room ID" } }, required: ["room_id"] } },
+  { name: "hiveagent_room_stats", description: "Data room platform statistics.", inputSchema: { type: "object", properties: {} } },
 ];
 
 
@@ -1232,6 +1273,39 @@ export async function handleTool(name, args) {
     case "hiveagent_rwa_search": return rwa.searchAssets(args);
     case "hiveagent_rwa_holdings": return rwa.getAgentHoldings(args.holder_agent_id);
     case "hiveagent_rwa_stats": return rwa.getRWAStats();
+
+    case "hiveagent_ent_create":         return createTenant(params);
+    case "hiveagent_ent_get":            return getTenant(params.tenant_id);
+    case "hiveagent_ent_update":         return updateTenant(params.tenant_id, params);
+    case "hiveagent_ent_add_agent":      return addAgent(params);
+    case "hiveagent_ent_remove_agent":   return removeAgent(params.tenant_id, params.agent_id);
+    case "hiveagent_ent_update_role":    return updateAgentRole(params);
+    case "hiveagent_ent_agents":         return getTenantAgents(params.tenant_id);
+    case "hiveagent_ent_create_key":     return createApiKey(params);
+    case "hiveagent_ent_revoke_key":     return revokeApiKey(params.key_id);
+    case "hiveagent_ent_plans":          return getPlans();
+    case "hiveagent_ent_stats":          return getEnterpriseStats();
+    case "hiveagent_audit_log":              return logAction(params);
+    case "hiveagent_audit_query":            return queryAuditLog(params);
+    case "hiveagent_audit_policy":           return createPolicy(params);
+    case "hiveagent_audit_policies":         return getPolicies(params.tenant_id);
+    case "hiveagent_audit_request_approval": return requestApproval(params);
+    case "hiveagent_audit_approve":          return approveRequest(params);
+    case "hiveagent_audit_deny":             return denyRequest(params);
+    case "hiveagent_audit_export":           return exportAuditLog(params);
+    case "hiveagent_audit_stats":            return getAuditStats(params);
+    case "hiveagent_room_create":    return createDataRoom(params);
+    case "hiveagent_room_invite":    return inviteToRoom(params);
+    case "hiveagent_room_sign_nda":  return signNDA(params);
+    case "hiveagent_room_upload":    return uploadDocument(params);
+    case "hiveagent_room_view":      return viewDocument(params);
+    case "hiveagent_room_download":  return downloadDocument(params);
+    case "hiveagent_room_get":       return getDataRoom(params.room_id);
+    case "hiveagent_room_my_rooms":  return getAgentRooms(params.agent_id);
+    case "hiveagent_room_activity":  return getRoomActivity(params.room_id);
+    case "hiveagent_room_lock":      return lockRoom(params.room_id);
+    case "hiveagent_room_destroy":   return destroyRoom(params.room_id);
+    case "hiveagent_room_stats":     return getDataRoomStats();
 
     default:
       throw new Error(`Unknown tool: ${name}`);
