@@ -34,6 +34,11 @@ import * as capital from "./services/capital.js";
 import * as tokenization from "./services/tokenization.js";
 import * as advertising from "./services/advertising.js";
 import * as analytics from "./services/analytics.js";
+import * as iot from "./services/iot-payments.js";
+import * as compute from "./services/compute.js";
+import * as compliance from "./services/compliance.js";
+import * as orchestration from "./services/orchestration.js";
+import * as rwa from "./services/rwa.js";
 import * as memory from "./services/memory.js";
 import * as sandbox from "./services/sandbox.js";
 import * as scheduler from "./services/scheduler.js";
@@ -743,6 +748,55 @@ export const tools = [
   { name: "hiveagent_analytics_trending", description: "What's trending — hottest services, agents, tokens, and markets right now.", inputSchema: { type: "object", properties: { period: { type: "string", description: "Time period", enum: ["1h", "24h", "7d", "30d"] }, limit: { type: "integer", description: "Number of results" } } } },
   { name: "hiveagent_analytics_whales", description: "Whale activity — large transactions and movements. Requires Pro+.", inputSchema: { type: "object", properties: { min_amount: { type: "number", description: "Minimum USD amount" }, limit: { type: "integer", description: "Number of results" } } } },
   { name: "hiveagent_analytics_stats", description: "Analytics platform stats — subscribers, MRR, signal volume.", inputSchema: { type: "object", properties: {} } },
+
+  // ─── IoT & Machine Payments ────────────────────
+  { name: "hiveagent_iot_register", description: "Register an IoT device — EV chargers, drones, robots, sensors, smart appliances. Set rate and earn from agent payments. 3% platform fee.", inputSchema: { type: "object", properties: { owner_agent_id: { type: "string", description: "Your agent ID" }, device_type: { type: "string", description: "Device type", enum: ["ev_charger", "smart_appliance", "drone", "autonomous_vehicle", "sensor", "robot", "vending_machine", "meter"] }, name: { type: "string", description: "Device name" }, location: { type: "string", description: "Physical location" }, rate_usd: { type: "number", description: "Rate per unit" }, rate_unit: { type: "string", description: "Billing unit", enum: ["per_kwh", "per_minute", "per_use", "per_kg", "per_km"] } }, required: ["owner_agent_id", "device_type", "name", "rate_usd", "rate_unit"] } },
+  { name: "hiveagent_iot_pay", description: "Pay an IoT device for its service — charge your EV, get sensor data, use a robot.", inputSchema: { type: "object", properties: { device_id: { type: "string", description: "Device ID" }, payer_agent_id: { type: "string", description: "Your agent ID" }, quantity: { type: "number", description: "Units to pay for" } }, required: ["device_id", "payer_agent_id", "quantity"] } },
+  { name: "hiveagent_iot_subscribe", description: "Subscribe to an IoT device for recurring data/access.", inputSchema: { type: "object", properties: { device_id: { type: "string", description: "Device ID" }, subscriber_agent_id: { type: "string", description: "Your agent ID" }, plan: { type: "string", description: "Plan name" }, price_usd_monthly: { type: "number", description: "Monthly price" } }, required: ["subscriber_agent_id", "plan", "price_usd_monthly"] } },
+  { name: "hiveagent_iot_device", description: "View IoT device details.", inputSchema: { type: "object", properties: { device_id: { type: "string", description: "Device ID" } }, required: ["device_id"] } },
+  { name: "hiveagent_iot_search", description: "Search IoT devices by type and location.", inputSchema: { type: "object", properties: { device_type: { type: "string", description: "Filter by type" }, location: { type: "string", description: "Filter by location" }, limit: { type: "integer", description: "Max results" } } } },
+  { name: "hiveagent_iot_my_devices", description: "List your registered IoT devices.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Your agent ID" } }, required: ["agent_id"] } },
+  { name: "hiveagent_iot_stats", description: "IoT payment platform statistics.", inputSchema: { type: "object", properties: {} } },
+
+  // ─── Compute Brokerage ─────────────────────────
+  { name: "hiveagent_compute_list", description: "List compute resources for sale — GPU (A100, H100, 4090), CPU clusters, inference APIs, storage, bandwidth, TPU, FPGA.", inputSchema: { type: "object", properties: { provider_agent_id: { type: "string", description: "Your agent ID" }, compute_type: { type: "string", description: "Resource type", enum: ["gpu_a100", "gpu_h100", "gpu_4090", "cpu_cluster", "inference_api", "storage_ssd", "storage_hdd", "bandwidth", "tpu", "fpga"] }, name: { type: "string", description: "Listing name" }, price_per_unit: { type: "number", description: "Price per unit" }, unit: { type: "string", description: "Billing unit", enum: ["per_hour", "per_token", "per_gb", "per_gbps", "per_request"] }, available_units: { type: "number", description: "Available quantity" }, specs: { type: "string", description: "Hardware specs" } }, required: ["provider_agent_id", "compute_type", "name", "price_per_unit", "unit"] } },
+  { name: "hiveagent_compute_search", description: "Search available compute resources. Find GPUs, storage, inference APIs.", inputSchema: { type: "object", properties: { compute_type: { type: "string", description: "Filter by type" }, max_price: { type: "number", description: "Max price per unit" }, limit: { type: "integer", description: "Max results" } } } },
+  { name: "hiveagent_compute_buy", description: "Buy compute resources. 5% commission.", inputSchema: { type: "object", properties: { listing_id: { type: "string", description: "Compute listing ID" }, buyer_agent_id: { type: "string", description: "Your agent ID" }, units_requested: { type: "number", description: "Units to buy" } }, required: ["listing_id", "buyer_agent_id", "units_requested"] } },
+  { name: "hiveagent_compute_bid", description: "Request bids from compute providers for a specific job.", inputSchema: { type: "object", properties: { job_request_id: { type: "string", description: "Job request ID" }, provider_agent_id: { type: "string", description: "Your agent ID" }, price_per_unit: { type: "number", description: "Your bid price" }, available_units: { type: "number", description: "Units you can provide" } }, required: ["provider_agent_id", "price_per_unit"] } },
+  { name: "hiveagent_compute_complete", description: "Mark a compute job as completed.", inputSchema: { type: "object", properties: { job_id: { type: "string", description: "Job ID" } }, required: ["job_id"] } },
+  { name: "hiveagent_compute_job", description: "View compute job details.", inputSchema: { type: "object", properties: { job_id: { type: "string", description: "Job ID" } }, required: ["job_id"] } },
+  { name: "hiveagent_compute_my_jobs", description: "List your compute jobs.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Your agent ID" } }, required: ["agent_id"] } },
+  { name: "hiveagent_compute_stats", description: "Compute brokerage statistics.", inputSchema: { type: "object", properties: {} } },
+
+  // ─── Compliance-as-a-Service ───────────────────
+  { name: "hiveagent_comply_check", description: "Run a compliance check — KYC, AML screening, sanctions, PEP, adverse media, license verification, tax ID validation. Required for high-value transactions.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Agent to check" }, check_type: { type: "string", description: "Check type", enum: ["kyc_basic", "kyc_enhanced", "aml_screen", "sanctions_check", "pep_check", "adverse_media", "transaction_monitoring", "license_verify", "tax_id_verify"] } }, required: ["agent_id", "check_type"] } },
+  { name: "hiveagent_comply_profile", description: "View compliance profile — KYC status, AML status, risk score.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Agent ID" } }, required: ["agent_id"] } },
+  { name: "hiveagent_comply_alerts", description: "View compliance alerts for an agent.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Agent ID" } }, required: ["agent_id"] } },
+  { name: "hiveagent_comply_report", description: "Generate a compliance report (SAR, CTR, OFAC match, periodic review).", inputSchema: { type: "object", properties: { report_type: { type: "string", description: "Report type", enum: ["sar", "ctr", "ofac_match", "periodic_review"] }, period: { type: "string", description: "Report period" } }, required: ["report_type"] } },
+  { name: "hiveagent_comply_agent", description: "Full compliance status for an agent.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Agent ID" } }, required: ["agent_id"] } },
+  { name: "hiveagent_comply_require", description: "Set compliance requirements for a transaction type.", inputSchema: { type: "object", properties: { transaction_type: { type: "string", description: "Transaction type" }, min_check: { type: "string", description: "Minimum required check type" }, threshold_usd: { type: "number", description: "Amount threshold" } }, required: ["transaction_type", "min_check"] } },
+  { name: "hiveagent_comply_stats", description: "Compliance platform statistics.", inputSchema: { type: "object", properties: {} } },
+
+  // ─── Agent Orchestration ──────────────────────
+  { name: "hiveagent_flow_create", description: "Create a multi-agent workflow. Chain tools and agents into pipelines with dependencies, conditionals, and parallel execution. $0.01/step.", inputSchema: { type: "object", properties: { creator_agent_id: { type: "string", description: "Your agent ID" }, name: { type: "string", description: "Workflow name" }, description: { type: "string", description: "What this workflow does" }, steps: { type: "array", description: "Array of workflow steps [{tool, args, depends_on}]" } }, required: ["creator_agent_id", "name", "steps"] } },
+  { name: "hiveagent_flow_start", description: "Start a workflow.", inputSchema: { type: "object", properties: { workflow_id: { type: "string", description: "Workflow ID" } }, required: ["workflow_id"] } },
+  { name: "hiveagent_flow_step", description: "Execute the next step in a workflow.", inputSchema: { type: "object", properties: { step_id: { type: "string", description: "Step ID" }, output: { type: "string", description: "Step output/result" } }, required: ["step_id"] } },
+  { name: "hiveagent_flow_team", description: "Create an agent team for coordinated work.", inputSchema: { type: "object", properties: { creator_agent_id: { type: "string", description: "Your agent ID" }, name: { type: "string", description: "Team name" }, member_ids: { type: "array", items: { type: "string" }, description: "Agent IDs to include" }, roles: { type: "object", description: "Role assignments {agent_id: role}" } }, required: ["creator_agent_id", "name", "member_ids"] } },
+  { name: "hiveagent_flow_handoff", description: "Hand off work from one agent to another with full context.", inputSchema: { type: "object", properties: { from_agent_id: { type: "string", description: "Handing off agent" }, to_agent_id: { type: "string", description: "Receiving agent" }, workflow_id: { type: "string", description: "Related workflow" }, context: { type: "object", description: "Context to pass" } }, required: ["from_agent_id", "to_agent_id", "context"] } },
+  { name: "hiveagent_flow_accept", description: "Accept a handoff from another agent.", inputSchema: { type: "object", properties: { handoff_id: { type: "string", description: "Handoff ID" }, agent_id: { type: "string", description: "Your agent ID" } }, required: ["handoff_id", "agent_id"] } },
+  { name: "hiveagent_flow_get", description: "View workflow details and status.", inputSchema: { type: "object", properties: { workflow_id: { type: "string", description: "Workflow ID" } }, required: ["workflow_id"] } },
+  { name: "hiveagent_flow_my_workflows", description: "List your workflows.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Your agent ID" } }, required: ["agent_id"] } },
+  { name: "hiveagent_flow_stats", description: "Orchestration platform statistics.", inputSchema: { type: "object", properties: {} } },
+
+  // ─── Real-World Asset Tokenization ────────────
+  { name: "hiveagent_rwa_create", description: "Tokenize a real-world asset — real estate, commodities, bonds, art, carbon credits, equity, IP, invoices. Fractional ownership from $1.", inputSchema: { type: "object", properties: { issuer_agent_id: { type: "string", description: "Your agent ID" }, name: { type: "string", description: "Asset name" }, description: { type: "string", description: "Asset description" }, asset_type: { type: "string", description: "Asset type", enum: ["real_estate", "commodity", "bond", "art", "equity", "carbon_credit", "intellectual_property", "invoice", "collectible"] }, underlying_value_usd: { type: "number", description: "Total asset value" }, total_tokens: { type: "integer", description: "Number of tokens to create" }, yield_pct: { type: "number", description: "Annual yield %" }, yield_frequency: { type: "string", description: "Yield payment frequency", enum: ["monthly", "quarterly", "annually"] }, jurisdiction: { type: "string", description: "Legal jurisdiction" } }, required: ["issuer_agent_id", "name", "asset_type", "underlying_value_usd", "total_tokens"] } },
+  { name: "hiveagent_rwa_buy", description: "Buy tokens in a real-world asset. Fractional ownership. 2% commission.", inputSchema: { type: "object", properties: { asset_id: { type: "string", description: "Asset ID" }, buyer_agent_id: { type: "string", description: "Your agent ID" }, tokens: { type: "integer", description: "Number of tokens to buy" } }, required: ["asset_id", "buyer_agent_id", "tokens"] } },
+  { name: "hiveagent_rwa_sell", description: "Sell your RWA tokens on the secondary market.", inputSchema: { type: "object", properties: { asset_id: { type: "string", description: "Asset ID" }, seller_agent_id: { type: "string", description: "Your agent ID" }, tokens: { type: "integer", description: "Tokens to sell" }, price_per_token: { type: "number", description: "Asking price per token" } }, required: ["asset_id", "seller_agent_id", "tokens"] } },
+  { name: "hiveagent_rwa_yield", description: "Distribute yield payments to token holders for an asset.", inputSchema: { type: "object", properties: { asset_id: { type: "string", description: "Asset ID" }, period: { type: "string", description: "Payment period (e.g., 2026-Q1)" } }, required: ["asset_id", "period"] } },
+  { name: "hiveagent_rwa_asset", description: "View asset details — value, tokens, yield, holders.", inputSchema: { type: "object", properties: { asset_id: { type: "string", description: "Asset ID" } }, required: ["asset_id"] } },
+  { name: "hiveagent_rwa_search", description: "Search tokenized real-world assets by type, yield, price.", inputSchema: { type: "object", properties: { asset_type: { type: "string", description: "Filter by asset type" }, min_yield: { type: "number", description: "Minimum yield %" }, max_price: { type: "number", description: "Max price per token" }, limit: { type: "integer", description: "Max results" } } } },
+  { name: "hiveagent_rwa_holdings", description: "View your RWA portfolio — tokens held, value, yield earned.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Your agent ID" } }, required: ["agent_id"] } },
+  { name: "hiveagent_rwa_stats", description: "Real-world asset tokenization statistics — total value locked, assets, trades.", inputSchema: { type: "object", properties: {} } },
 ];
 
 
@@ -1138,6 +1192,46 @@ export async function handleTool(name, args) {
     case "hiveagent_analytics_trending": return analytics.getTrendingServices(args);
     case "hiveagent_analytics_whales": return analytics.getWhaleActivity(args);
     case "hiveagent_analytics_stats": return analytics.getAnalyticsStats();
+
+    case "hiveagent_iot_register": return iot.registerDevice(args);
+    case "hiveagent_iot_pay": return iot.payDevice(args);
+    case "hiveagent_iot_subscribe": return iot.subscribeToDevice(args);
+    case "hiveagent_iot_get": return iot.getDevice(args.id);
+    case "hiveagent_iot_search": return iot.searchDevices(args);
+    case "hiveagent_iot_agent_devices": return iot.getAgentDevices(args.owner_agent_id);
+    case "hiveagent_iot_stats": return iot.getIoTStats();
+    case "hiveagent_compute_list": return compute.listCompute(args);
+    case "hiveagent_compute_search": return compute.searchCompute(args);
+    case "hiveagent_compute_buy": return compute.buyCompute(args);
+    case "hiveagent_compute_bid": return compute.requestComputeBid(args);
+    case "hiveagent_compute_complete": return compute.completeJob(args);
+    case "hiveagent_compute_get": return compute.getComputeJob(args.job_id);
+    case "hiveagent_compute_agent_jobs": return compute.getAgentComputeJobs(args.buyer_agent_id);
+    case "hiveagent_compute_stats": return compute.getComputeStats();
+    case "hiveagent_comply_check": return compliance.runCheck(args);
+    case "hiveagent_comply_profile": return compliance.getProfile(args.agent_id);
+    case "hiveagent_comply_alerts": return compliance.getAlerts(args);
+    case "hiveagent_comply_report": return compliance.generateReport(args);
+    case "hiveagent_comply_agent": return compliance.getAgentCompliance(args.agent_id);
+    case "hiveagent_comply_require": return compliance.setComplianceRequirement(args);
+    case "hiveagent_comply_stats": return compliance.getComplianceStats();
+    case "hiveagent_flow_create": return orchestration.createWorkflow(args);
+    case "hiveagent_flow_start": return orchestration.startWorkflow(args);
+    case "hiveagent_flow_step": return orchestration.executeStep(args);
+    case "hiveagent_flow_team": return orchestration.createTeam(args);
+    case "hiveagent_flow_handoff": return orchestration.handoff(args);
+    case "hiveagent_flow_accept": return orchestration.acceptHandoff(args);
+    case "hiveagent_flow_get": return orchestration.getWorkflow(args.workflow_id);
+    case "hiveagent_flow_agent": return orchestration.getAgentWorkflows(args.creator_agent_id);
+    case "hiveagent_flow_stats": return orchestration.getOrchestrationStats();
+    case "hiveagent_rwa_create": return rwa.createAsset(args);
+    case "hiveagent_rwa_buy": return rwa.buyTokens(args);
+    case "hiveagent_rwa_sell": return rwa.sellTokens(args);
+    case "hiveagent_rwa_yield": return rwa.distributeYield(args);
+    case "hiveagent_rwa_get": return rwa.getAsset(args.asset_id);
+    case "hiveagent_rwa_search": return rwa.searchAssets(args);
+    case "hiveagent_rwa_holdings": return rwa.getAgentHoldings(args.holder_agent_id);
+    case "hiveagent_rwa_stats": return rwa.getRWAStats();
 
     default:
       throw new Error(`Unknown tool: ${name}`);
