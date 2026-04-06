@@ -33,7 +33,7 @@ export const verticalTools = [
   // ═══════════════════════════════════════════════════════════
   {
     name: "commerce_verify_product",
-    description: "Verify product authenticity, check claims against known databases, and detect counterfeits or misleading listings before an agent completes a purchase.",
+    description: "Use when you need to verify a product before an agent completes a purchase — checks authenticity, validates label claims (organic, UL listed, made in USA), and flags counterfeits or misleading listings. Works across electronics, food, health, apparel, industrial, and automotive categories. Returns a verification verdict, flagged claims, and a confidence score.",
     inputSchema: {
       type: "object",
       properties: {
@@ -58,7 +58,7 @@ export const verticalTools = [
   },
   {
     name: "commerce_merchant_trust",
-    description: "Get a trust score and risk breakdown for an online merchant or marketplace seller based on historical data, reviews, and dispute records.",
+    description: "Use when you need to know whether an online merchant or marketplace seller can be trusted before placing an order — evaluates dispute history, review authenticity, chargeback rates, and platform standing. Returns a 0–100 trust score, risk tier, red-flag breakdown, and a buy/caution/avoid recommendation.",
     inputSchema: {
       type: "object",
       properties: {
@@ -76,7 +76,7 @@ export const verticalTools = [
   },
   {
     name: "commerce_detect_manipulation",
-    description: "Detect dark patterns, fake reviews, artificial urgency, or pricing manipulation in product content or marketing copy.",
+    description: "Use when you need to check product listings, review sections, or checkout pages for dark patterns, fake reviews, artificial urgency, hidden fees, or deceptive pricing. Catches manufactured scarcity, astroturfed ratings, drip pricing, and misleading comparisons. Returns flagged patterns, severity ratings, and cleaned content.",
     inputSchema: {
       type: "object",
       properties: {
@@ -94,7 +94,7 @@ export const verticalTools = [
   },
   {
     name: "commerce_verify_receipt",
-    description: "Verify a purchase receipt against expected items, amounts, and merchant details to detect fraud or overcharging.",
+    description: "Use when you need to confirm that a purchase receipt matches what was ordered — compares line items, unit prices, merchant details, and totals against expected values to catch overcharges, unauthorized items, or billing fraud. Returns a match verdict, any discrepancy details, and a corrected expected total.",
     inputSchema: {
       type: "object",
       properties: {
@@ -113,7 +113,7 @@ export const verticalTools = [
   },
   {
     name: "commerce_risk_assessment",
-    description: "Get a comprehensive risk assessment for a proposed transaction, covering fraud probability, merchant reliability, and product authenticity.",
+    description: "Use when you need a full risk picture before authorizing a transaction — combines fraud probability, merchant reliability, product authenticity, payment method risk, and shipping destination flags into a single composite score. Returns an overall risk level (low/medium/high/critical), contributing factors, and a go/hold/decline recommendation.",
     inputSchema: {
       type: "object",
       properties: {
@@ -127,7 +127,7 @@ export const verticalTools = [
   },
   {
     name: "commerce_report_incident",
-    description: "Report a commerce incident (fraud, counterfeit, non-delivery) to contribute to the shared trust network and initiate dispute resolution.",
+    description: "Use when you need to report a commerce problem — fraud, counterfeit product, non-delivery, price manipulation, or data breach — so it feeds into the shared trust network and initiates dispute resolution. Returns a case ID, estimated resolution timeline, and next steps for the affected transaction.",
     inputSchema: {
       type: "object",
       properties: {
@@ -154,7 +154,7 @@ export const verticalTools = [
   // ═══════════════════════════════════════════════════════════
   {
     name: "commerce_create_order",
-    description: "Create and submit a purchase order on behalf of an agent, including item selection, payment method, and shipping address.",
+    description: "Use when you need an agent to place a purchase order on behalf of a user — specify items, quantities, price caps, payment method, and shipping destination. Handles item selection, checkout, and payment submission across supported merchants. Returns an order confirmation ID, itemized receipt, and estimated delivery date.",
     inputSchema: {
       type: "object",
       properties: {
@@ -181,7 +181,7 @@ export const verticalTools = [
   },
   {
     name: "commerce_compare_prices",
-    description: "Compare prices for a product across multiple merchants to find the best deal for an agent.",
+    description: "Use when you need to find the best price for a product before buying — searches across multiple merchants and marketplaces simultaneously for a given product name, SKU, or description. Returns a ranked list of offers with merchant name, price, availability, shipping cost, and trust score.",
     inputSchema: {
       type: "object",
       properties: {
@@ -200,7 +200,7 @@ export const verticalTools = [
   },
   {
     name: "commerce_track_purchase",
-    description: "Track the fulfillment status of a purchase order, including shipping updates and estimated delivery.",
+    description: "Use when you need to check where an order is and when it will arrive — tracks fulfillment status, carrier updates, and delivery estimates for any order placed through commerce_create_order. Returns current status, tracking number, carrier link, and estimated delivery window.",
     inputSchema: {
       type: "object",
       properties: {
@@ -214,7 +214,7 @@ export const verticalTools = [
   },
   {
     name: "commerce_initiate_return",
-    description: "Initiate a product return or refund request for a completed purchase.",
+    description: "Use when you need to return a product or request a refund — handles return authorization for defective items, wrong shipments, damaged-in-transit goods, or changed-mind returns. Returns a return authorization number, prepaid label (if applicable), and expected refund timeline.",
     inputSchema: {
       type: "object",
       properties: {
@@ -237,7 +237,7 @@ export const verticalTools = [
   },
   {
     name: "commerce_shopping_history",
-    description: "Retrieve an agent's shopping history with analytics on spending patterns, merchant reliability, and category breakdown.",
+    description: "Use when you need a record of an agent's past purchases or want to analyze spending — retrieves full order history with optional analytics on category breakdowns, top merchants, average order value, and return rate. Returns a chronological order list plus optional analytics summary.",
     inputSchema: {
       type: "object",
       properties: {
@@ -264,7 +264,7 @@ export const verticalTools = [
   // ═══════════════════════════════════════════════════════════
   {
     name: "anti_injection_scan",
-    description: "Scan content for prompt injection, jailbreak attempts, or adversarial instructions before passing it to an LLM or agent.",
+    description: "Use when you need to check untrusted content before passing it to an LLM or agent pipeline — detects prompt injection, jailbreak patterns, goal hijacking, role confusion, and adversarial instructions in user input, web pages, documents, emails, or API responses. Returns a threat verdict, detected patterns, and a sanitized content snippet.",
     inputSchema: {
       type: "object",
       properties: {
@@ -284,7 +284,7 @@ export const verticalTools = [
   },
   {
     name: "anti_injection_quarantine",
-    description: "Quarantine content identified as containing an injection attack, isolating it from agent processing pipelines.",
+    description: "Use when you need to isolate malicious content that has been identified as a prompt injection or jailbreak attempt — removes it from active agent processing pipelines and logs it for security review. Returns a quarantine confirmation, threat level, and case ID for the isolated content.",
     inputSchema: {
       type: "object",
       properties: {
@@ -308,7 +308,7 @@ export const verticalTools = [
   },
   {
     name: "anti_injection_shield_status",
-    description: "Get the current status of the anti-injection shield, including active rule counts, recent block rate, and threat statistics.",
+    description: "Use when you need to know the current health and effectiveness of the anti-injection shield — returns active rule count, recent block rate, top threat categories detected, and last rule-set update timestamp. Useful for monitoring pipeline security posture in real time.",
     inputSchema: {
       type: "object",
       properties: {},
@@ -317,7 +317,7 @@ export const verticalTools = [
   },
   {
     name: "anti_injection_report_vector",
-    description: "Report a novel injection attack vector to improve collective defenses across the HiveAgent network.",
+    description: "Use when you have discovered a novel prompt injection or jailbreak pattern that should be added to collective defenses — contributes the attack type, payload, and context to the HiveAgent threat-sharing network. Returns a submission ID and estimated time to rule propagation across the network.",
     inputSchema: {
       type: "object",
       properties: {
@@ -340,7 +340,7 @@ export const verticalTools = [
   },
   {
     name: "anti_injection_safe_content",
-    description: "Retrieve a certified-safe version of content that has passed all injection checks, or certify raw content on demand.",
+    description: "Use when you need a certified-safe version of content that has already been scanned, or when you want to scan-and-certify raw content in a single call before feeding it into an agent. Returns the sanitized content, a pass/fail certificate, and a content hash for audit purposes.",
     inputSchema: {
       type: "object",
       properties: {
@@ -362,7 +362,7 @@ export const verticalTools = [
   // ═══════════════════════════════════════════════════════════
   {
     name: "recovery_register_endpoint",
-    description: "Register an agent endpoint for health monitoring with configurable check intervals and circuit-breaker thresholds.",
+    description: "Use when you need to enroll an agent endpoint into continuous health monitoring — configures check interval, circuit-breaker failure thresholds, and alerting. Returns a registration confirmation, assigned monitor ID, and the schedule of upcoming health checks.",
     inputSchema: {
       type: "object",
       properties: {
@@ -385,7 +385,7 @@ export const verticalTools = [
   },
   {
     name: "recovery_check_health",
-    description: "Run an immediate health check against an agent endpoint and return latency, status code, and circuit state.",
+    description: "Use when you need an immediate, on-demand health check of an agent endpoint — pings the endpoint and measures response latency, HTTP status, and circuit state right now rather than waiting for the next scheduled check. Returns latency in ms, HTTP status, circuit state (closed/open/half-open), and a pass/fail verdict.",
     inputSchema: {
       type: "object",
       properties: {
@@ -404,7 +404,7 @@ export const verticalTools = [
   },
   {
     name: "recovery_circuit_status",
-    description: "Get the current circuit-breaker status for a target agent, including failure count and cooldown time remaining.",
+    description: "Use when you need to know whether an agent's circuit breaker is open or closed before calling it — returns current circuit state, consecutive failure count, last failure timestamp, and cooldown time remaining before automatic retry is allowed.",
     inputSchema: {
       type: "object",
       properties: {
@@ -418,7 +418,7 @@ export const verticalTools = [
   },
   {
     name: "recovery_trip_circuit",
-    description: "Manually trip the circuit breaker for an agent to halt traffic and trigger recovery procedures.",
+    description: "Use when you need to manually stop traffic to an agent — opens its circuit breaker immediately to prevent further calls and triggers recovery procedures. Useful for maintenance windows or confirmed failures. Returns confirmation of circuit state change and the audit log entry.",
     inputSchema: {
       type: "object",
       properties: {
@@ -436,7 +436,7 @@ export const verticalTools = [
   },
   {
     name: "recovery_health_dashboard",
-    description: "Get a full health dashboard for an agent including uptime history, incident log, and dependency health.",
+    description: "Use when you need a comprehensive health overview for an agent — shows uptime history, SLA compliance, active incidents, dependency health tree, and a timeline of recent failures and recoveries. Returns a dashboard object suitable for display or automated decision-making.",
     inputSchema: {
       type: "object",
       properties: {
@@ -450,7 +450,7 @@ export const verticalTools = [
   },
   {
     name: "recovery_list_incidents",
-    description: "List incidents for an agent filtered by severity and time range, with root cause and resolution details.",
+    description: "Use when you need to review an agent's incident history — lists failures, outages, and degradations filtered by severity level and time window, with root cause analysis and resolution details for each event. Returns a paginated incident list with timestamps, severity, duration, and resolution notes.",
     inputSchema: {
       type: "object",
       properties: {
@@ -479,7 +479,7 @@ export const verticalTools = [
   // ═══════════════════════════════════════════════════════════
   {
     name: "recovery_create_handoff_protocol",
-    description: "Define a multi-stage handoff protocol for a workflow, specifying which agents handle each stage and what context must be transferred.",
+    description: "Use when you need to define how a multi-stage workflow passes control between agents — specifies which agent handles each stage, required context keys that must be carried across every boundary, and success criteria for each transition. Returns a protocol ID and a validated stage map.",
     inputSchema: {
       type: "object",
       properties: {
@@ -503,7 +503,7 @@ export const verticalTools = [
   },
   {
     name: "recovery_initiate_handoff",
-    description: "Initiate a handoff from one agent to another within a registered protocol, transferring context and verifying readiness.",
+    description: "Use when you need to transfer control from one agent to another within a registered handoff protocol — packages the current context, verifies all required keys are present, and signals the receiving agent that it is now responsible. Returns a handoff ID, transfer confirmation, and receiving-agent acknowledgment status.",
     inputSchema: {
       type: "object",
       properties: {
@@ -529,7 +529,7 @@ export const verticalTools = [
   },
   {
     name: "recovery_validate_handoff",
-    description: "Validate that a handoff completed successfully by checking context integrity and agent acknowledgment.",
+    description: "Use when you need to confirm that a handoff actually succeeded — checks context integrity, verifies the receiving agent acknowledged responsibility, and flags any missing or corrupted context keys. Returns a pass/fail result with a detailed diff of expected vs. received context.",
     inputSchema: {
       type: "object",
       properties: {
@@ -543,7 +543,7 @@ export const verticalTools = [
   },
   {
     name: "recovery_handoff_trace",
-    description: "Get the full trace of all handoffs in a workflow, including timing, context diffs, and any validation failures.",
+    description: "Use when you need a full audit trail of how a workflow moved between agents — returns a chronological trace of every handoff event including timing, agent IDs, context diffs, and any validation failures or retries that occurred.",
     inputSchema: {
       type: "object",
       properties: {
@@ -557,7 +557,7 @@ export const verticalTools = [
   },
   {
     name: "recovery_recover_handoff",
-    description: "Attempt to recover a failed handoff using a specified recovery strategy such as retry, rollback, or escalation.",
+    description: "Use when a handoff has failed and you need to get the workflow back on track — applies a recovery strategy (retry, rollback, escalate to human, switch to alternate agent, or abort) to the failed handoff. Returns the outcome of the recovery attempt and the new workflow state.",
     inputSchema: {
       type: "object",
       properties: {
@@ -580,7 +580,7 @@ export const verticalTools = [
   // ═══════════════════════════════════════════════════════════
   {
     name: "recovery_start_trace",
-    description: "Start an observability trace for a multi-agent workflow, enabling span-level visibility into agent operations.",
+    description: "Use when you need to start end-to-end observability for a multi-agent workflow — opens a trace that all subsequent agents can attach spans to for full pipeline visibility. Returns a trace ID that must be passed to recovery_add_span for each downstream operation.",
     inputSchema: {
       type: "object",
       properties: {
@@ -602,7 +602,7 @@ export const verticalTools = [
   },
   {
     name: "recovery_add_span",
-    description: "Add a span to an active trace, recording an agent's operation with its input, output, and duration.",
+    description: "Use when you need to record a single agent operation as part of an active trace — captures the agent ID, operation name, input, output, and duration so the full execution timeline can be reconstructed. Returns a span ID and the updated trace breadcrumb.",
     inputSchema: {
       type: "object",
       properties: {
@@ -636,7 +636,7 @@ export const verticalTools = [
   },
   {
     name: "recovery_detect_hallucination",
-    description: "Analyze agent output against ground-truth sources to detect factual hallucinations or unsupported claims.",
+    description: "Use when you need to verify that an agent's output is factually grounded — compares the agent's claims against provided authoritative source texts or URLs and flags statements that appear unsupported or fabricated. Returns a hallucination score, flagged claims with confidence levels, and grounding excerpts from the sources.",
     inputSchema: {
       type: "object",
       properties: {
@@ -660,7 +660,7 @@ export const verticalTools = [
   },
   {
     name: "recovery_dead_letter",
-    description: "Send a failed task to the dead-letter queue for later inspection and replay after the root cause is resolved.",
+    description: "Use when a task has failed and you need to safely park it for later inspection and replay — stores the full task payload, failure reason, and originating agent in the dead-letter queue without losing any data. Returns a dead-letter entry ID and an estimated replay-ready timestamp.",
     inputSchema: {
       type: "object",
       properties: {
@@ -686,7 +686,7 @@ export const verticalTools = [
   },
   {
     name: "recovery_dead_letter_queue",
-    description: "Retrieve tasks from the dead-letter queue for a given agent, optionally filtered by status.",
+    description: "Use when you need to inspect or manage tasks that have failed processing — retrieves the dead-letter queue for a given agent, optionally filtered by status (pending, replaying, resolved, abandoned). Returns a list of dead-letter entries with task payloads, failure reasons, and retry history.",
     inputSchema: {
       type: "object",
       properties: {
@@ -705,7 +705,7 @@ export const verticalTools = [
   },
   {
     name: "recovery_observability_report",
-    description: "Generate a full observability report for a workflow including span timeline, error rates, hallucination detections, and dead-letter counts.",
+    description: "Use when you need a complete picture of how a multi-agent workflow performed — generates a full observability report covering span timelines, per-agent error rates, hallucination detections, dead-letter counts, and latency percentiles for a given time range. Returns a structured report object suitable for dashboards or post-mortems.",
     inputSchema: {
       type: "object",
       properties: {
@@ -729,7 +729,7 @@ export const verticalTools = [
   // ═══════════════════════════════════════════════════════════
   {
     name: "trades_lookup_permits",
-    description: "Look up permit requirements for a trade job in a given municipality, including required inspections, fees, and typical turnaround times.",
+    description: "Use when you need to know what permits are required before starting a trade job — looks up permit requirements, required inspections, application fees, and typical approval turnaround times for electrical, plumbing, HVAC, roofing, gas, solar, or low-voltage work in any US municipality. Returns a permit checklist, fee schedule, and submission instructions.",
     inputSchema: {
       type: "object",
       properties: {
@@ -752,7 +752,7 @@ export const verticalTools = [
   },
   {
     name: "trades_estimate_job",
-    description: "Generate a cost and time estimate for a trade job from a plain-language description, including labor, materials, and permits.",
+    description: "Use when you need a cost and time estimate for a trade job — takes a plain-language description and produces an itemized breakdown of labor hours, material costs, permit fees, and total project cost for electrical, plumbing, HVAC, roofing, gas, solar, or general construction work. Adjusts rates by city and property type (residential, commercial, industrial).",
     inputSchema: {
       type: "object",
       properties: {
@@ -781,7 +781,7 @@ export const verticalTools = [
   },
   {
     name: "trades_find_parts",
-    description: "Find and source parts or materials for a trade job from local suppliers, distributors, and online vendors.",
+    description: "Use when you need to source a part or material for a trade job — searches local suppliers, wholesale distributors, and online vendors by description, model number, or spec, with urgency options from standard to same-day emergency. Returns a ranked list of suppliers with price, availability, distance, and lead time.",
     inputSchema: {
       type: "object",
       properties: {
@@ -805,7 +805,7 @@ export const verticalTools = [
   },
   {
     name: "trades_check_compliance",
-    description: "Check whether proposed trade work meets current code requirements for a given jurisdiction and trade type.",
+    description: "Use when you need to confirm that proposed trade work meets current building and safety codes before starting — checks electrical (NEC), plumbing (UPC/IPC), HVAC (IMC), and other trade codes for the specific jurisdiction. Returns a compliance verdict, relevant code citations, and any required modifications to bring the work into compliance.",
     inputSchema: {
       type: "object",
       properties: {
@@ -828,7 +828,7 @@ export const verticalTools = [
   },
   {
     name: "trades_generate_invoice",
-    description: "Generate a professional trade invoice with itemized labor, materials, taxes, and payment terms.",
+    description: "Use when you need to create a professional invoice for a completed trade job — builds an itemized bill with labor hours, materials, taxes, and payment terms formatted for client delivery. Returns a ready-to-send invoice document with line items, totals, and payment instructions.",
     inputSchema: {
       type: "object",
       properties: {
@@ -856,7 +856,7 @@ export const verticalTools = [
   },
   {
     name: "trades_stats",
-    description: "Get aggregate statistics for the trades services platform including active jobs, average estimate accuracy, and top trade categories.",
+    description: "Use when you need platform-level metrics for the trades services system — returns active job counts, average estimate accuracy, top trade categories by volume, regional demand trends, and permit approval rate benchmarks. Useful for operational dashboards and capacity planning.",
     inputSchema: {
       type: "object",
       properties: {},
@@ -869,7 +869,7 @@ export const verticalTools = [
   // ═══════════════════════════════════════════════════════════
   {
     name: "smb_categorize_transaction",
-    description: "Categorize a business transaction into a standard chart-of-accounts category for bookkeeping and tax purposes.",
+    description: "Use when you need to classify a bank transaction for bookkeeping or tax purposes — maps a transaction description and amount to the correct chart-of-accounts category (COGS, office supplies, utilities, payroll, etc.) following standard accounting practice. Returns the category name, account code, tax treatment, and confidence score.",
     inputSchema: {
       type: "object",
       properties: {
@@ -891,7 +891,7 @@ export const verticalTools = [
   },
   {
     name: "smb_prep_tax",
-    description: "Prepare tax document summaries and filing checklists for a small business based on transaction history and business type.",
+    description: "Use when you need to prepare for small-business tax filing — analyzes transaction history to generate income summaries, deduction lists, and filing checklists tailored to the business type (sole prop, LLC, S-corp, partnership). Returns a tax prep summary, estimated liability, key deductions to capture, and a deadline calendar.",
     inputSchema: {
       type: "object",
       properties: {
@@ -920,7 +920,7 @@ export const verticalTools = [
   },
   {
     name: "smb_check_licenses",
-    description: "Check the renewal status of business licenses, professional certifications, and permits for a small business.",
+    description: "Use when you need to know if a small business's licenses, certifications, or permits are current — checks renewal deadlines, identifies expired or expiring-soon credentials, and provides renewal instructions. Returns a status table showing license name, expiration date, renewal fee, and required action for each credential.",
     inputSchema: {
       type: "object",
       properties: {
@@ -947,7 +947,7 @@ export const verticalTools = [
   },
   {
     name: "smb_compare_insurance",
-    description: "Compare business insurance plans from multiple carriers for a given business type, employee count, and coverage needs.",
+    description: "Use when you need to find the right business insurance policy — compares plans from multiple carriers for a given business type, employee count, revenue, and coverage needs (general liability, BOP, E&O, workers comp, cyber). Returns a side-by-side comparison of premiums, coverage limits, deductibles, and carrier ratings.",
     inputSchema: {
       type: "object",
       properties: {
@@ -978,7 +978,7 @@ export const verticalTools = [
   },
   {
     name: "smb_generate_contract",
-    description: "Generate a business contract from a template (NDA, service agreement, contractor agreement, etc.) pre-populated with provided terms.",
+    description: "Use when you need a legally sound business contract quickly — generates NDAs, service agreements, independent contractor agreements, vendor contracts, or client proposals pre-populated with the provided terms. Returns a complete contract draft in plain language, ready for attorney review or direct signature.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1001,7 +1001,7 @@ export const verticalTools = [
   },
   {
     name: "smb_dashboard",
-    description: "Get a comprehensive SMB dashboard with financial health indicators, upcoming deadlines, compliance status, and actionable recommendations.",
+    description: "Use when you need a health check on a small business at a glance — compiles financial health indicators (cash flow, receivables aging, burn rate), upcoming tax and license deadlines, compliance status, and prioritized action items into a single dashboard. Returns a structured snapshot with alerts and ranked recommendations.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1019,7 +1019,7 @@ export const verticalTools = [
   // ═══════════════════════════════════════════════════════════
   {
     name: "legal_intake_case",
-    description: "Intake a new legal case, capturing client information, facts, and practice area to generate a structured case file.",
+    description: "Use when you need to open a new legal case file — captures client information, facts of the matter, key dates, and practice area (personal injury, employment, family law, immigration, contract dispute) to generate a structured case file with a matter summary and initial task list. Returns a case ID, matter summary, and recommended next steps.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1042,7 +1042,7 @@ export const verticalTools = [
   },
   {
     name: "legal_summarize_records",
-    description: "Summarize medical records for litigation purposes, extracting injuries, treatment timelines, prognosis, and costs.",
+    description: "Use when you need to distill a stack of medical records for litigation — extracts injuries, diagnosis codes, treatment timelines, provider notes, prognosis, and total cost of care into a concise litigation-ready summary. Returns a structured medical summary with a treatment chronology, injury severity assessment, and economic damages total.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1066,7 +1066,7 @@ export const verticalTools = [
   },
   {
     name: "legal_demand_letter",
-    description: "Generate a formal demand letter for a personal injury or civil matter, itemizing damages and stating settlement demand.",
+    description: "Use when you need to draft a formal demand letter for a personal injury, property damage, breach of contract, or civil dispute — itemizes all damages (medical, lost wages, pain and suffering, property), states the settlement demand, and sets a response deadline. Returns a professionally formatted demand letter ready for attorney review and signature.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1094,7 +1094,7 @@ export const verticalTools = [
   },
   {
     name: "legal_track_deadlines",
-    description: "Track and calculate critical legal deadlines (statutes of limitations, filing deadlines, response due dates) for a case.",
+    description: "Use when you need to know the critical dates for a case — calculates statutes of limitations, response deadlines, filing cutoffs, and discovery milestones based on jurisdiction, case type, and incident date. Returns a deadline calendar with dates, rules cited, and risk flags for any approaching or already-missed deadlines.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1116,7 +1116,7 @@ export const verticalTools = [
   },
   {
     name: "legal_fill_immigration_form",
-    description: "Fill out a USCIS immigration form from applicant data, generating a completed PDF-ready form with field validations.",
+    description: "Use when you need to complete a USCIS immigration form — takes applicant data and auto-populates the correct fields for I-130, I-485, I-765, I-131, N-400, or other USCIS forms with field-level validation. Returns a completed, PDF-ready form with a validation report flagging any missing or inconsistent fields.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1135,7 +1135,7 @@ export const verticalTools = [
   },
   {
     name: "legal_search_case_law",
-    description: "Search case law databases for relevant precedents, statutes, and rulings by query, jurisdiction, and practice area.",
+    description: "Use when you need to find relevant legal precedents, statutes, or rulings to support a matter — searches case law databases by legal question, jurisdiction, court level, and practice area (tort, employment, immigration, criminal, family, IP). Returns matching cases with citation, holding summary, relevance score, and a brief explaining how each supports the argument.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1167,7 +1167,7 @@ export const verticalTools = [
   // ═══════════════════════════════════════════════════════════
   {
     name: "health_prior_auth",
-    description: "Check prior authorization requirements and submit pre-auth requests to an insurance provider for a procedure or medication.",
+    description: "Use when you need to check if a procedure or medication requires prior authorization from a payer, or to submit a pre-auth request — covers medical and surgical procedures, specialty drugs, imaging, DME, and behavioral health services. Returns the auth requirement status, required documentation checklist, expected turnaround, and auth reference number upon submission.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1189,7 +1189,7 @@ export const verticalTools = [
   },
   {
     name: "health_clinical_note",
-    description: "Generate a structured clinical note (SOAP, H&P, or discharge summary) from encounter information.",
+    description: "Use when you need to document a patient encounter — generates a structured SOAP note, H&P, progress note, or discharge summary from encounter information including chief complaint, history, exam findings, assessment, and plan. Returns a complete, formatted clinical note ready for EHR entry with appropriate medical terminology.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1221,7 +1221,7 @@ export const verticalTools = [
   },
   {
     name: "health_claim_codes",
-    description: "Suggest optimal ICD-10 diagnosis codes and CPT procedure codes for a clinical encounter to maximize claim accuracy.",
+    description: "Use when you need to select the most accurate and reimbursable ICD-10 diagnosis codes and CPT procedure codes for a clinical encounter — analyzes the encounter description and suggests the optimal code set to maximize claim accuracy and reduce denial risk. Returns a ranked list of recommended codes with specificity guidance and common denial flags.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1245,7 +1245,7 @@ export const verticalTools = [
   },
   {
     name: "health_optimize_schedule",
-    description: "Optimize a provider's appointment schedule to minimize gaps, balance patient mix, and accommodate urgent visits.",
+    description: "Use when you need to improve a provider's daily or weekly appointment schedule — identifies gaps, balances new vs. follow-up patient mix, accommodates urgent-care slots, and aligns visit types with provider availability. Returns an optimized schedule with recommended adjustments, projected revenue impact, and no-show risk flags by appointment.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1268,7 +1268,7 @@ export const verticalTools = [
   },
   {
     name: "health_interpret_labs",
-    description: "Interpret laboratory results by comparing values to reference ranges, flagging abnormalities, and suggesting clinical follow-up.",
+    description: "Use when you need to make sense of laboratory results — compares each value against age- and sex-adjusted reference ranges, flags critical and borderline abnormalities, and suggests appropriate clinical follow-up for CBC, CMP, lipid panel, thyroid, HbA1c, urinalysis, and other common panels. Returns a flagged results table with clinical significance notes and suggested next steps.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1291,7 +1291,7 @@ export const verticalTools = [
   },
   {
     name: "health_compliance",
-    description: "Check whether a clinical action or workflow complies with HIPAA, CMS, or other healthcare regulations.",
+    description: "Use when you need to confirm that a clinical workflow, documentation practice, or patient interaction complies with HIPAA, CMS conditions of participation, OIG requirements, or state-specific regulations — covers billing compliance, patient privacy, informed consent, and telehealth rules. Returns a compliance verdict, citation of the relevant rule, and remediation guidance for any violations found.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1315,7 +1315,7 @@ export const verticalTools = [
   // ═══════════════════════════════════════════════════════════
   {
     name: "construction_lookup_zoning",
-    description: "Look up zoning classification, setback requirements, height limits, and allowed uses for a property address.",
+    description: "Use when you need to check what can be built on a property — looks up zoning classification, allowed uses, setback requirements, height limits, lot coverage maximums, and parking minimums for any US property address. Returns the zone code, full list of permitted and prohibited uses, dimensional standards, and overlay district notes.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1337,7 +1337,7 @@ export const verticalTools = [
   },
   {
     name: "construction_permit_status",
-    description: "Track the status of a building or development permit through the municipal review process.",
+    description: "Use when you need to know where a building or development permit stands in the review process — tracks the application through plan check, agency reviews, corrections, approvals, and issuance. Returns current status, completed and pending review stages, outstanding corrections, reviewer comments, and estimated approval date.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1355,7 +1355,7 @@ export const verticalTools = [
   },
   {
     name: "construction_material_takeoff",
-    description: "Generate a material quantity takeoff and cost estimate for a construction project based on project type and square footage.",
+    description: "Use when you need a quantity takeoff and cost estimate for a construction project — generates a bill of materials with quantities, unit costs, and total pricing for the project type and square footage. Covers new construction, additions, tenant improvements, and renovations for residential, commercial, and industrial projects. Returns a line-item material list with quantities, unit prices, and a total cost summary.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1378,7 +1378,7 @@ export const verticalTools = [
   },
   {
     name: "construction_match_subcontractor",
-    description: "Find and match qualified subcontractors for a specific trade and project based on location, project size, and timeline.",
+    description: "Use when you need to find qualified subcontractors for a construction project — matches licensed and insured subs for specific trades (framing, MEP, concrete, roofing, finishes) based on project location, size, scope, and start date. Returns a shortlist of matched subcontractors with license status, insurance verification, past project history, and availability.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1407,7 +1407,7 @@ export const verticalTools = [
   },
   {
     name: "construction_draw_schedule",
-    description: "Generate a construction loan draw schedule aligned with project milestones and lender requirements.",
+    description: "Use when you need a construction loan draw schedule — generates milestone-aligned disbursement tranches that satisfy lender requirements for residential or commercial construction loans. Returns a draw schedule with milestone descriptions, percentage of completion benchmarks, draw amounts, and documentation required for each draw request.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1430,7 +1430,7 @@ export const verticalTools = [
   },
   {
     name: "construction_stats",
-    description: "Get aggregate statistics for the construction services platform including active projects, average permit timelines, and cost indices by region.",
+    description: "Use when you need aggregate performance metrics for the construction services platform — returns active project counts, regional cost indices, average permit approval timelines by municipality, subcontractor availability by trade, and material price trends. Useful for project planning, bid benchmarking, and market analysis.",
     inputSchema: {
       type: "object",
       properties: {},
@@ -1443,7 +1443,7 @@ export const verticalTools = [
   // ═══════════════════════════════════════════════════════════
   {
     name: "insurance_claim_intake",
-    description: "Process a new insurance claim intake, capturing incident details, policy information, and initial documentation.",
+    description: "Use when you need to file, submit, or start an insurance claim — handles intake for auto, property, liability, health, and workers' comp claims by capturing incident details, policy information, and initial documentation. Assigns an adjuster, generates a required document checklist, sets severity triage, and returns a claim ID, status, adjuster assignment, and next steps.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1471,7 +1471,7 @@ export const verticalTools = [
   },
   {
     name: "insurance_compare_policies",
-    description: "Compare insurance policies from multiple carriers for a given coverage type and applicant profile.",
+    description: "Use when you need to shop or compare insurance policies — queries multiple carriers for auto, homeowners, renters, commercial property, general liability, or life insurance and returns a side-by-side comparison of premiums, deductibles, coverage limits, exclusions, and AM Best carrier ratings for the given applicant profile.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1494,7 +1494,7 @@ export const verticalTools = [
   },
   {
     name: "insurance_assess_damage",
-    description: "Assess property or vehicle damage from a plain-language description and photo count to estimate repair costs and claim value.",
+    description: "Use when you need to estimate damage and claim value for a property or vehicle loss — analyzes a plain-language description of the damage, photo count, and loss type (fire, flood, wind, collision, theft) to produce a repair cost estimate and recommended claim settlement range. Returns an itemized damage assessment with estimated repair costs, depreciation, ACV, and RCV values.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1522,7 +1522,7 @@ export const verticalTools = [
   },
   {
     name: "insurance_check_subrogation",
-    description: "Evaluate a claim for subrogation potential — identifying liable third parties from whom the insurer may seek recovery.",
+    description: "Use when you need to evaluate whether a paid claim has recovery potential from a liable third party — analyzes the incident facts, responsible parties, applicable law, and policy language to determine subrogation viability. Returns a subrogation assessment with identified third parties, estimated recovery potential, recommended action, and statute of limitations deadline.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1540,7 +1540,7 @@ export const verticalTools = [
   },
   {
     name: "insurance_adjuster_report",
-    description: "Generate a formal adjuster report documenting damage findings, coverage analysis, and recommended settlement amount.",
+    description: "Use when you need to produce a formal adjuster report for a claim file — documents damage findings, coverage analysis, applicable exclusions, and a recommended settlement amount in the standard format required for claim closure and litigation defense. Returns a complete adjuster report ready for file attachment and supervisor review.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1568,7 +1568,7 @@ export const verticalTools = [
   },
   {
     name: "insurance_claims_analytics",
-    description: "Get portfolio-level claims analytics including loss ratios, frequency trends, and fraud indicator patterns.",
+    description: "Use when you need portfolio-level insights on claims performance — analyzes loss ratios, claim frequency trends, severity distributions, emerging fraud patterns, and reserve adequacy across a book of business. Returns analytics dashboards with trend charts, anomaly flags, peer benchmarks, and recommended reserve adjustments.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1590,7 +1590,7 @@ export const verticalTools = [
   // ═══════════════════════════════════════════════════════════
   {
     name: "trade_classify_hs",
-    description: "Classify a product under the Harmonized System (HS) tariff code for import/export documentation and duty calculation.",
+    description: "Use when you need to classify a product under the Harmonized System (HS) tariff code for import/export paperwork, duty calculation, or compliance — provide a product description and the tool returns the recommended 6-digit HS code, chapter heading, duty rate, and common classification notes or ambiguities to resolve.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1612,7 +1612,7 @@ export const verticalTools = [
   },
   {
     name: "trade_screen_sanctions",
-    description: "Screen an entity (person, organization, or vessel) against OFAC, UN, EU, and other sanctions lists.",
+    description: "Use when you need to check whether a person, company, or vessel is on a restricted or sanctioned party list before doing business with them — screens against OFAC SDN, BIS Entity List, UN, EU, and other major sanctions and export-control lists. Returns a clear/hit/review result with the specific list entry, basis for designation, and recommended compliance action.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1637,7 +1637,7 @@ export const verticalTools = [
   },
   {
     name: "trade_calculate_duty",
-    description: "Calculate import duties, taxes, and fees for a shipment based on HS code, origin, destination, declared value, and quantity.",
+    description: "Use when you need to know the landed cost for an international shipment — calculates import duties, tariffs, VAT/GST, customs processing fees, and MPF for a given HS code, country of origin, destination country, declared value, and quantity. Returns a full landed-cost breakdown with applicable rate citations and total payable at import.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1667,7 +1667,7 @@ export const verticalTools = [
   },
   {
     name: "trade_generate_customs_docs",
-    description: "Generate required customs documentation (commercial invoice, packing list, certificate of origin) for a shipment.",
+    description: "Use when you need the paperwork to clear a shipment through customs — generates a commercial invoice, packing list, shipper's export declaration, or certificate of origin pre-filled with the shipment details. Returns completed, print-ready documents with all fields required by the destination customs authority.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1693,7 +1693,7 @@ export const verticalTools = [
   },
   {
     name: "trade_check_export_controls",
-    description: "Check whether a product is subject to export control regulations (EAR, ITAR, or equivalent) for a given destination and end use.",
+    description: "Use when you need to confirm whether a product can be legally exported to a specific country or end user — checks EAR jurisdiction, ECCN classification, ITAR applicability, and country/end-use restrictions for the given product, destination, and stated end use. Returns a compliance verdict, applicable control reasons, required license or license exception, and red-flag end-use warnings.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1721,7 +1721,7 @@ export const verticalTools = [
   // ═══════════════════════════════════════════════════════════
   {
     name: "gov_lookup_license",
-    description: "Look up business license requirements, fees, and application procedures for a given business type and location.",
+    description: "Use when you need to know what business licenses are required to operate a specific type of business in a given city or state — looks up license types, application requirements, fees, processing times, and renewal schedules for retail, food service, contracting, professional, and other business categories. Returns a complete license requirement list with application links and fee schedule.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1744,7 +1744,7 @@ export const verticalTools = [
   },
   {
     name: "gov_permit_requirements",
-    description: "Look up government permit requirements for a construction or development project in a specific jurisdiction.",
+    description: "Use when you need to understand the government approvals required before starting a construction or development project — identifies required building, grading, environmental, and zoning permits for the project type and jurisdiction, including which agencies must sign off. Returns a permit roadmap with required approvals, sequencing, estimated fees, and typical review timelines.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1762,7 +1762,7 @@ export const verticalTools = [
   },
   {
     name: "gov_foia_request",
-    description: "Submit a Freedom of Information Act (FOIA) request to a federal or state agency for public records.",
+    description: "Use when you need to request government records under the Freedom of Information Act — drafts and submits a FOIA or state-equivalent public records request to the appropriate federal or state agency for the records sought. Returns a submission confirmation, assigned request tracking number, statutory response deadline, and status monitoring link.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1786,7 +1786,7 @@ export const verticalTools = [
   },
   {
     name: "gov_monitor_contract_bids",
-    description: "Monitor government contract bid opportunities matching specified keywords, agencies, and set-aside types.",
+    description: "Use when you need to find government contracting opportunities — monitors SAM.gov and state procurement portals for contract solicitations matching specified keywords, NAICS codes, agency names, and set-aside types (small business, 8(a), HUBZone, SDVOSB). Returns a list of matching opportunities with solicitation numbers, due dates, estimated values, and agency contacts.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1814,7 +1814,7 @@ export const verticalTools = [
   },
   {
     name: "gov_track_regulatory_changes",
-    description: "Monitor and receive alerts on regulatory changes affecting specified industries and jurisdictions.",
+    description: "Use when you need to stay current on regulatory changes that could affect a business — monitors the Federal Register, agency websites, and state regulatory databases for new rules, proposed rulemakings, and guidance documents relevant to specified industries and jurisdictions. Returns a digest of recent and upcoming changes with effective dates, compliance deadlines, and plain-language summaries.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1838,7 +1838,7 @@ export const verticalTools = [
   // ═══════════════════════════════════════════════════════════
   {
     name: "ag_identify_crop_issue",
-    description: "Identify crop diseases, pests, nutrient deficiencies, or environmental stress from symptom descriptions and suggest treatments.",
+    description: "Use when you need to diagnose what is wrong with a crop — analyzes symptom descriptions (yellowing, lesions, wilting, defoliation, unusual growths) to identify diseases, pests, nutrient deficiencies, or environmental stress for field crops, vegetables, orchard fruits, and row crops. Returns a probable cause, confidence level, affected crop stage, and recommended treatment or intervention options.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1866,7 +1866,7 @@ export const verticalTools = [
   },
   {
     name: "ag_forecast_yield",
-    description: "Forecast crop yield for a field based on crop type, acreage, planting date, location, and weather data.",
+    description: "Use when you need to project how much a field will produce at harvest — combines crop type, planted acreage, planting date, location, soil type, and current or historical weather data to generate a yield forecast. Returns a yield range (low/mid/high) in bushels or tons per acre, key risk factors, and comparison to county or regional averages.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1896,7 +1896,7 @@ export const verticalTools = [
   },
   {
     name: "ag_commodity_alerts",
-    description: "Get price alerts and market intelligence for specified commodities when prices cross defined thresholds.",
+    description: "Use when you need to monitor commodity prices and get notified when market conditions hit target thresholds — sets up price alerts for corn, soybeans, wheat, cotton, cattle, hogs, or other commodities at specified price levels. Returns current cash and futures prices, basis, recent trend direction, and alert configuration confirmation.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1918,7 +1918,7 @@ export const verticalTools = [
   },
   {
     name: "ag_analyze_soil",
-    description: "Analyze a soil report to generate fertilizer recommendations, pH adjustment guidance, and crop suitability ratings.",
+    description: "Use when you need fertilizer and amendment recommendations based on a soil test report — analyzes pH, macro- and micronutrient levels, organic matter, and CEC to generate application rate recommendations for lime, nitrogen, phosphorus, potassium, and micronutrients, along with crop suitability ratings for the field. Returns an amendment plan with product recommendations, application timing, and expected yield response.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1940,7 +1940,7 @@ export const verticalTools = [
   },
   {
     name: "ag_check_compliance",
-    description: "Check whether farming activities comply with USDA, EPA, and state agricultural regulations including organic certification requirements.",
+    description: "Use when you need to confirm that farming operations are compliant with applicable regulations — checks USDA farm program requirements, EPA pesticide and nutrient management rules, OSHA agricultural safety standards, and state-specific regulations including organic certification (NOP) and water quality rules. Returns a compliance status by regulation category with any violations flagged and corrective action guidance.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1968,7 +1968,7 @@ export const verticalTools = [
   // ═══════════════════════════════════════════════════════════
   {
     name: "edu_generate_curriculum",
-    description: "Generate a standards-aligned curriculum plan for a subject and grade level, including unit breakdowns, learning objectives, and assessments.",
+    description: "Use when you need a complete, standards-aligned curriculum plan for a course or unit — specify the subject, grade level, state standards (Common Core, NGSS, or state-specific), and available instructional weeks to get a full plan with unit breakdowns, learning objectives, suggested activities, and formative and summative assessments. Returns a structured curriculum map ready for classroom use or administrator review.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1997,7 +1997,7 @@ export const verticalTools = [
   },
   {
     name: "edu_track_progress",
-    description: "Track a student's learning progress across assessments, identify knowledge gaps, and recommend targeted interventions.",
+    description: "Use when you need to monitor a student's learning trajectory and identify where they need support — analyzes assessment results, assignment completion, and skill mastery data to pinpoint knowledge gaps, calculate growth metrics, and recommend targeted interventions or enrichment. Returns a progress report with mastery percentages by standard, trend direction, and a prioritized intervention plan.",
     inputSchema: {
       type: "object",
       properties: {
@@ -2020,7 +2020,7 @@ export const verticalTools = [
   },
   {
     name: "edu_verify_credential",
-    description: "Verify an educational credential (degree, certificate, or transcript) against the issuing institution's records.",
+    description: "Use when you need to confirm that a degree, certificate, diploma, or transcript is legitimate — verifies the credential against the issuing institution's official records and flags any discrepancies in degree type, graduation date, honors, or field of study. Returns a verification verdict, verified credential details, and an official confirmation reference number.",
     inputSchema: {
       type: "object",
       properties: {
@@ -2043,7 +2043,7 @@ export const verticalTools = [
   },
   {
     name: "edu_detect_ai_content",
-    description: "Detect whether student-submitted text was generated by an AI model, with a confidence score and evidence highlights.",
+    description: "Use when you need to determine whether a student submission was written by an AI — analyzes the text for linguistic patterns, perplexity, burstiness, and stylistic markers associated with AI-generated content. Returns an AI-likelihood score (0–100%), confidence classification, highlighted suspect passages, and a human-vs-AI evidence summary suitable for academic integrity review.",
     inputSchema: {
       type: "object",
       properties: {
@@ -2063,7 +2063,7 @@ export const verticalTools = [
   },
   {
     name: "edu_check_financial_aid",
-    description: "Check financial aid eligibility and available aid packages for a student at a given institution and program.",
+    description: "Use when you need to determine what financial aid a student qualifies for — evaluates EFC/SAI, enrollment status, program type, and institution to identify eligible federal grants (Pell, SEOG), subsidized and unsubsidized loans, work-study, and institutional aid packages. Returns an estimated aid package breakdown by type, award amounts, disbursement schedule, and any FAFSA or verification steps still needed.",
     inputSchema: {
       type: "object",
       properties: {

@@ -14,6 +14,7 @@
 
 import { Router } from "express";
 import { tools, handleTool } from "./mcp-tools.js";
+import { enhanceResponse } from "./response-enhancer.js";
 
 const router = Router();
 
@@ -75,7 +76,8 @@ router.post("/", async (req, res) => {
           });
         }
 
-        const result = await handleTool(toolName, toolArgs);
+        const raw = await handleTool(toolName, toolArgs);
+        const result = enhanceResponse(toolName, raw);
         return res.json({
           jsonrpc: "2.0",
           result: {
