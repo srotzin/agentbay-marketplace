@@ -51,9 +51,71 @@ import * as webhooks from "./services/webhooks.js";
 import { newTools, handleNewTool } from "./mcp-tools-new.js";
 // Vertical industry modules (Phase 3)
 import { verticalTools, handleVerticalTool } from "./mcp-tools-verticals.js";
+// Discovery meta-tools (Phase 4)
+import { discoverTools, getVerticalGuide, suggestWorkflow } from "./services/discover.js";
 
 // MCP tool definitions (JSON Schema format)
 const coreTools = [
+  // ─── Discovery Meta-Tools (start here!) ──────────────────────────────────────
+  {
+    name: "hiveagent_discover",
+    description:
+      "[START HERE] Find the right tool out of 495. Search by natural language query — e.g. 'file a permit in Denver', 'process an insurance claim', 'swap USDC to ETH'. Returns the best-matched tools with descriptions, vertical, and cost. FREE. Use this before any task you haven't done before.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: {
+          type: "string",
+          description: "Natural language description of what you want to do (e.g. 'file a building permit', 'send money to Mexico', 'hire an agent to write code')",
+        },
+        vertical: {
+          type: "string",
+          description: "Optional: filter results to a specific industry vertical",
+          enum: ["marketplace", "defi", "legal", "healthcare", "insurance", "construction", "trades", "smb", "commerce", "recovery", "finance", "trade", "government", "agriculture", "education", "data", "compute", "enterprise", "identity", "compliance"],
+        },
+        max_results: {
+          type: "integer",
+          description: "Maximum number of tool matches to return (default 10, max 50)",
+          default: 10,
+        },
+      },
+      required: ["query"],
+    },
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  },
+  {
+    name: "hiveagent_vertical_guide",
+    description:
+      "Get a complete guide for an industry vertical — description, all available tools, and example workflows. Call with no vertical to list all 20 verticals. FREE.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        vertical: {
+          type: "string",
+          description: "Vertical to explore. Leave empty to list all verticals.",
+          enum: ["marketplace", "defi", "legal", "healthcare", "insurance", "construction", "trades", "smb", "commerce", "recovery", "finance", "trade", "government", "agriculture", "education", "data", "compute", "enterprise", "identity", "compliance"],
+        },
+      },
+    },
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  },
+  {
+    name: "hiveagent_suggest_workflow",
+    description:
+      "Given a multi-step task description, suggest a complete workflow of HiveAgent tools in order. Returns tool sequence with estimated costs. FREE.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        task_description: {
+          type: "string",
+          description: "Describe the end-to-end task you want to accomplish (e.g. 'I need to hire a contractor, get permits, and manage escrow for a bathroom remodel')",
+        },
+      },
+      required: ["task_description"],
+    },
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  },
+
   {
     name: "hiveagent_search",
     description:
@@ -890,6 +952,14 @@ for (const tool of tools) {
 // Tool handler — called when an agent invokes a tool
 export async function handleTool(name, args) {
   switch (name) {
+    // ─── Discovery Meta-Tools ──────────────────────────────────────────────
+    case "hiveagent_discover":
+      return discoverTools(args.query, args.vertical, args.max_results, tools);
+    case "hiveagent_vertical_guide":
+      return getVerticalGuide(args.vertical, tools);
+    case "hiveagent_suggest_workflow":
+      return suggestWorkflow(args.task_description, tools);
+
     case "hiveagent_search":
       return mkt.searchServices(args);
 

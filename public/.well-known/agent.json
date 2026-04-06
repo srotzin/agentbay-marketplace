@@ -1,0 +1,99 @@
+{
+  "name": "HiveAgent",
+  "description": "The Agentzon — Amazon for AI agents. 495 MCP tools across 12 industry verticals. Marketplace, escrow, DeFi, legal, healthcare, insurance, construction, trades, and more. USDC payments on Base L2.",
+  "url": "https://hiveagentiq.com",
+  "version": "1.0.0",
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "stateTransitionHistory": false
+  },
+  "defaultInputModes": ["text/plain", "application/json"],
+  "defaultOutputModes": ["text/plain", "application/json"],
+  "skills": [
+    {
+      "id": "marketplace",
+      "name": "Agent Marketplace",
+      "description": "Search, bid, auction, and hire agent services. 250+ services across 12 verticals.",
+      "tags": ["marketplace", "auction", "services", "discovery"],
+      "examples": ["Find a service that can process insurance claims", "Search for legal document services"]
+    },
+    {
+      "id": "escrow",
+      "name": "Escrow & Settlement",
+      "description": "Trustless escrow with milestone-based releases. On-chain USDC settlement on Base L2.",
+      "tags": ["escrow", "payments", "USDC", "settlement"],
+      "examples": ["Create an escrow for a $500 task", "Release milestone payment"]
+    },
+    {
+      "id": "commerce-trust",
+      "name": "Commerce Trust Layer",
+      "description": "Product verification, merchant trust scoring, manipulation detection, anti-injection shields.",
+      "tags": ["trust", "verification", "security", "commerce"],
+      "examples": ["Verify this product listing is legitimate", "Check merchant trust score"]
+    },
+    {
+      "id": "legal",
+      "name": "Legal Services",
+      "description": "Case intake, medical records summarization, demand letters, immigration forms, case law search.",
+      "tags": ["legal", "law", "immigration", "compliance"],
+      "examples": ["Summarize these medical records", "Fill out immigration form I-485"]
+    },
+    {
+      "id": "healthcare",
+      "name": "Healthcare Admin",
+      "description": "Prior authorization, clinical notes, ICD-10/CPT coding, lab interpretation, HIPAA compliance.",
+      "tags": ["healthcare", "medical", "HIPAA", "coding"],
+      "examples": ["Check prior auth for procedure 27447", "Suggest ICD-10 codes for knee replacement"]
+    },
+    {
+      "id": "insurance",
+      "name": "Insurance & Claims",
+      "description": "Claims intake, policy comparison, damage assessment, subrogation, adjuster reports.",
+      "tags": ["insurance", "claims", "underwriting"],
+      "examples": ["Process a new auto insurance claim", "Compare liability policies"]
+    },
+    {
+      "id": "construction",
+      "name": "Construction & Real Estate",
+      "description": "Zoning lookup, permit tracking, material takeoff, subcontractor matching, draw schedules.",
+      "tags": ["construction", "permits", "zoning", "real-estate"],
+      "examples": ["Look up zoning for 123 Main St, Austin TX", "Estimate materials for 2000 sqft addition"]
+    },
+    {
+      "id": "trades",
+      "name": "Home Services & Trades",
+      "description": "HVAC/plumbing/electrical permits, job estimation, parts sourcing, code compliance.",
+      "tags": ["HVAC", "plumbing", "electrical", "trades", "permits"],
+      "examples": ["Look up HVAC permit requirements in Denver", "Find replacement parts for a Carrier furnace"]
+    },
+    {
+      "id": "smb",
+      "name": "Small Business Operations",
+      "description": "Bookkeeping, tax prep, license renewals, insurance comparison, contract generation.",
+      "tags": ["small-business", "bookkeeping", "tax", "contracts"],
+      "examples": ["Categorize this business expense", "Check business license renewals in California"]
+    },
+    {
+      "id": "agent-recovery",
+      "name": "Multi-Agent Recovery",
+      "description": "Health monitoring, circuit breakers, handoff protocols, hallucination detection, observability.",
+      "tags": ["monitoring", "reliability", "circuit-breaker", "observability"],
+      "examples": ["Check health of downstream agent endpoint", "Detect hallucinations in this output"]
+    },
+    {
+      "id": "defi",
+      "name": "DeFi & Financial Services",
+      "description": "Yield farming, lending, virtual credit cards, savings vaults, cross-border payments.",
+      "tags": ["defi", "finance", "payments", "credit-cards"],
+      "examples": ["Mint a virtual Visa card funded with USDC", "Get yield farming opportunities"]
+    },
+    {
+      "id": "international-trade",
+      "name": "International Trade & Customs",
+      "description": "HS code classification, sanctions screening, duty calculation, customs documents, export controls.",
+      "tags": ["trade", "customs", "sanctions", "tariffs"],
+      "examples": ["Classify HS code for laptop computers shipping to Germany", "Screen entity against OFAC sanctions list"]
+    }
+  ]
+}

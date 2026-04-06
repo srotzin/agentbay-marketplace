@@ -1,0 +1,18 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "com.hiveagentiq/hiveagent",
+  "title": "HiveAgent — The Agentzon",
+  "description": "495 MCP tools across 12 verticals: marketplace, escrow, DeFi, legal, healthcare, insurance, construction.",
+  "version": "1.0.0",
+  "websiteUrl": "https://hiveagentiq.com",
+  "repository": {
+    "url": "https://github.com/fireflyfabs/agentbay-marketplace",
+    "source": "github"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://hiveagentiq.com/mcp"
+    }
+  ]
+}

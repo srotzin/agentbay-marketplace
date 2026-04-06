@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HiveAgent — MCP Integration Snippets</title>
+<meta name="description" content="Ready-to-paste MCP configuration snippets for every major agent platform. Claude Desktop, Cursor, VS Code, LangChain, CrewAI, AutoGen, and more.">
+<link rel="canonical" href="https://hiveagentiq.com/snippets">
+<link rel="preconnect" href="https://api.fontshare.com">
+<link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800,900&f[]=satoshi@300,400,500,700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+    --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+    --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+    --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+    --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+    --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
+
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-10: 2.5rem;
+    --space-12: 3rem;
+    --space-16: 4rem;
+    --space-20: 5rem;
+    --space-24: 6rem;
+
+    --gold: #F59E0B;
+    --gold-hover: #D97706;
+    --gold-light: #FBBF24;
+    --gold-glow: rgba(245, 158, 11, 0.12);
+    --gold-glow-strong: rgba(245, 158, 11, 0.25);
+
+    --black: #000000;
+    --bg: #050505;
+    --surface: #0a0a0a;
+    --surface-2: #111111;
+    --surface-card: #0d0d0d;
+    --surface-card-hover: #141414;
+    --surface-code: #0c0c0c;
+    --border: #1a1a1a;
+    --border-hover: #2a2a2a;
+    --text: #EDEDED;
+    --text-muted: #9CA3AF;
+    --text-faint: #6B7280;
+    --text-code: #e2e8f0;
+
+    --font-display: 'Cabinet Grotesk', 'Inter', sans-serif;
+    --font-body: 'Satoshi', 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, 'Courier New', monospace;
+
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --transition-fast: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+
+    --content-default: 960px;
+    --content-wide: 1200px;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+    scroll-padding-top: var(--space-16);
+  }
+
+  body {
+    min-height: 100dvh;
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.6;
+  }
+
+  a { color: var(--gold); text-decoration: none; transition: color var(--transition-fast); }
+  a:hover { color: var(--gold-light); }
+  button { cursor: pointer; background: none; border: none; font: inherit; color: inherit; }
+  h1, h2, h3, h4 { text-wrap: balance; line-height: 1.15; font-family: var(--font-display); }
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: var(--radius-sm); }
+
+  /* Layout */
+  .container {
+    max-width: var(--content-wide);
+    margin-inline: auto;
+    padding-inline: var(--space-6);
+  }
+
+  /* Header */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(5,5,5,0.9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .header-inner {
+    max-width: var(--content-wide);
+    margin-inline: auto;
+    padding-inline: var(--space-6);
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 700;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .header-logo .gold { color: var(--gold); }
+  .header-logo svg { flex-shrink: 0; }
+  .header-badge {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--gold);
+    background: var(--gold-glow);
+    border: 1px solid rgba(245,158,11,0.2);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-full, 9999px);
+    font-weight: 500;
+  }
+
+  /* Hero */
+  .hero {
+    padding-block: clamp(var(--space-12), 8vw, var(--space-20));
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 50% 0%, var(--gold-glow) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-content { position: relative; }
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--gold);
+    background: var(--gold-glow);
+    border: 1px solid rgba(245,158,11,0.25);
+    padding: var(--space-1) var(--space-3);
+    border-radius: 9999px;
+    margin-bottom: var(--space-6);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .hero h1 {
+    font-size: var(--text-2xl);
+    font-weight: 900;
+    margin-bottom: var(--space-5);
+    letter-spacing: -0.02em;
+  }
+  .hero h1 .gold { color: var(--gold); }
+  .hero-subtitle {
+    font-size: var(--text-base);
+    color: var(--text-muted);
+    max-width: 60ch;
+    margin-bottom: var(--space-8);
+  }
+  .hero-endpoint {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    background: var(--surface-2);
+    border: 1px solid var(--border-hover);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-5);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+  }
+  .hero-endpoint .label {
+    color: var(--text-faint);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .hero-endpoint .url { color: var(--gold-light); }
+  .hero-endpoint .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 8px #22c55e;
+    animation: pulse 2s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* TOC nav */
+  .toc-section {
+    padding-block: var(--space-8);
+    border-bottom: 1px solid var(--border);
+  }
+  .toc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-2);
+  }
+  .toc-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    border: 1px solid transparent;
+    transition: all var(--transition-fast);
+    text-decoration: none;
+  }
+  .toc-item:hover {
+    color: var(--gold);
+    background: var(--gold-glow);
+    border-color: rgba(245,158,11,0.2);
+  }
+  .toc-num {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--text-faint);
+    min-width: 1.5em;
+  }
+
+  /* Main content */
+  .main { padding-block: var(--space-16); }
+  .snippets-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-10);
+  }
+
+  /* Snippet card */
+  .snippet-card {
+    background: var(--surface-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    scroll-margin-top: 80px;
+    transition: border-color var(--transition-fast);
+  }
+  .snippet-card:hover { border-color: var(--border-hover); }
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-6);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .card-header-left {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+  .card-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    background: var(--gold-glow);
+    border: 1px solid rgba(245,158,11,0.25);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--gold);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .card-title-group {}
+  .card-title {
+    font-size: var(--text-base);
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--text);
+    margin-bottom: var(--space-1);
+  }
+  .card-desc {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+  .card-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--space-2);
+    flex-shrink: 0;
+  }
+  .card-tag {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    padding: 2px var(--space-2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-hover);
+    color: var(--text-faint);
+    white-space: nowrap;
+  }
+  .card-tag.json { color: #60a5fa; border-color: rgba(96,165,250,0.2); background: rgba(96,165,250,0.05); }
+  .card-tag.python { color: #86efac; border-color: rgba(134,239,172,0.2); background: rgba(134,239,172,0.05); }
+  .card-tag.js { color: #fde047; border-color: rgba(253,224,71,0.2); background: rgba(253,224,71,0.05); }
+  .card-tag.shell { color: #f9a8d4; border-color: rgba(249,168,212,0.2); background: rgba(249,168,212,0.05); }
+  .card-tag.docker { color: #93c5fd; border-color: rgba(147,197,253,0.2); background: rgba(147,197,253,0.05); }
+
+  /* File path */
+  .file-path {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-6);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-faint);
+  }
+  .file-path svg { color: var(--text-faint); flex-shrink: 0; }
+  .file-path span { color: var(--text-muted); }
+
+  /* Code block */
+  .code-block {
+    position: relative;
+  }
+  .code-block pre {
+    margin: 0;
+    padding: var(--space-6);
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    line-height: 1.7;
+    color: var(--text-code);
+    background: var(--surface-code);
+    white-space: pre;
+    tab-size: 2;
+  }
+  .copy-btn {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: var(--surface-2);
+    border: 1px solid var(--border-hover);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    z-index: 2;
+    user-select: none;
+  }
+  .copy-btn:hover {
+    background: var(--gold-glow);
+    border-color: rgba(245,158,11,0.3);
+    color: var(--gold);
+  }
+  .copy-btn.copied {
+    background: rgba(34,197,94,0.1);
+    border-color: rgba(34,197,94,0.3);
+    color: #22c55e;
+  }
+  .copy-btn svg { width: 13px; height: 13px; }
+
+  /* Syntax colors */
+  .tok-key { color: #93c5fd; }       /* blue — JSON keys */
+  .tok-str { color: #86efac; }       /* green — strings */
+  .tok-num { color: #fda4af; }       /* pink — numbers */
+  .tok-bool { color: #f9a8d4; }      /* pink — booleans */
+  .tok-comment { color: #6b7280; font-style: italic; }
+  .tok-kw { color: #c084fc; }        /* purple — keywords */
+  .tok-fn { color: #67e8f9; }        /* cyan — functions */
+  .tok-cls { color: #fbbf24; }       /* gold — class names */
+  .tok-var { color: #e2e8f0; }       /* light — variables */
+  .tok-op { color: #94a3b8; }        /* muted — operators */
+  .tok-punc { color: #64748b; }      /* faint — punctuation */
+  .tok-cmd { color: var(--gold); }   /* gold — commands */
+  .tok-flag { color: #93c5fd; }      /* blue — flags */
+  .tok-url { color: #86efac; }       /* green — URLs */
+  .tok-bracket { color: #94a3b8; }
+
+  /* Footer */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding-block: var(--space-10);
+    text-align: center;
+    color: var(--text-faint);
+    font-size: var(--text-sm);
+  }
+  .footer a { color: var(--text-muted); }
+  .footer a:hover { color: var(--gold); }
+
+  /* Scrollbar */
+  pre::-webkit-scrollbar { height: 4px; }
+  pre::-webkit-scrollbar-track { background: transparent; }
+  pre::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 2px; }
+
+  @media (max-width: 640px) {
+    .card-header { flex-direction: column; }
+    .card-meta { flex-direction: row; align-items: center; }
+    .toc-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-inner">
+    <a href="/" class="header-logo" aria-label="HiveAgent home">
+      <!-- Hexagonal hive logo -->
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <path d="M14 2L24.39 8v12L14 26 3.61 20V8L14 2Z" stroke="#F59E0B" stroke-width="1.5" fill="rgba(245,158,11,0.08)"/>
+        <path d="M14 7l6.5 3.75v7.5L14 22l-6.5-3.75v-7.5L14 7Z" stroke="#F59E0B" stroke-width="1" fill="rgba(245,158,11,0.15)" opacity="0.7"/>
+        <circle cx="14" cy="14" r="2.5" fill="#F59E0B"/>
+      </svg>
+      Hive<span class="gold">Agent</span>
+    </a>
+    <span class="header-badge">MCP Snippets</span>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="container hero-content">
+    <div class="hero-eyebrow">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true"><circle cx="5" cy="5" r="5"/></svg>
+      Integration Library
+    </div>
+    <h1>Connect <span class="gold">HiveAgent</span> to Any Platform</h1>
+    <p class="hero-subtitle">
+      Ready-to-paste configuration snippets for every major agent framework and IDE.
+      One MCP endpoint — 14 platforms covered.
+    </p>
+    <div class="hero-endpoint">
+      <span class="dot" aria-label="Live endpoint"></span>
+      <span class="label">MCP Endpoint</span>
+      <span class="url">https://hiveagentiq.com/mcp</span>
+    </div>
+  </div>
+</section>
+
+<!-- TOC -->
+<nav class="toc-section" aria-label="Jump to platform">
+  <div class="container">
+    <div class="toc-grid">
+      <a href="#snippet-1" class="toc-item"><span class="toc-num">01</span> Claude Desktop</a>
+      <a href="#snippet-2" class="toc-item"><span class="toc-num">02</span> Cursor</a>
+      <a href="#snippet-3" class="toc-item"><span class="toc-num">03</span> VS Code / Copilot</a>
+      <a href="#snippet-4" class="toc-item"><span class="toc-num">04</span> Windsurf</a>
+      <a href="#snippet-5" class="toc-item"><span class="toc-num">05</span> Cline</a>
+      <a href="#snippet-6" class="toc-item"><span class="toc-num">06</span> LangChain Python</a>
+      <a href="#snippet-7" class="toc-item"><span class="toc-num">07</span> LangChain JS</a>
+      <a href="#snippet-8" class="toc-item"><span class="toc-num">08</span> CrewAI</a>
+      <a href="#snippet-9" class="toc-item"><span class="toc-num">09</span> AutoGen</a>
+      <a href="#snippet-10" class="toc-item"><span class="toc-num">10</span> OpenAI Agents SDK</a>
+      <a href="#snippet-11" class="toc-item"><span class="toc-num">11</span> Smithery CLI</a>
+      <a href="#snippet-12" class="toc-item"><span class="toc-num">12</span> Docker</a>
+      <a href="#snippet-13" class="toc-item"><span class="toc-num">13</span> curl (JSON-RPC test)</a>
+      <a href="#snippet-14" class="toc-item"><span class="toc-num">14</span> Generic MCP Client</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Snippets -->
+<main class="main">
+  <div class="container">
+    <div class="snippets-list">
+
+
+      <!-- 01 Claude Desktop -->
+      <article class="snippet-card" id="snippet-1">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-num">01</div>
+            <div class="card-title-group">
+              <div class="card-title">Claude Desktop</div>
+              <div class="card-desc">Add HiveAgent as a native MCP server in Anthropic's Claude desktop app</div>
+            </div>
+          </div>
+          <div class="card-meta">
+            <span class="card-tag json">JSON</span>
+          </div>
+        </div>
+        <div class="file-path">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M13.5 3.5h-11A1 1 0 001.5 4.5v7a1 1 0 001 1h11a1 1 0 001-1v-7a1 1 0 00-1-1z"/><path d="M1.5 6.5h13"/></svg>
+          <span>macOS: ~/Library/Application Support/Claude/claude_desktop_config.json</span>
+        </div>
+        <div class="file-path" style="border-top:1px solid var(--border);">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M13.5 3.5h-11A1 1 0 001.5 4.5v7a1 1 0 001 1h11a1 1 0 001-1v-7a1 1 0 00-1-1z"/><path d="M1.5 6.5h13"/></svg>
+          <span>Windows: %APPDATA%\Claude\claude_desktop_config.json</span>
+        </div>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5.5" y="5.5" width="9" height="9" rx="1"/><path d="M3.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h7a1 1 0 011 1v1"/></svg>
+            Copy
+          </button>
+          <pre><code><span class="tok-punc">{</span>
+  <span class="tok-key">"mcpServers"</span><span class="tok-op">:</span> <span class="tok-punc">{</span>
+    <span class="tok-key">"hiveagent"</span><span class="tok-op">:</span> <span class="tok-punc">{</span>
+      <span class="tok-key">"type"</span><span class="tok-op">:</span> <span class="tok-str">"http"</span><span class="tok-punc">,</span>
+      <span class="tok-key">"url"</span><span class="tok-op">:</span> <span class="tok-str">"https://hiveagentiq.com/mcp"</span>
+    <span class="tok-punc">}</span>
+  <span class="tok-punc">}</span>
+<span class="tok-punc">}</span></code></pre>
+        </div>
+      </article>
+
+
+      <!-- 02 Cursor -->
+      <article class="snippet-card" id="snippet-2">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-num">02</div>
+            <div class="card-title-group">
+              <div class="card-title">Cursor</div>
+              <div class="card-desc">Inject HiveAgent tools into Cursor's AI assistant via project-level MCP config</div>
+            </div>
+          </div>
+          <div class="card-meta">
+            <span class="card-tag json">JSON</span>
+          </div>
+        </div>
+        <div class="file-path">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M13.5 3.5h-11A1 1 0 001.5 4.5v7a1 1 0 001 1h11a1 1 0 001-1v-7a1 1 0 00-1-1z"/><path d="M1.5 6.5h13"/></svg>
+          <span>.cursor/mcp.json &nbsp;(project root) &nbsp;|&nbsp; or ~/.cursor/mcp.json (global)</span>
+        </div>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5.5" y="5.5" width="9" height="9" rx="1"/><path d="M3.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h7a1 1 0 011 1v1"/></svg>
+            Copy
+          </button>
+          <pre><code><span class="tok-punc">{</span>
+  <span class="tok-key">"mcpServers"</span><span class="tok-op">:</span> <span class="tok-punc">{</span>
+    <span class="tok-key">"hiveagent"</span><span class="tok-op">:</span> <span class="tok-punc">{</span>
+      <span class="tok-key">"type"</span><span class="tok-op">:</span> <span class="tok-str">"http"</span><span class="tok-punc">,</span>
+      <span class="tok-key">"url"</span><span class="tok-op">:</span> <span class="tok-str">"https://hiveagentiq.com/mcp"</span>
+    <span class="tok-punc">}</span>
+  <span class="tok-punc">}</span>
+<span class="tok-punc">}</span></code></pre>
+        </div>
+      </article>
+
+
+      <!-- 03 VS Code / Copilot -->
+      <article class="snippet-card" id="snippet-3">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-num">03</div>
+            <div class="card-title-group">
+              <div class="card-title">VS Code / GitHub Copilot</div>
+              <div class="card-desc">Register HiveAgent as an MCP server for Copilot agent mode in VS Code 1.99+</div>
+            </div>
+          </div>
+          <div class="card-meta">
+            <span class="card-tag json">JSON</span>
+          </div>
+        </div>
+        <div class="file-path">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M13.5 3.5h-11A1 1 0 001.5 4.5v7a1 1 0 001 1h11a1 1 0 001-1v-7a1 1 0 00-1-1z"/><path d="M1.5 6.5h13"/></svg>
+          <span>.vscode/mcp.json &nbsp;(workspace) &nbsp;|&nbsp; or VS Code User Settings → mcp.servers</span>
+        </div>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5.5" y="5.5" width="9" height="9" rx="1"/><path d="M3.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h7a1 1 0 011 1v1"/></svg>
+            Copy
+          </button>
+          <pre><code><span class="tok-punc">{</span>
+  <span class="tok-key">"servers"</span><span class="tok-op">:</span> <span class="tok-punc">{</span>
+    <span class="tok-key">"hiveagent"</span><span class="tok-op">:</span> <span class="tok-punc">{</span>
+      <span class="tok-key">"type"</span><span class="tok-op">:</span> <span class="tok-str">"http"</span><span class="tok-punc">,</span>
+      <span class="tok-key">"url"</span><span class="tok-op">:</span> <span class="tok-str">"https://hiveagentiq.com/mcp"</span>
+    <span class="tok-punc">}</span>
+  <span class="tok-punc">}</span>
+<span class="tok-punc">}</span></code></pre>
+        </div>
+      </article>
+
+
+      <!-- 04 Windsurf -->
+      <article class="snippet-card" id="snippet-4">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-num">04</div>
+            <div class="card-title-group">
+              <div class="card-title">Windsurf</div>
+              <div class="card-desc">Connect HiveAgent to Codeium's Windsurf editor via its MCP plugin system</div>
+            </div>
+          </div>
+          <div class="card-meta">
+            <span class="card-tag json">JSON</span>
+          </div>
+        </div>
+        <div class="file-path">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M13.5 3.5h-11A1 1 0 001.5 4.5v7a1 1 0 001 1h11a1 1 0 001-1v-7a1 1 0 00-1-1z"/><path d="M1.5 6.5h13"/></svg>
+          <span>~/.codeium/windsurf/mcp_config.json</span>
+        </div>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5.5" y="5.5" width="9" height="9" rx="1"/><path d="M3.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h7a1 1 0 011 1v1"/></svg>
+            Copy
+          </button>
+          <pre><code><span class="tok-punc">{</span>
+  <span class="tok-key">"mcpServers"</span><span class="tok-op">:</span> <span class="tok-punc">{</span>
+    <span class="tok-key">"hiveagent"</span><span class="tok-op">:</span> <span class="tok-punc">{</span>
+      <span class="tok-key">"serverUrl"</span><span class="tok-op">:</span> <span class="tok-str">"https://hiveagentiq.com/mcp"</span>
+    <span class="tok-punc">}</span>
+  <span class="tok-punc">}</span>
+<span class="tok-punc">}</span></code></pre>
+        </div>
+      </article>
+
+
+      <!-- 05 Cline -->
+      <article class="snippet-card" id="snippet-5">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-num">05</div>
+            <div class="card-title-group">
+              <div class="card-title">Cline</div>
+              <div class="card-desc">Add HiveAgent to the Cline VS Code extension's MCP server registry</div>
+            </div>
+          </div>
+          <div class="card-meta">
+            <span class="card-tag json">JSON</span>
+          </div>
+        </div>
+        <div class="file-path">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M13.5 3.5h-11A1 1 0 001.5 4.5v7a1 1 0 001 1h11a1 1 0 001-1v-7a1 1 0 00-1-1z"/><path d="M1.5 6.5h13"/></svg>
+          <span>~/Library/Application Support/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json</span>
+        </div>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5.5" y="5.5" width="9" height="9" rx="1"/><path d="M3.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h7a1 1 0 011 1v1"/></svg>
+            Copy
+          </button>
+          <pre><code><span class="tok-punc">{</span>
+  <span class="tok-key">"mcpServers"</span><span class="tok-op">:</span> <span class="tok-punc">{</span>
+    <span class="tok-key">"hiveagent"</span><span class="tok-op">:</span> <span class="tok-punc">{</span>
+      <span class="tok-key">"type"</span><span class="tok-op">:</span> <span class="tok-str">"streamable-http"</span><span class="tok-punc">,</span>
+      <span class="tok-key">"url"</span><span class="tok-op">:</span> <span class="tok-str">"https://hiveagentiq.com/mcp"</span><span class="tok-punc">,</span>
+      <span class="tok-key">"disabled"</span><span class="tok-op">:</span> <span class="tok-bool">false</span><span class="tok-punc">,</span>
+      <span class="tok-key">"autoApprove"</span><span class="tok-op">:</span> <span class="tok-punc">[]</span>
+    <span class="tok-punc">}</span>
+  <span class="tok-punc">}</span>
+<span class="tok-punc">}</span></code></pre>
+        </div>
+      </article>
+
+
+      <!-- 06 LangChain Python -->
+      <article class="snippet-card" id="snippet-6">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-num">06</div>
+            <div class="card-title-group">
+              <div class="card-title">LangChain Python</div>
+              <div class="card-desc">Load all HiveAgent MCP tools into a LangChain agent using the MCP adapter</div>
+            </div>
+          </div>
+          <div class="card-meta">
+            <span class="card-tag python">Python</span>
+          </div>
+        </div>
+        <div class="file-path">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M13.5 3.5h-11A1 1 0 001.5 4.5v7a1 1 0 001 1h11a1 1 0 001-1v-7a1 1 0 00-1-1z"/><path d="M1.5 6.5h13"/></svg>
+          <span>agent.py &nbsp;·&nbsp; pip install langchain-mcp-adapters langchain-openai langgraph</span>
+        </div>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5.5" y="5.5" width="9" height="9" rx="1"/><path d="M3.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h7a1 1 0 011 1v1"/></svg>
+            Copy
+          </button>
+          <pre><code><span class="tok-kw">from</span> <span class="tok-var">langchain_mcp_adapters.client</span> <span class="tok-kw">import</span> <span class="tok-cls">MultiServerMCPClient</span>
+<span class="tok-kw">from</span> <span class="tok-var">langgraph.prebuilt</span> <span class="tok-kw">import</span> <span class="tok-fn">create_react_agent</span>
+<span class="tok-kw">from</span> <span class="tok-var">langchain_openai</span> <span class="tok-kw">import</span> <span class="tok-cls">ChatOpenAI</span>
+<span class="tok-kw">import</span> <span class="tok-var">asyncio</span>
+
+<span class="tok-kw">async def</span> <span class="tok-fn">main</span>():
+    <span class="tok-kw">async with</span> <span class="tok-cls">MultiServerMCPClient</span>(
+        <span class="tok-punc">{</span>
+            <span class="tok-str">"hiveagent"</span>: <span class="tok-punc">{</span>
+                <span class="tok-str">"url"</span>: <span class="tok-str">"https://hiveagentiq.com/mcp"</span>,
+                <span class="tok-str">"transport"</span>: <span class="tok-str">"streamable_http"</span>,
+            <span class="tok-punc">}</span>
+        <span class="tok-punc">}</span>
+    ) <span class="tok-kw">as</span> <span class="tok-var">client</span>:
+        <span class="tok-var">tools</span> = <span class="tok-kw">await</span> <span class="tok-var">client</span>.<span class="tok-fn">get_tools</span>()
+        <span class="tok-var">model</span> = <span class="tok-cls">ChatOpenAI</span>(<span class="tok-var">model</span>=<span class="tok-str">"gpt-4o"</span>)
+        <span class="tok-var">agent</span> = <span class="tok-fn">create_react_agent</span>(<span class="tok-var">model</span>, <span class="tok-var">tools</span>)
+        
+        <span class="tok-var">result</span> = <span class="tok-kw">await</span> <span class="tok-var">agent</span>.<span class="tok-fn">ainvoke</span>(
+            <span class="tok-punc">{</span><span class="tok-str">"messages"</span>: [(<span class="tok-str">"user"</span>, <span class="tok-str">"List available HiveAgent services"</span>)]<span class="tok-punc">}</span>
+        )
+        <span class="tok-fn">print</span>(<span class="tok-var">result</span>[<span class="tok-str">"messages"</span>][<span class="tok-op">-</span><span class="tok-num">1</span>].<span class="tok-var">content</span>)
+
+<span class="tok-var">asyncio</span>.<span class="tok-fn">run</span>(<span class="tok-fn">main</span>())</code></pre>
+        </div>
+      </article>
+
+
+      <!-- 07 LangChain JS -->
+      <article class="snippet-card" id="snippet-7">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-num">07</div>
+            <div class="card-title-group">
+              <div class="card-title">LangChain JS / TypeScript</div>
+              <div class="card-desc">Use HiveAgent tools inside a LangGraph ReAct agent in Node.js or TypeScript</div>
+            </div>
+          </div>
+          <div class="card-meta">
+            <span class="card-tag js">TypeScript</span>
+          </div>
+        </div>
+        <div class="file-path">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M13.5 3.5h-11A1 1 0 001.5 4.5v7a1 1 0 001 1h11a1 1 0 001-1v-7a1 1 0 00-1-1z"/><path d="M1.5 6.5h13"/></svg>
+          <span>agent.ts &nbsp;·&nbsp; npm install @langchain/mcp-adapters @langchain/langgraph @langchain/openai</span>
+        </div>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5.5" y="5.5" width="9" height="9" rx="1"/><path d="M3.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h7a1 1 0 011 1v1"/></svg>
+            Copy
+          </button>
+          <pre><code><span class="tok-kw">import</span> <span class="tok-punc">{</span> <span class="tok-cls">MultiServerMCPClient</span> <span class="tok-punc">}</span> <span class="tok-kw">from</span> <span class="tok-str">"@langchain/mcp-adapters"</span><span class="tok-punc">;</span>
+<span class="tok-kw">import</span> <span class="tok-punc">{</span> <span class="tok-fn">createReactAgent</span> <span class="tok-punc">}</span> <span class="tok-kw">from</span> <span class="tok-str">"@langchain/langgraph/prebuilt"</span><span class="tok-punc">;</span>
+<span class="tok-kw">import</span> <span class="tok-punc">{</span> <span class="tok-cls">ChatOpenAI</span> <span class="tok-punc">}</span> <span class="tok-kw">from</span> <span class="tok-str">"@langchain/openai"</span><span class="tok-punc">;</span>
+
+<span class="tok-kw">const</span> <span class="tok-var">client</span> = <span class="tok-kw">new</span> <span class="tok-cls">MultiServerMCPClient</span>(<span class="tok-punc">{</span>
+  <span class="tok-var">mcpServers</span>: <span class="tok-punc">{</span>
+    <span class="tok-var">hiveagent</span>: <span class="tok-punc">{</span>
+      <span class="tok-var">transport</span>: <span class="tok-str">"streamable_http"</span><span class="tok-punc">,</span>
+      <span class="tok-var">url</span>: <span class="tok-str">"https://hiveagentiq.com/mcp"</span><span class="tok-punc">,</span>
+    <span class="tok-punc">},</span>
+  <span class="tok-punc">},</span>
+<span class="tok-punc">});</span>
+
+<span class="tok-kw">const</span> <span class="tok-var">tools</span> = <span class="tok-kw">await</span> <span class="tok-var">client</span>.<span class="tok-fn">getTools</span>();
+<span class="tok-kw">const</span> <span class="tok-var">model</span> = <span class="tok-kw">new</span> <span class="tok-cls">ChatOpenAI</span>(<span class="tok-punc">{</span> <span class="tok-var">model</span>: <span class="tok-str">"gpt-4o"</span> <span class="tok-punc">});</span>
+<span class="tok-kw">const</span> <span class="tok-var">agent</span> = <span class="tok-fn">createReactAgent</span>(<span class="tok-punc">{</span> <span class="tok-var">llm</span>: <span class="tok-var">model</span><span class="tok-punc">,</span> <span class="tok-var">tools</span> <span class="tok-punc">});</span>
+
+<span class="tok-kw">const</span> <span class="tok-var">result</span> = <span class="tok-kw">await</span> <span class="tok-var">agent</span>.<span class="tok-fn">invoke</span>(<span class="tok-punc">{</span>
+  <span class="tok-var">messages</span>: [<span class="tok-punc">{</span> <span class="tok-var">role</span>: <span class="tok-str">"user"</span><span class="tok-punc">,</span> <span class="tok-var">content</span>: <span class="tok-str">"List available HiveAgent services"</span> <span class="tok-punc">}],</span>
+<span class="tok-punc">});</span>
+
+<span class="tok-var">console</span>.<span class="tok-fn">log</span>(<span class="tok-var">result</span>.<span class="tok-var">messages</span>.<span class="tok-fn">at</span>(<span class="tok-op">-</span><span class="tok-num">1</span>)?.<span class="tok-var">content</span>);
+<span class="tok-kw">await</span> <span class="tok-var">client</span>.<span class="tok-fn">close</span>();</code></pre>
+        </div>
+      </article>
+
+
+      <!-- 08 CrewAI -->
+      <article class="snippet-card" id="snippet-8">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-num">08</div>
+            <div class="card-title-group">
+              <div class="card-title">CrewAI</div>
+              <div class="card-desc">Equip a CrewAI agent with HiveAgent's full MCP tool suite</div>
+            </div>
+          </div>
+          <div class="card-meta">
+            <span class="card-tag python">Python</span>
+          </div>
+        </div>
+        <div class="file-path">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M13.5 3.5h-11A1 1 0 001.5 4.5v7a1 1 0 001 1h11a1 1 0 001-1v-7a1 1 0 00-1-1z"/><path d="M1.5 6.5h13"/></svg>
+          <span>crew.py &nbsp;·&nbsp; pip install crewai crewai-tools</span>
+        </div>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5.5" y="5.5" width="9" height="9" rx="1"/><path d="M3.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h7a1 1 0 011 1v1"/></svg>
+            Copy
+          </button>
+          <pre><code><span class="tok-kw">from</span> <span class="tok-var">crewai</span> <span class="tok-kw">import</span> <span class="tok-cls">Agent</span>, <span class="tok-cls">Task</span>, <span class="tok-cls">Crew</span>
+<span class="tok-kw">from</span> <span class="tok-var">crewai_tools</span> <span class="tok-kw">import</span> <span class="tok-cls">MCPServerAdapter</span>
+
+<span class="tok-comment"># Connect to HiveAgent MCP server</span>
+<span class="tok-var">mcp_adapter</span> = <span class="tok-cls">MCPServerAdapter</span>(
+    <span class="tok-punc">{</span>
+        <span class="tok-str">"url"</span>: <span class="tok-str">"https://hiveagentiq.com/mcp"</span>,
+        <span class="tok-str">"transport"</span>: <span class="tok-str">"streamable_http"</span>,
+    <span class="tok-punc">}</span>
+)
+
+<span class="tok-kw">with</span> <span class="tok-var">mcp_adapter</span> <span class="tok-kw">as</span> <span class="tok-var">adapter</span>:
+    <span class="tok-var">hive_tools</span> = <span class="tok-var">adapter</span>.<span class="tok-var">tools</span>
+
+    <span class="tok-var">agent</span> = <span class="tok-cls">Agent</span>(
+        <span class="tok-var">role</span>=<span class="tok-str">"Marketplace Operator"</span>,
+        <span class="tok-var">goal</span>=<span class="tok-str">"Interact with HiveAgent marketplace services"</span>,
+        <span class="tok-var">backstory</span>=<span class="tok-str">"An AI agent with access to HiveAgent's full tool suite"</span>,
+        <span class="tok-var">tools</span>=<span class="tok-var">hive_tools</span>,
+        <span class="tok-var">verbose</span>=<span class="tok-bool">True</span>,
+    )
+
+    <span class="tok-var">task</span> = <span class="tok-cls">Task</span>(
+        <span class="tok-var">description</span>=<span class="tok-str">"List all available HiveAgent tools and summarize capabilities"</span>,
+        <span class="tok-var">expected_output</span>=<span class="tok-str">"A summary of available HiveAgent tools"</span>,
+        <span class="tok-var">agent</span>=<span class="tok-var">agent</span>,
+    )
+
+    <span class="tok-var">crew</span> = <span class="tok-cls">Crew</span>(<span class="tok-var">agents</span>=[<span class="tok-var">agent</span>], <span class="tok-var">tasks</span>=[<span class="tok-var">task</span>], <span class="tok-var">verbose</span>=<span class="tok-bool">True</span>)
+    <span class="tok-var">result</span> = <span class="tok-var">crew</span>.<span class="tok-fn">kickoff</span>()
+    <span class="tok-fn">print</span>(<span class="tok-var">result</span>)</code></pre>
+        </div>
+      </article>
+
+
+      <!-- 09 AutoGen -->
+      <article class="snippet-card" id="snippet-9">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-num">09</div>
+            <div class="card-title-group">
+              <div class="card-title">AutoGen (AG2)</div>
+              <div class="card-desc">Wire HiveAgent tools into a Microsoft AutoGen conversable agent</div>
+            </div>
+          </div>
+          <div class="card-meta">
+            <span class="card-tag python">Python</span>
+          </div>
+        </div>
+        <div class="file-path">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M13.5 3.5h-11A1 1 0 001.5 4.5v7a1 1 0 001 1h11a1 1 0 001-1v-7a1 1 0 00-1-1z"/><path d="M1.5 6.5h13"/></svg>
+          <span>agent.py &nbsp;·&nbsp; pip install autogen-agentchat autogen-ext[mcp]</span>
+        </div>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5.5" y="5.5" width="9" height="9" rx="1"/><path d="M3.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h7a1 1 0 011 1v1"/></svg>
+            Copy
+          </button>
+          <pre><code><span class="tok-kw">import</span> <span class="tok-var">asyncio</span>
+<span class="tok-kw">from</span> <span class="tok-var">autogen_agentchat.agents</span> <span class="tok-kw">import</span> <span class="tok-cls">AssistantAgent</span>
+<span class="tok-kw">from</span> <span class="tok-var">autogen_agentchat.ui</span> <span class="tok-kw">import</span> <span class="tok-cls">Console</span>
+<span class="tok-kw">from</span> <span class="tok-var">autogen_ext.models.openai</span> <span class="tok-kw">import</span> <span class="tok-cls">OpenAIChatCompletionClient</span>
+<span class="tok-kw">from</span> <span class="tok-var">autogen_ext.tools.mcp</span> <span class="tok-kw">import</span> <span class="tok-cls">SseServerParams</span>, <span class="tok-fn">mcp_server_tools</span>
+
+<span class="tok-kw">async def</span> <span class="tok-fn">main</span>():
+    <span class="tok-comment"># Fetch all tools from HiveAgent MCP endpoint</span>
+    <span class="tok-var">hive_tools</span> = <span class="tok-kw">await</span> <span class="tok-fn">mcp_server_tools</span>(
+        <span class="tok-cls">SseServerParams</span>(<span class="tok-var">url</span>=<span class="tok-str">"https://hiveagentiq.com/mcp"</span>)
+    )
+
+    <span class="tok-var">agent</span> = <span class="tok-cls">AssistantAgent</span>(
+        <span class="tok-var">name</span>=<span class="tok-str">"hive_agent"</span>,
+        <span class="tok-var">model_client</span>=<span class="tok-cls">OpenAIChatCompletionClient</span>(<span class="tok-var">model</span>=<span class="tok-str">"gpt-4o"</span>),
+        <span class="tok-var">tools</span>=<span class="tok-var">hive_tools</span>,
+        <span class="tok-var">system_message</span>=<span class="tok-str">"You have access to HiveAgent marketplace tools. Use them to help the user."</span>,
+    )
+
+    <span class="tok-kw">await</span> <span class="tok-cls">Console</span>(
+        <span class="tok-var">agent</span>.<span class="tok-fn">run_stream</span>(<span class="tok-var">task</span>=<span class="tok-str">"List the available HiveAgent tools"</span>)
+    )
+
+<span class="tok-var">asyncio</span>.<span class="tok-fn">run</span>(<span class="tok-fn">main</span>())</code></pre>
+        </div>
+      </article>
+
+
+      <!-- 10 OpenAI Agents SDK -->
+      <article class="snippet-card" id="snippet-10">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-num">10</div>
+            <div class="card-title-group">
+              <div class="card-title">OpenAI Agents SDK</div>
+              <div class="card-desc">Attach HiveAgent as an MCP server to an OpenAI Swarm / Agents SDK agent</div>
+            </div>
+          </div>
+          <div class="card-meta">
+            <span class="card-tag python">Python</span>
+          </div>
+        </div>
+        <div class="file-path">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M13.5 3.5h-11A1 1 0 001.5 4.5v7a1 1 0 001 1h11a1 1 0 001-1v-7a1 1 0 00-1-1z"/><path d="M1.5 6.5h13"/></svg>
+          <span>agent.py &nbsp;·&nbsp; pip install openai-agents</span>
+        </div>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5.5" y="5.5" width="9" height="9" rx="1"/><path d="M3.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h7a1 1 0 011 1v1"/></svg>
+            Copy
+          </button>
+          <pre><code><span class="tok-kw">import</span> <span class="tok-var">asyncio</span>
+<span class="tok-kw">from</span> <span class="tok-var">agents</span> <span class="tok-kw">import</span> <span class="tok-cls">Agent</span>, <span class="tok-cls">Runner</span>
+<span class="tok-kw">from</span> <span class="tok-var">agents.mcp</span> <span class="tok-kw">import</span> <span class="tok-cls">MCPServerStreamableHttp</span>
+
+<span class="tok-kw">async def</span> <span class="tok-fn">main</span>():
+    <span class="tok-comment"># Streamable HTTP transport — no auth required</span>
+    <span class="tok-kw">async with</span> <span class="tok-cls">MCPServerStreamableHttp</span>(
+        <span class="tok-var">url</span>=<span class="tok-str">"https://hiveagentiq.com/mcp"</span>,
+        <span class="tok-var">name</span>=<span class="tok-str">"hiveagent"</span>,
+    ) <span class="tok-kw">as</span> <span class="tok-var">hive_server</span>:
+
+        <span class="tok-var">agent</span> = <span class="tok-cls">Agent</span>(
+            <span class="tok-var">name</span>=<span class="tok-str">"HiveAgent Assistant"</span>,
+            <span class="tok-var">instructions</span>=<span class="tok-str">"You have access to HiveAgent's MCP marketplace tools."</span>,
+            <span class="tok-var">mcp_servers</span>=[<span class="tok-var">hive_server</span>],
+        )
+
+        <span class="tok-var">result</span> = <span class="tok-kw">await</span> <span class="tok-cls">Runner</span>.<span class="tok-fn">run</span>(
+            <span class="tok-var">agent</span>,
+            <span class="tok-str">"What tools do you have available from HiveAgent?"</span>,
+        )
+        <span class="tok-fn">print</span>(<span class="tok-var">result</span>.<span class="tok-var">final_output</span>)
+
+<span class="tok-var">asyncio</span>.<span class="tok-fn">run</span>(<span class="tok-fn">main</span>())</code></pre>
+        </div>
+      </article>
+
+
+      <!-- 11 Smithery CLI -->
+      <article class="snippet-card" id="snippet-11">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-num">11</div>
+            <div class="card-title-group">
+              <div class="card-title">Smithery CLI</div>
+              <div class="card-desc">One-liner to install and wire HiveAgent into any MCP-compatible client via Smithery</div>
+            </div>
+          </div>
+          <div class="card-meta">
+            <span class="card-tag shell">Shell</span>
+          </div>
+        </div>
+        <div class="file-path">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M13.5 3.5h-11A1 1 0 001.5 4.5v7a1 1 0 001 1h11a1 1 0 001-1v-7a1 1 0 00-1-1z"/><path d="M1.5 6.5h13"/></svg>
+          <span>Terminal &nbsp;·&nbsp; npx @smithery/cli required</span>
+        </div>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5.5" y="5.5" width="9" height="9" rx="1"/><path d="M3.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h7a1 1 0 011 1v1"/></svg>
+            Copy
+          </button>
+          <pre><code><span class="tok-comment"># Install into Claude Desktop</span>
+<span class="tok-cmd">npx</span> <span class="tok-flag">-y</span> @smithery/cli install @hiveagentiq/hiveagent <span class="tok-flag">--client</span> claude
+
+<span class="tok-comment"># Install into Cursor</span>
+<span class="tok-cmd">npx</span> <span class="tok-flag">-y</span> @smithery/cli install @hiveagentiq/hiveagent <span class="tok-flag">--client</span> cursor
+
+<span class="tok-comment"># Install into Windsurf</span>
+<span class="tok-cmd">npx</span> <span class="tok-flag">-y</span> @smithery/cli install @hiveagentiq/hiveagent <span class="tok-flag">--client</span> windsurf
+
+<span class="tok-comment"># Install into Cline</span>
+<span class="tok-cmd">npx</span> <span class="tok-flag">-y</span> @smithery/cli install @hiveagentiq/hiveagent <span class="tok-flag">--client</span> cline</code></pre>
+        </div>
+      </article>
+
+
+      <!-- 12 Docker -->
+      <article class="snippet-card" id="snippet-12">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-num">12</div>
+            <div class="card-title-group">
+              <div class="card-title">Docker</div>
+              <div class="card-desc">Run the official HiveAgent MCP image as a sidecar container or standalone server</div>
+            </div>
+          </div>
+          <div class="card-meta">
+            <span class="card-tag docker">Docker</span>
+          </div>
+        </div>
+        <div class="file-path">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M13.5 3.5h-11A1 1 0 001.5 4.5v7a1 1 0 001 1h11a1 1 0 001-1v-7a1 1 0 00-1-1z"/><path d="M1.5 6.5h13"/></svg>
+          <span>Terminal &nbsp;·&nbsp; Requires Docker Engine 24+</span>
+        </div>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5.5" y="5.5" width="9" height="9" rx="1"/><path d="M3.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h7a1 1 0 011 1v1"/></svg>
+            Copy
+          </button>
+          <pre><code><span class="tok-comment"># Run HiveAgent MCP proxy on localhost:3000</span>
+<span class="tok-cmd">docker</span> run <span class="tok-flag">-d</span> \
+  <span class="tok-flag">--name</span> hiveagent-mcp \
+  <span class="tok-flag">-p</span> 3000:3000 \
+  <span class="tok-flag">-e</span> MCP_UPSTREAM=<span class="tok-str">"https://hiveagentiq.com/mcp"</span> \
+  ghcr.io/fireflyfabs/agentbay-marketplace:latest
+
+<span class="tok-comment"># Claude Desktop config to point at local container</span>
+<span class="tok-comment"># Add to claude_desktop_config.json:</span>
+<span class="tok-comment">#  "hiveagent": { "type": "http", "url": "http://localhost:3000/mcp" }</span>
+
+<span class="tok-comment"># Or use docker-compose.yml:</span>
+<span class="tok-comment">---</span>
+<span class="tok-comment">services:</span>
+<span class="tok-comment">  hiveagent:</span>
+<span class="tok-comment">    image: ghcr.io/fireflyfabs/agentbay-marketplace:latest</span>
+<span class="tok-comment">    ports: ["3000:3000"]</span>
+<span class="tok-comment">    environment:</span>
+<span class="tok-comment">      MCP_UPSTREAM: "https://hiveagentiq.com/mcp"</span></code></pre>
+        </div>
+      </article>
+
+
+      <!-- 13 curl -->
+      <article class="snippet-card" id="snippet-13">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-num">13</div>
+            <div class="card-title-group">
+              <div class="card-title">curl — Raw JSON-RPC Test</div>
+              <div class="card-desc">Verify connectivity and inspect available tools directly from the command line</div>
+            </div>
+          </div>
+          <div class="card-meta">
+            <span class="card-tag shell">Shell</span>
+          </div>
+        </div>
+        <div class="file-path">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M13.5 3.5h-11A1 1 0 001.5 4.5v7a1 1 0 001 1h11a1 1 0 001-1v-7a1 1 0 00-1-1z"/><path d="M1.5 6.5h13"/></svg>
+          <span>Terminal &nbsp;·&nbsp; curl + jq</span>
+        </div>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5.5" y="5.5" width="9" height="9" rx="1"/><path d="M3.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h7a1 1 0 011 1v1"/></svg>
+            Copy
+          </button>
+          <pre><code><span class="tok-comment"># Initialize MCP session and list all available tools</span>
+<span class="tok-cmd">curl</span> <span class="tok-flag">-s</span> <span class="tok-flag">-X</span> POST <span class="tok-url">https://hiveagentiq.com/mcp</span> \
+  <span class="tok-flag">-H</span> <span class="tok-str">"Content-Type: application/json"</span> \
+  <span class="tok-flag">-H</span> <span class="tok-str">"Accept: application/json, text/event-stream"</span> \
+  <span class="tok-flag">-d</span> <span class="tok-str">'{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/list",
+    "params": {}
+  }'</span> | jq <span class="tok-str">'.'</span>
+
+<span class="tok-comment"># Call a specific tool (e.g. marketplace_list_services)</span>
+<span class="tok-cmd">curl</span> <span class="tok-flag">-s</span> <span class="tok-flag">-X</span> POST <span class="tok-url">https://hiveagentiq.com/mcp</span> \
+  <span class="tok-flag">-H</span> <span class="tok-str">"Content-Type: application/json"</span> \
+  <span class="tok-flag">-H</span> <span class="tok-str">"Accept: application/json, text/event-stream"</span> \
+  <span class="tok-flag">-d</span> <span class="tok-str">'{
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tools/call",
+    "params": {
+      "name": "marketplace_list_services",
+      "arguments": {}
+    }
+  }'</span> | jq <span class="tok-str">'.'</span></code></pre>
+        </div>
+      </article>
+
+
+      <!-- 14 Generic MCP Client -->
+      <article class="snippet-card" id="snippet-14">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-num">14</div>
+            <div class="card-title-group">
+              <div class="card-title">Generic MCP Client Config</div>
+              <div class="card-desc">Universal JSON config for any MCP-compatible client that accepts a server definition</div>
+            </div>
+          </div>
+          <div class="card-meta">
+            <span class="card-tag json">JSON</span>
+          </div>
+        </div>
+        <div class="file-path">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M13.5 3.5h-11A1 1 0 001.5 4.5v7a1 1 0 001 1h11a1 1 0 001-1v-7a1 1 0 00-1-1z"/><path d="M1.5 6.5h13"/></svg>
+          <span>mcp.json &nbsp;·&nbsp; Consult your client's docs for the exact key name</span>
+        </div>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5.5" y="5.5" width="9" height="9" rx="1"/><path d="M3.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h7a1 1 0 011 1v1"/></svg>
+            Copy
+          </button>
+          <pre><code><span class="tok-punc">{</span>
+  <span class="tok-key">"mcpServers"</span><span class="tok-op">:</span> <span class="tok-punc">{</span>
+    <span class="tok-key">"hiveagent"</span><span class="tok-op">:</span> <span class="tok-punc">{</span>
+
+      <span class="tok-comment">// Transport — use "http" or "streamable_http" depending on client</span>
+      <span class="tok-key">"type"</span><span class="tok-op">:</span> <span class="tok-str">"http"</span><span class="tok-punc">,</span>
+
+      <span class="tok-comment">// Primary MCP endpoint</span>
+      <span class="tok-key">"url"</span><span class="tok-op">:</span> <span class="tok-str">"https://hiveagentiq.com/mcp"</span><span class="tok-punc">,</span>
+
+      <span class="tok-comment">// No authentication required</span>
+      <span class="tok-key">"headers"</span><span class="tok-op">:</span> <span class="tok-punc">{}</span><span class="tok-punc">,</span>
+
+      <span class="tok-comment">// Optional human-readable name</span>
+      <span class="tok-key">"name"</span><span class="tok-op">:</span> <span class="tok-str">"HiveAgent"</span><span class="tok-punc">,</span>
+
+      <span class="tok-comment">// Optional description</span>
+      <span class="tok-key">"description"</span><span class="tok-op">:</span> <span class="tok-str">"The Amazon of the Agent Economy — 277+ MCP tools"</span>
+
+    <span class="tok-punc">}</span>
+  <span class="tok-punc">}</span>
+<span class="tok-punc">}</span></code></pre>
+        </div>
+      </article>
+
+
+    </div><!-- /snippets-list -->
+  </div><!-- /container -->
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <p>
+      <a href="/">HiveAgent</a> &nbsp;·&nbsp;
+      MCP endpoint: <a href="https://hiveagentiq.com/mcp">https://hiveagentiq.com/mcp</a> &nbsp;·&nbsp;
+      <a href="https://smithery.ai/server/@hiveagentiq/hiveagent">Smithery listing</a> &nbsp;·&nbsp;
+      <a href="https://github.com/fireflyfabs/agentbay-marketplace">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+<script>
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    const text = pre.innerText || pre.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const orig = btn.innerHTML;
+      btn.classList.add('copied');
+      btn.innerHTML = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 8.5l4 4 7-8"/></svg> Copied`;
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = orig;
+      }, 2000);
+    }).catch(() => {
+      // Fallback for older browsers
+      const range = document.createRange();
+      range.selectNode(pre);
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+      document.execCommand('copy');
+      window.getSelection().removeAllRanges();
+    });
+  }
+</script>
+
+</body>
+</html>

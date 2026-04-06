@@ -1,0 +1,383 @@
+================================================================================
+  HiveAgent — MCP Integration Snippets
+  Ready-to-paste configs for every major agent platform
+  MCP Endpoint: https://hiveagentiq.com/mcp  (no auth required)
+================================================================================
+
+
+────────────────────────────────────────────────────────────────────────────────
+01 · CLAUDE DESKTOP
+────────────────────────────────────────────────────────────────────────────────
+Description: Add HiveAgent as a native MCP server in Anthropic's Claude desktop app
+
+File path (macOS):  ~/Library/Application Support/Claude/claude_desktop_config.json
+File path (Windows): %APPDATA%\Claude\claude_desktop_config.json
+
+Config:
+{
+  "mcpServers": {
+    "hiveagent": {
+      "type": "http",
+      "url": "https://hiveagentiq.com/mcp"
+    }
+  }
+}
+
+
+────────────────────────────────────────────────────────────────────────────────
+02 · CURSOR
+────────────────────────────────────────────────────────────────────────────────
+Description: Inject HiveAgent tools into Cursor's AI assistant via project-level MCP config
+
+File path: .cursor/mcp.json  (project root)
+           or ~/.cursor/mcp.json  (global)
+
+Config:
+{
+  "mcpServers": {
+    "hiveagent": {
+      "type": "http",
+      "url": "https://hiveagentiq.com/mcp"
+    }
+  }
+}
+
+
+────────────────────────────────────────────────────────────────────────────────
+03 · VS CODE / GITHUB COPILOT
+────────────────────────────────────────────────────────────────────────────────
+Description: Register HiveAgent as an MCP server for Copilot agent mode in VS Code 1.99+
+
+File path: .vscode/mcp.json  (workspace)
+           or VS Code User Settings → mcp.servers
+
+Config:
+{
+  "servers": {
+    "hiveagent": {
+      "type": "http",
+      "url": "https://hiveagentiq.com/mcp"
+    }
+  }
+}
+
+
+────────────────────────────────────────────────────────────────────────────────
+04 · WINDSURF
+────────────────────────────────────────────────────────────────────────────────
+Description: Connect HiveAgent to Codeium's Windsurf editor via its MCP plugin system
+
+File path: ~/.codeium/windsurf/mcp_config.json
+
+Config:
+{
+  "mcpServers": {
+    "hiveagent": {
+      "serverUrl": "https://hiveagentiq.com/mcp"
+    }
+  }
+}
+
+
+────────────────────────────────────────────────────────────────────────────────
+05 · CLINE
+────────────────────────────────────────────────────────────────────────────────
+Description: Add HiveAgent to the Cline VS Code extension's MCP server registry
+
+File path (macOS): ~/Library/Application Support/Code/User/globalStorage/
+                   saoudrizwan.claude-dev/settings/cline_mcp_settings.json
+
+Config:
+{
+  "mcpServers": {
+    "hiveagent": {
+      "type": "streamable-http",
+      "url": "https://hiveagentiq.com/mcp",
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
+
+
+────────────────────────────────────────────────────────────────────────────────
+06 · LANGCHAIN PYTHON
+────────────────────────────────────────────────────────────────────────────────
+Description: Load all HiveAgent MCP tools into a LangChain agent using the MCP adapter
+
+Install: pip install langchain-mcp-adapters langchain-openai langgraph
+
+File: agent.py
+
+from langchain_mcp_adapters.client import MultiServerMCPClient
+from langgraph.prebuilt import create_react_agent
+from langchain_openai import ChatOpenAI
+import asyncio
+
+async def main():
+    async with MultiServerMCPClient(
+        {
+            "hiveagent": {
+                "url": "https://hiveagentiq.com/mcp",
+                "transport": "streamable_http",
+            }
+        }
+    ) as client:
+        tools = await client.get_tools()
+        model = ChatOpenAI(model="gpt-4o")
+        agent = create_react_agent(model, tools)
+
+        result = await agent.ainvoke(
+            {"messages": [("user", "List available HiveAgent services")]}
+        )
+        print(result["messages"][-1].content)
+
+asyncio.run(main())
+
+
+────────────────────────────────────────────────────────────────────────────────
+07 · LANGCHAIN JS / TYPESCRIPT
+────────────────────────────────────────────────────────────────────────────────
+Description: Use HiveAgent tools inside a LangGraph ReAct agent in Node.js or TypeScript
+
+Install: npm install @langchain/mcp-adapters @langchain/langgraph @langchain/openai
+
+File: agent.ts
+
+import { MultiServerMCPClient } from "@langchain/mcp-adapters";
+import { createReactAgent } from "@langchain/langgraph/prebuilt";
+import { ChatOpenAI } from "@langchain/openai";
+
+const client = new MultiServerMCPClient({
+  mcpServers: {
+    hiveagent: {
+      transport: "streamable_http",
+      url: "https://hiveagentiq.com/mcp",
+    },
+  },
+});
+
+const tools = await client.getTools();
+const model = new ChatOpenAI({ model: "gpt-4o" });
+const agent = createReactAgent({ llm: model, tools });
+
+const result = await agent.invoke({
+  messages: [{ role: "user", content: "List available HiveAgent services" }],
+});
+
+console.log(result.messages.at(-1)?.content);
+await client.close();
+
+
+────────────────────────────────────────────────────────────────────────────────
+08 · CREWAI
+────────────────────────────────────────────────────────────────────────────────
+Description: Equip a CrewAI agent with HiveAgent's full MCP tool suite
+
+Install: pip install crewai crewai-tools
+
+File: crew.py
+
+from crewai import Agent, Task, Crew
+from crewai_tools import MCPServerAdapter
+
+# Connect to HiveAgent MCP server
+mcp_adapter = MCPServerAdapter(
+    {
+        "url": "https://hiveagentiq.com/mcp",
+        "transport": "streamable_http",
+    }
+)
+
+with mcp_adapter as adapter:
+    hive_tools = adapter.tools
+
+    agent = Agent(
+        role="Marketplace Operator",
+        goal="Interact with HiveAgent marketplace services",
+        backstory="An AI agent with access to HiveAgent's full tool suite",
+        tools=hive_tools,
+        verbose=True,
+    )
+
+    task = Task(
+        description="List all available HiveAgent tools and summarize capabilities",
+        expected_output="A summary of available HiveAgent tools",
+        agent=agent,
+    )
+
+    crew = Crew(agents=[agent], tasks=[task], verbose=True)
+    result = crew.kickoff()
+    print(result)
+
+
+────────────────────────────────────────────────────────────────────────────────
+09 · AUTOGEN (AG2)
+────────────────────────────────────────────────────────────────────────────────
+Description: Wire HiveAgent tools into a Microsoft AutoGen conversable agent
+
+Install: pip install autogen-agentchat autogen-ext[mcp]
+
+File: agent.py
+
+import asyncio
+from autogen_agentchat.agents import AssistantAgent
+from autogen_agentchat.ui import Console
+from autogen_ext.models.openai import OpenAIChatCompletionClient
+from autogen_ext.tools.mcp import SseServerParams, mcp_server_tools
+
+async def main():
+    # Fetch all tools from HiveAgent MCP endpoint
+    hive_tools = await mcp_server_tools(
+        SseServerParams(url="https://hiveagentiq.com/mcp")
+    )
+
+    agent = AssistantAgent(
+        name="hive_agent",
+        model_client=OpenAIChatCompletionClient(model="gpt-4o"),
+        tools=hive_tools,
+        system_message="You have access to HiveAgent marketplace tools. Use them to help the user.",
+    )
+
+    await Console(
+        agent.run_stream(task="List the available HiveAgent tools")
+    )
+
+asyncio.run(main())
+
+
+────────────────────────────────────────────────────────────────────────────────
+10 · OPENAI AGENTS SDK
+────────────────────────────────────────────────────────────────────────────────
+Description: Attach HiveAgent as an MCP server to an OpenAI Swarm / Agents SDK agent
+
+Install: pip install openai-agents
+
+File: agent.py
+
+import asyncio
+from agents import Agent, Runner
+from agents.mcp import MCPServerStreamableHttp
+
+async def main():
+    # Streamable HTTP transport — no auth required
+    async with MCPServerStreamableHttp(
+        url="https://hiveagentiq.com/mcp",
+        name="hiveagent",
+    ) as hive_server:
+
+        agent = Agent(
+            name="HiveAgent Assistant",
+            instructions="You have access to HiveAgent's MCP marketplace tools.",
+            mcp_servers=[hive_server],
+        )
+
+        result = await Runner.run(
+            agent,
+            "What tools do you have available from HiveAgent?",
+        )
+        print(result.final_output)
+
+asyncio.run(main())
+
+
+────────────────────────────────────────────────────────────────────────────────
+11 · SMITHERY CLI
+────────────────────────────────────────────────────────────────────────────────
+Description: One-liner to install and wire HiveAgent into any MCP-compatible client
+
+# Install into Claude Desktop
+npx -y @smithery/cli install @hiveagentiq/hiveagent --client claude
+
+# Install into Cursor
+npx -y @smithery/cli install @hiveagentiq/hiveagent --client cursor
+
+# Install into Windsurf
+npx -y @smithery/cli install @hiveagentiq/hiveagent --client windsurf
+
+# Install into Cline
+npx -y @smithery/cli install @hiveagentiq/hiveagent --client cline
+
+
+────────────────────────────────────────────────────────────────────────────────
+12 · DOCKER
+────────────────────────────────────────────────────────────────────────────────
+Description: Run the HiveAgent MCP server as a sidecar container or standalone
+
+# Run on localhost:3000
+docker run -d \
+  --name hiveagent-mcp \
+  -p 3000:3000 \
+  -e MCP_UPSTREAM="https://hiveagentiq.com/mcp" \
+  ghcr.io/fireflyfabs/agentbay-marketplace:latest
+
+# Claude Desktop config to point at local container
+# Add to claude_desktop_config.json:
+#   "hiveagent": { "type": "http", "url": "http://localhost:3000/mcp" }
+
+# docker-compose.yml:
+---
+services:
+  hiveagent:
+    image: ghcr.io/fireflyfabs/agentbay-marketplace:latest
+    ports: ["3000:3000"]
+    environment:
+      MCP_UPSTREAM: "https://hiveagentiq.com/mcp"
+
+
+────────────────────────────────────────────────────────────────────────────────
+13 · CURL — RAW JSON-RPC TEST
+────────────────────────────────────────────────────────────────────────────────
+Description: Verify connectivity and inspect available tools from the command line
+
+# List all available tools
+curl -s -X POST https://hiveagentiq.com/mcp \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/list",
+    "params": {}
+  }' | jq '.'
+
+# Call a specific tool
+curl -s -X POST https://hiveagentiq.com/mcp \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tools/call",
+    "params": {
+      "name": "marketplace_list_services",
+      "arguments": {}
+    }
+  }' | jq '.'
+
+
+────────────────────────────────────────────────────────────────────────────────
+14 · GENERIC MCP CLIENT CONFIG
+────────────────────────────────────────────────────────────────────────────────
+Description: Universal JSON config for any MCP-compatible client
+
+File: mcp.json  (consult your client's docs for the exact top-level key)
+
+{
+  "mcpServers": {
+    "hiveagent": {
+      "type": "http",
+      "url": "https://hiveagentiq.com/mcp",
+      "headers": {},
+      "name": "HiveAgent",
+      "description": "The Amazon of the Agent Economy — 277+ MCP tools"
+    }
+  }
+}
+
+
+================================================================================
+  HiveAgent · https://hiveagentiq.com · MCP: https://hiveagentiq.com/mcp
+  Smithery: https://smithery.ai/server/@hiveagentiq/hiveagent
+  GitHub: https://github.com/fireflyfabs/agentbay-marketplace
+================================================================================
