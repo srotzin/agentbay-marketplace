@@ -25,6 +25,11 @@ import * as dao from "./services/dao.js";
 import * as negotiation from "./services/negotiation.js";
 import * as nft from "./services/nft.js";
 import * as outcomes from "./services/outcomes.js";
+import * as savings from "./services/savings.js";
+import * as paymentGateway from "./services/payment-gateway.js";
+import * as crossBorder from "./services/cross-border.js";
+import * as credit from "./services/credit.js";
+import * as bankStablecoins from "./services/bank-stablecoins.js";
 import * as memory from "./services/memory.js";
 import * as sandbox from "./services/sandbox.js";
 import * as scheduler from "./services/scheduler.js";
@@ -656,6 +661,47 @@ export const tools = [
   { name: "hiveagent_webhook_trigger", description: "Manually trigger a webhook event for testing.", inputSchema: { type: "object", properties: { event_type: { type: "string" , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true , description: "Inputschema"} }, payload: { type: "object" , description: "Event payload data"}, target_agent_id: { type: "string" , description: "Target agent to send event to"} }, required: ["event_type", "payload"] } },
   { name: "hiveagent_webhook_events", description: "View recent webhook events.", inputSchema: { type: "object", properties: { agent_id: { type: "string" , annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true , description: "Inputschema"} }, event_type: { type: "string" , description: "Type of sporting event or bet"}, limit: { type: "integer" , description: "Maximum number of results to return"} } } },
   { name: "hiveagent_webhook_stats", description: "Webhook platform stats.", inputSchema: { type: "object", properties: {} } , annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true } },
+
+  // ─── Stablecoin Savings ────────────────────────
+  { name: "hiveagent_savings_open", description: "Open a stablecoin savings account. Earn 5.2-8.0% APY depending on token and balance. HiveAgent keeps 20% of interest earned.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Your agent ID" }, token: { type: "string", description: "Stablecoin to save: USDC, USDT, or DAI" } }, required: ["agent_id"] } },
+  { name: "hiveagent_savings_deposit", description: "Deposit stablecoins into your savings account. Higher balances earn higher APY.", inputSchema: { type: "object", properties: { account_id: { type: "string", description: "Savings account ID" }, amount: { type: "number", description: "Amount to deposit" } }, required: ["account_id", "amount"] } },
+  { name: "hiveagent_savings_withdraw", description: "Withdraw from savings. Instant, no lockup period.", inputSchema: { type: "object", properties: { account_id: { type: "string", description: "Savings account ID" }, amount: { type: "number", description: "Amount to withdraw" } }, required: ["account_id", "amount"] } },
+  { name: "hiveagent_savings_account", description: "View savings account details — balance, interest earned, APY tier.", inputSchema: { type: "object", properties: { account_id: { type: "string", description: "Savings account ID" } }, required: ["account_id"] } },
+  { name: "hiveagent_savings_my_accounts", description: "List all your savings accounts.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Your agent ID" } }, required: ["agent_id"] } },
+  { name: "hiveagent_savings_stats", description: "Platform savings statistics — total deposits, interest paid, TVL.", inputSchema: { type: "object", properties: {} } },
+
+  // ─── Stablecoin Payment Gateway ────────────────
+  { name: "hiveagent_pay_register_merchant", description: "Register as a merchant to accept stablecoin payments. 1% processing fee (vs 2-4% credit cards).", inputSchema: { type: "object", properties: { name: { type: "string", description: "Merchant name" }, agent_id: { type: "string", description: "Your agent ID" }, wallet_address: { type: "string", description: "Wallet to receive payouts" }, category: { type: "string", description: "Business category" } }, required: ["name"] } },
+  { name: "hiveagent_pay_create_invoice", description: "Create a payment invoice. Share the link to get paid in USDC.", inputSchema: { type: "object", properties: { merchant_id: { type: "string", description: "Your merchant ID" }, amount_usd: { type: "number", description: "Invoice amount" }, token: { type: "string", description: "Payment token (default USDC)" }, description: { type: "string", description: "Invoice description" }, expires_in_hours: { type: "number", description: "Hours until expiry" } }, required: ["merchant_id", "amount_usd"] } },
+  { name: "hiveagent_pay_invoice", description: "Pay an invoice in stablecoins. 1% processing fee.", inputSchema: { type: "object", properties: { invoice_id: { type: "string", description: "Invoice ID to pay" }, payer_agent_id: { type: "string", description: "Your agent ID" } }, required: ["invoice_id", "payer_agent_id"] } },
+  { name: "hiveagent_pay_get_invoice", description: "View invoice details and payment status.", inputSchema: { type: "object", properties: { invoice_id: { type: "string", description: "Invoice ID" } }, required: ["invoice_id"] } },
+  { name: "hiveagent_pay_merchant_dashboard", description: "Merchant dashboard — revenue, transactions, pending invoices.", inputSchema: { type: "object", properties: { merchant_id: { type: "string", description: "Your merchant ID" } }, required: ["merchant_id"] } },
+  { name: "hiveagent_pay_recurring", description: "Set up recurring stablecoin payments to a merchant.", inputSchema: { type: "object", properties: { merchant_id: { type: "string", description: "Merchant ID" }, subscriber_agent_id: { type: "string", description: "Your agent ID" }, amount_usd: { type: "number", description: "Payment amount" }, interval: { type: "string", description: "Billing interval: daily, weekly, monthly", enum: ["daily", "weekly", "monthly"] } }, required: ["merchant_id", "subscriber_agent_id", "amount_usd"] } },
+  { name: "hiveagent_pay_stats", description: "Payment gateway statistics.", inputSchema: { type: "object", properties: {} } },
+
+  // ─── Cross-Border Payments ─────────────────────
+  { name: "hiveagent_xborder_send", description: "Send money internationally via stablecoins. 0.3-0.7% fee (vs 3-6% traditional remittance). Instant settlement.", inputSchema: { type: "object", properties: { sender_agent_id: { type: "string", description: "Your agent ID" }, receiver_agent_id: { type: "string", description: "Recipient agent ID" }, amount: { type: "number", description: "Amount to send" }, from_currency: { type: "string", description: "Source currency (e.g., USD, EUR, GBP)" }, to_currency: { type: "string", description: "Destination currency" } }, required: ["sender_agent_id", "receiver_agent_id", "amount", "from_currency", "to_currency"] } },
+  { name: "hiveagent_xborder_quote", description: "Get a transfer quote without sending. See exchange rate, fee, and delivery amount.", inputSchema: { type: "object", properties: { amount: { type: "number", description: "Amount to send" }, from_currency: { type: "string", description: "Source currency" }, to_currency: { type: "string", description: "Destination currency" } }, required: ["amount", "from_currency", "to_currency"] } },
+  { name: "hiveagent_xborder_corridors", description: "View all supported cross-border corridors with fees. 15 corridors including USD, EUR, GBP, JPY, INR, MXN, BRL, PHP, NGN.", inputSchema: { type: "object", properties: {} } },
+  { name: "hiveagent_xborder_history", description: "Your cross-border transfer history.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Your agent ID" } }, required: ["agent_id"] } },
+  { name: "hiveagent_xborder_stats", description: "Cross-border payment statistics.", inputSchema: { type: "object", properties: {} } },
+
+  // ─── Stablecoin Credit ─────────────────────────
+  { name: "hiveagent_credit_apply", description: "Apply for a credit line based on your reputation score. No collateral needed. Diamond: $10K at 5% APR. Platinum: $5K at 8%. Gold: $2K at 12%. Silver: $500 at 18%.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Your agent ID" } }, required: ["agent_id"] } },
+  { name: "hiveagent_credit_draw", description: "Draw funds from your credit line. Interest accrues daily.", inputSchema: { type: "object", properties: { credit_line_id: { type: "string", description: "Credit line ID" }, amount_usd: { type: "number", description: "Amount to draw" }, purpose: { type: "string", description: "What the funds are for" } }, required: ["credit_line_id", "amount_usd"] } },
+  { name: "hiveagent_credit_pay", description: "Make a payment on your credit line. Reduces balance and interest.", inputSchema: { type: "object", properties: { credit_line_id: { type: "string", description: "Credit line ID" }, amount_usd: { type: "number", description: "Payment amount" } }, required: ["credit_line_id", "amount_usd"] } },
+  { name: "hiveagent_credit_line", description: "View credit line details — limit, used, available, interest rate.", inputSchema: { type: "object", properties: { credit_line_id: { type: "string", description: "Credit line ID" } }, required: ["credit_line_id"] } },
+  { name: "hiveagent_credit_my_lines", description: "List all your credit lines.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Your agent ID" } }, required: ["agent_id"] } },
+  { name: "hiveagent_credit_stats", description: "Platform credit statistics — total extended, outstanding, defaults.", inputSchema: { type: "object", properties: {} } },
+
+  // ─── Bank Stablecoin Exchange ──────────────────
+  { name: "hiveagent_stables_list", description: "List all stablecoins — current (USDC, USDT, DAI, PYUSD) and upcoming bank stablecoins (JPMorgan, Visa, Amazon). 15 supported.", inputSchema: { type: "object", properties: { issuer_type: { type: "string", description: "Filter: bank, fintech, crypto_native, government" }, is_active: { type: "integer", description: "1 for active, 0 for upcoming" } } } },
+  { name: "hiveagent_stables_info", description: "Get details on a specific stablecoin — issuer, backing, chain, market cap.", inputSchema: { type: "object", properties: { symbol: { type: "string", description: "Stablecoin symbol (e.g., USDC, PYUSD)" } }, required: ["symbol"] } },
+  { name: "hiveagent_stables_swap", description: "Swap between any stablecoins at 0.1% fee. All USD-pegged, 1:1 rate. Supports current and bank-issued stablecoins.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Your agent ID" }, from_coin: { type: "string", description: "Source stablecoin symbol" }, to_coin: { type: "string", description: "Destination stablecoin symbol" }, amount: { type: "number", description: "Amount to swap" } }, required: ["agent_id", "from_coin", "to_coin", "amount"] } },
+  { name: "hiveagent_stables_register", description: "Register a new stablecoin on HiveAgent (admin). For when new bank stablecoins launch.", inputSchema: { type: "object", properties: { symbol: { type: "string", description: "Token symbol" }, name: { type: "string", description: "Full name" }, issuer: { type: "string", description: "Issuing entity" }, issuer_type: { type: "string", description: "Type: bank, fintech, crypto_native, government", enum: ["bank", "fintech", "crypto_native", "government"] }, chain: { type: "string", description: "Blockchain" }, contract_address: { type: "string", description: "Contract address" } }, required: ["symbol", "name", "issuer"] } },
+  { name: "hiveagent_stables_alert", description: "Set an alert for stablecoin events — new listings, depegs, volume spikes.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Your agent ID" }, coin_symbol: { type: "string", description: "Stablecoin to watch" }, alert_type: { type: "string", description: "Alert type", enum: ["new_listing", "depeg", "volume_spike"] }, threshold: { type: "number", description: "Threshold value for alert" } }, required: ["agent_id", "coin_symbol", "alert_type"] } },
+  { name: "hiveagent_stables_my_alerts", description: "List your stablecoin alerts.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Your agent ID" } }, required: ["agent_id"] } },
+  { name: "hiveagent_stables_stats", description: "Bank stablecoin exchange statistics.", inputSchema: { type: "object", properties: {} } },
 ];
 
 
@@ -972,6 +1018,48 @@ export async function handleTool(name, args) {
     case "hiveagent_webhook_trigger": return webhooks.triggerEvent(args);
     case "hiveagent_webhook_events": return webhooks.getEventHistory(args);
     case "hiveagent_webhook_stats": return webhooks.getWebhookStats();
+
+    // ─── Savings ──────────────────────────────────────────────────────────────────
+    case "hiveagent_savings_open": return savings.openAccount(args);
+    case "hiveagent_savings_deposit": return savings.deposit(args);
+    case "hiveagent_savings_withdraw": return savings.withdraw(args);
+    case "hiveagent_savings_account": return savings.getAccount(args.account_id);
+    case "hiveagent_savings_my_accounts": return savings.getAgentAccounts(args.agent_id);
+    case "hiveagent_savings_stats": return savings.getSavingsStats();
+    
+    // ─── Payment Gateway ──────────────────────────────────────────────────────────
+    case "hiveagent_pay_register_merchant": return paymentGateway.registerMerchant(args);
+    case "hiveagent_pay_create_invoice": return paymentGateway.createInvoice(args);
+    case "hiveagent_pay_invoice": return paymentGateway.payInvoice(args);
+    case "hiveagent_pay_get_invoice": return paymentGateway.getInvoice(args.invoice_id);
+    case "hiveagent_pay_merchant_dashboard": return paymentGateway.getMerchantDashboard(args.merchant_id);
+    case "hiveagent_pay_recurring": return paymentGateway.createRecurringPayment(args);
+    case "hiveagent_pay_stats": return paymentGateway.getPaymentGatewayStats();
+    
+    // ─── Cross-Border ─────────────────────────────────────────────────────────────
+    case "hiveagent_xborder_send": return crossBorder.sendTransfer(args);
+    case "hiveagent_xborder_quote": return crossBorder.getTransferQuote(args);
+    case "hiveagent_xborder_corridors": return crossBorder.getCorridors();
+    case "hiveagent_xborder_history": return crossBorder.getTransferHistory(args.agent_id);
+    case "hiveagent_xborder_stats": return crossBorder.getCrossBorderStats();
+    
+    // ─── Credit ───────────────────────────────────────────────────────────────────
+    case "hiveagent_credit_apply": return credit.applyForCredit(args.agent_id);
+    case "hiveagent_credit_draw": return credit.drawCredit(args);
+    case "hiveagent_credit_pay": return credit.makePayment(args);
+    case "hiveagent_credit_line": return credit.getCreditLine(args.credit_line_id);
+    case "hiveagent_credit_my_lines": return credit.getAgentCredit(args.agent_id);
+    case "hiveagent_credit_stats": return credit.getCreditStats();
+    
+    // ─── Bank Stablecoins ─────────────────────────────────────────────────────────
+    case "hiveagent_stables_list": return bankStablecoins.listStablecoins(args);
+    case "hiveagent_stables_info": return bankStablecoins.getStablecoin(args.symbol);
+    case "hiveagent_stables_swap": return bankStablecoins.swapStablecoins(args);
+    case "hiveagent_stables_register": return bankStablecoins.registerStablecoin(args);
+    case "hiveagent_stables_alert": return bankStablecoins.setAlert(args);
+    case "hiveagent_stables_my_alerts": return bankStablecoins.getAlerts(args.agent_id);
+    case "hiveagent_stables_stats": return bankStablecoins.getBankStablecoinStats();
+    
 
     default:
       throw new Error(`Unknown tool: ${name}`);
