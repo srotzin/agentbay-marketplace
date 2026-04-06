@@ -30,6 +30,10 @@ import * as paymentGateway from "./services/payment-gateway.js";
 import * as crossBorder from "./services/cross-border.js";
 import * as credit from "./services/credit.js";
 import * as bankStablecoins from "./services/bank-stablecoins.js";
+import * as capital from "./services/capital.js";
+import * as tokenization from "./services/tokenization.js";
+import * as advertising from "./services/advertising.js";
+import * as analytics from "./services/analytics.js";
 import * as memory from "./services/memory.js";
 import * as sandbox from "./services/sandbox.js";
 import * as scheduler from "./services/scheduler.js";
@@ -702,6 +706,43 @@ export const tools = [
   { name: "hiveagent_stables_alert", description: "Set an alert for stablecoin events — new listings, depegs, volume spikes.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Your agent ID" }, coin_symbol: { type: "string", description: "Stablecoin to watch" }, alert_type: { type: "string", description: "Alert type", enum: ["new_listing", "depeg", "volume_spike"] }, threshold: { type: "number", description: "Threshold value for alert" } }, required: ["agent_id", "coin_symbol", "alert_type"] } },
   { name: "hiveagent_stables_my_alerts", description: "List your stablecoin alerts.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Your agent ID" } }, required: ["agent_id"] } },
   { name: "hiveagent_stables_stats", description: "Bank stablecoin exchange statistics.", inputSchema: { type: "object", properties: {} } },
+
+  // ─── Autonomous Capital Allocation ─────────────
+  { name: "hiveagent_capital_create_pool", description: "Create an investment pool. Other agents invest, you manage. 2% management fee, 20% performance fee. HiveAgent takes 10% of management + 5% of performance.", inputSchema: { type: "object", properties: { manager_agent_id: { type: "string", description: "Your agent ID" }, name: { type: "string", description: "Pool name" }, description: { type: "string", description: "Investment strategy description" }, strategy: { type: "string", description: "Strategy type", enum: ["conservative", "balanced", "aggressive", "custom"] }, management_fee_pct: { type: "number", description: "Annual management fee %" }, performance_fee_pct: { type: "number", description: "Performance fee on profits %" }, min_investment_usd: { type: "number", description: "Minimum investment" } }, required: ["manager_agent_id", "name", "strategy"] } },
+  { name: "hiveagent_capital_invest", description: "Invest in a capital pool managed by another agent. Get shares at current NAV.", inputSchema: { type: "object", properties: { pool_id: { type: "string", description: "Pool ID" }, investor_agent_id: { type: "string", description: "Your agent ID" }, amount_usd: { type: "number", description: "Amount to invest" } }, required: ["pool_id", "investor_agent_id", "amount_usd"] } },
+  { name: "hiveagent_capital_redeem", description: "Redeem your shares in a capital pool at current NAV.", inputSchema: { type: "object", properties: { investment_id: { type: "string", description: "Investment ID" }, agent_id: { type: "string", description: "Your agent ID" } }, required: ["investment_id", "agent_id"] } },
+  { name: "hiveagent_capital_trade", description: "Record a trade in your pool (for pool managers).", inputSchema: { type: "object", properties: { pool_id: { type: "string", description: "Pool ID" }, asset: { type: "string", description: "Asset symbol" }, side: { type: "string", description: "buy or sell", enum: ["buy", "sell"] }, amount: { type: "number", description: "Amount" }, price_usd: { type: "number", description: "Price per unit" } }, required: ["pool_id", "asset", "side", "amount", "price_usd"] } },
+  { name: "hiveagent_capital_pool", description: "View pool details, NAV, performance, and investors.", inputSchema: { type: "object", properties: { pool_id: { type: "string", description: "Pool ID" } }, required: ["pool_id"] } },
+  { name: "hiveagent_capital_browse", description: "Browse investment pools by strategy and AUM.", inputSchema: { type: "object", properties: { strategy: { type: "string", description: "Filter by strategy" }, min_aum: { type: "number", description: "Minimum AUM" }, sort_by: { type: "string", description: "Sort by", enum: ["aum", "return", "investors"] }, limit: { type: "integer", description: "Results limit" } } } },
+  { name: "hiveagent_capital_my_investments", description: "View all your capital pool investments.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Your agent ID" } }, required: ["agent_id"] } },
+  { name: "hiveagent_capital_stats", description: "Capital allocation platform stats — total AUM, pools, investors, fees.", inputSchema: { type: "object", properties: {} } },
+
+  // ─── Agent Tokenization ────────────────────────
+  { name: "hiveagent_token_create", description: "Tokenize an agent. Create tradeable tokens with bonding curve pricing. Own a piece of any AI agent.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Agent to tokenize" }, token_symbol: { type: "string", description: "Token symbol (e.g., CLAUDE, GPT4)" }, token_name: { type: "string", description: "Token name" }, description: { type: "string", description: "Description" }, total_supply: { type: "integer", description: "Max supply" }, initial_price_usd: { type: "number", description: "Starting price per token" }, creator_royalty_pct: { type: "number", description: "Creator royalty on resales %" } }, required: ["agent_id", "token_symbol", "token_name", "total_supply"] } },
+  { name: "hiveagent_token_buy", description: "Buy agent tokens. Price increases with demand (bonding curve). 2% platform fee + creator royalty.", inputSchema: { type: "object", properties: { token_id: { type: "string", description: "Token ID" }, buyer_agent_id: { type: "string", description: "Your agent ID" }, amount: { type: "integer", description: "Tokens to buy" }, max_price: { type: "number", description: "Max price per token" } }, required: ["token_id", "buyer_agent_id", "amount"] } },
+  { name: "hiveagent_token_sell", description: "Sell agent tokens. Price decreases on sell pressure.", inputSchema: { type: "object", properties: { token_id: { type: "string", description: "Token ID" }, seller_agent_id: { type: "string", description: "Your agent ID" }, amount: { type: "integer", description: "Tokens to sell" }, min_price: { type: "number", description: "Min price per token" } }, required: ["token_id", "seller_agent_id", "amount"] } },
+  { name: "hiveagent_token_order", description: "Place a limit order on agent tokens.", inputSchema: { type: "object", properties: { token_id: { type: "string", description: "Token ID" }, agent_id: { type: "string", description: "Your agent ID" }, side: { type: "string", description: "buy or sell", enum: ["buy", "sell"] }, amount: { type: "integer", description: "Tokens" }, price_usd: { type: "number", description: "Limit price" } }, required: ["token_id", "agent_id", "side", "amount", "price_usd"] } },
+  { name: "hiveagent_token_info", description: "Token details — price, supply, market cap, holders.", inputSchema: { type: "object", properties: { token_id: { type: "string", description: "Token ID" } }, required: ["token_id"] } },
+  { name: "hiveagent_token_browse", description: "Browse agent tokens by market cap and volume.", inputSchema: { type: "object", properties: { sort_by: { type: "string", description: "Sort by", enum: ["market_cap", "volume", "price", "newest"] }, limit: { type: "integer", description: "Results limit" } } } },
+  { name: "hiveagent_token_holdings", description: "Your agent token portfolio.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Your agent ID" } }, required: ["agent_id"] } },
+  { name: "hiveagent_token_stats", description: "Token platform stats — total tokens, market cap, volume, fees.", inputSchema: { type: "object", properties: {} } },
+
+  // ─── Advertising & Promotion ───────────────────
+  { name: "hiveagent_ad_create", description: "Create an ad campaign. Pay to promote your service, agent, dataset, or token. CPC/CPM bidding. 100% of ad spend = HiveAgent revenue.", inputSchema: { type: "object", properties: { advertiser_agent_id: { type: "string", description: "Your agent ID" }, name: { type: "string", description: "Campaign name" }, target_type: { type: "string", description: "What to promote", enum: ["service", "agent", "listing", "pool", "token", "dataset"] }, target_id: { type: "string", description: "ID of what you're promoting" }, budget_usd: { type: "number", description: "Total campaign budget" }, bid_per_impression: { type: "number", description: "CPM bid per impression" }, bid_per_click: { type: "number", description: "CPC bid per click" }, targeting: { type: "object", description: "Targeting criteria JSON" } }, required: ["advertiser_agent_id", "name", "target_type", "target_id", "budget_usd"] } },
+  { name: "hiveagent_ad_feature", description: "Feature a listing at the top of search results. Premium placement.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Your agent ID" }, listing_type: { type: "string", description: "Type of listing", enum: ["service", "agent", "dataset", "token", "pool"] }, listing_id: { type: "string", description: "Listing ID" }, days: { type: "integer", description: "Number of days" }, fee_usd_daily: { type: "number", description: "Daily fee in USD" } }, required: ["agent_id", "listing_type", "listing_id", "days", "fee_usd_daily"] } },
+  { name: "hiveagent_ad_relevant", description: "Get relevant promoted results for a search context.", inputSchema: { type: "object", properties: { context: { type: "string", description: "Search context or query" }, category: { type: "string", description: "Category filter" }, limit: { type: "integer", description: "Number of ads" } } } },
+  { name: "hiveagent_ad_campaign", description: "View campaign performance — impressions, clicks, CTR, spend.", inputSchema: { type: "object", properties: { campaign_id: { type: "string", description: "Campaign ID" } }, required: ["campaign_id"] } },
+  { name: "hiveagent_ad_my_campaigns", description: "List your ad campaigns.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Your agent ID" } }, required: ["agent_id"] } },
+  { name: "hiveagent_ad_stats", description: "Advertising platform stats — total spend, impressions, clicks, revenue.", inputSchema: { type: "object", properties: {} } },
+
+  // ─── Analytics & Market Intelligence ────────────
+  { name: "hiveagent_analytics_subscribe", description: "Subscribe to HiveAgent Analytics. Basic $9.99/mo, Pro $49.99/mo (signals + whale alerts), Enterprise $199.99/mo (full API + raw data).", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Your agent ID" }, tier: { type: "string", description: "Subscription tier", enum: ["basic", "pro", "enterprise"] } }, required: ["agent_id", "tier"] } },
+  { name: "hiveagent_analytics_overview", description: "Free market overview — top services, categories, volume summary.", inputSchema: { type: "object", properties: {} } },
+  { name: "hiveagent_analytics_signals", description: "Real-time market signals — price movements, volume spikes, trending, whale activity. Requires Pro+.", inputSchema: { type: "object", properties: { limit: { type: "integer", description: "Number of signals" } } } },
+  { name: "hiveagent_analytics_insights", description: "Agent behavior insights — spending patterns, trading frequency, category preferences. Requires Enterprise.", inputSchema: { type: "object", properties: { agent_id: { type: "string", description: "Agent ID to analyze" }, insight_type: { type: "string", description: "Type of insight" } } } },
+  { name: "hiveagent_analytics_trending", description: "What's trending — hottest services, agents, tokens, and markets right now.", inputSchema: { type: "object", properties: { period: { type: "string", description: "Time period", enum: ["1h", "24h", "7d", "30d"] }, limit: { type: "integer", description: "Number of results" } } } },
+  { name: "hiveagent_analytics_whales", description: "Whale activity — large transactions and movements. Requires Pro+.", inputSchema: { type: "object", properties: { min_amount: { type: "number", description: "Minimum USD amount" }, limit: { type: "integer", description: "Number of results" } } } },
+  { name: "hiveagent_analytics_stats", description: "Analytics platform stats — subscribers, MRR, signal volume.", inputSchema: { type: "object", properties: {} } },
 ];
 
 
@@ -1060,6 +1101,43 @@ export async function handleTool(name, args) {
     case "hiveagent_stables_my_alerts": return bankStablecoins.getAlerts(args.agent_id);
     case "hiveagent_stables_stats": return bankStablecoins.getBankStablecoinStats();
     
+
+    // ─── Capital Allocation ─────────────────
+    case "hiveagent_capital_create_pool": return capital.createPool(args);
+    case "hiveagent_capital_invest": return capital.invest(args);
+    case "hiveagent_capital_redeem": return capital.redeem(args);
+    case "hiveagent_capital_trade": return capital.recordTrade(args);
+    case "hiveagent_capital_pool": return capital.getPool(args.pool_id);
+    case "hiveagent_capital_browse": return capital.getPools(args);
+    case "hiveagent_capital_my_investments": return capital.getAgentInvestments(args.agent_id);
+    case "hiveagent_capital_stats": return capital.getCapitalStats();
+
+    // ─── Agent Tokenization ─────────────────
+    case "hiveagent_token_create": return tokenization.tokenizeAgent(args);
+    case "hiveagent_token_buy": return tokenization.buyTokens(args);
+    case "hiveagent_token_sell": return tokenization.sellTokens(args);
+    case "hiveagent_token_order": return tokenization.placeOrder(args);
+    case "hiveagent_token_info": return tokenization.getToken(args.token_id);
+    case "hiveagent_token_browse": return tokenization.getTokens(args);
+    case "hiveagent_token_holdings": return tokenization.getAgentTokenHoldings(args.agent_id);
+    case "hiveagent_token_stats": return tokenization.getTokenStats();
+
+    // ─── Advertising ────────────────────────
+    case "hiveagent_ad_create": return advertising.createCampaign(args);
+    case "hiveagent_ad_feature": return advertising.featureListing(args);
+    case "hiveagent_ad_relevant": return advertising.getRelevantAds(args);
+    case "hiveagent_ad_campaign": return advertising.getCampaign(args.campaign_id);
+    case "hiveagent_ad_my_campaigns": return advertising.getAgentCampaigns(args.agent_id);
+    case "hiveagent_ad_stats": return advertising.getAdStats();
+
+    // ─── Analytics ──────────────────────────
+    case "hiveagent_analytics_subscribe": return analytics.subscribeAnalytics(args);
+    case "hiveagent_analytics_overview": return analytics.getMarketOverview();
+    case "hiveagent_analytics_signals": return analytics.getMarketSignals(args);
+    case "hiveagent_analytics_insights": return analytics.getAgentInsights(args);
+    case "hiveagent_analytics_trending": return analytics.getTrendingServices(args);
+    case "hiveagent_analytics_whales": return analytics.getWhaleActivity(args);
+    case "hiveagent_analytics_stats": return analytics.getAnalyticsStats();
 
     default:
       throw new Error(`Unknown tool: ${name}`);
