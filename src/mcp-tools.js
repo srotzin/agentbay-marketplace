@@ -47,8 +47,11 @@ import * as sandbox from "./services/sandbox.js";
 import * as scheduler from "./services/scheduler.js";
 import * as webhooks from "./services/webhooks.js";
 
+// AI-requested service modules (Phase 2)
+import { newTools, handleNewTool } from "./mcp-tools-new.js";
+
 // MCP tool definitions (JSON Schema format)
-export const tools = [
+const coreTools = [
   {
     name: "hiveagent_search",
     description:
@@ -840,6 +843,8 @@ export const tools = [
   { name: "hiveagent_room_stats", description: "Data room platform statistics.", inputSchema: { type: "object", properties: {} } },
 ];
 
+// Merge core tools + Phase 2 (AI-requested) tools
+export const tools = [...coreTools, ...newTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1308,6 +1313,7 @@ export async function handleTool(name, args) {
     case "hiveagent_room_stats":     return getDataRoomStats();
 
     default:
-      throw new Error(`Unknown tool: ${name}`);
+      // Try Phase 2 (AI-requested) tools
+      return handleNewTool(name, params);
   }
 }

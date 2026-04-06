@@ -9,6 +9,8 @@ if (!existsSync(DB_PATH)) {
   execSync("node src/seed-expanded.js", { stdio: "inherit" });
   console.log("Seeding variants...");
   execSync("node src/seed-variants.js", { stdio: "inherit" });
+  console.log("Seeding AI-requested services...");
+  execSync("node src/seed-ai-services.js", { stdio: "inherit" });
 }
 
 // Start the server
