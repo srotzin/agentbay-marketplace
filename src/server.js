@@ -20,9 +20,16 @@ app.use(express.json());
 // ─── Static assets (OG image, logo, etc.) ────────────
 app.use(express.static(join(__dirname, "../public"), {
   maxAge: "1h",
+  dotfiles: "allow",  // Serve .well-known directory
   setHeaders: (res, filePath) => {
     if (filePath.endsWith(".png") || filePath.endsWith(".jpeg") || filePath.endsWith(".jpg")) {
       res.set("Cache-Control", "public, max-age=86400");
+    }
+    if (filePath.endsWith(".json")) {
+      res.set("Content-Type", "application/json");
+    }
+    if (filePath.includes("mcp-registry-auth") || filePath.endsWith("llms.txt")) {
+      res.set("Content-Type", "text/plain");
     }
   }
 }));
