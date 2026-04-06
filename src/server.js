@@ -1,16 +1,31 @@
 import express from "express";
 import cors from "cors";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 import apiRoutes from "./routes/api.js";
 import mcpServer from "./mcp-server.js";
 import x402Services from "./routes/x402-services.js";
 import settlementApi from "./routes/settlement-api.js";
 import { initPayments } from "./services/payments.js";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+
+// ─── Static assets (OG image, logo, etc.) ────────────
+app.use(express.static(join(__dirname, "../public"), {
+  maxAge: "1h",
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith(".png") || filePath.endsWith(".jpeg") || filePath.endsWith(".jpg")) {
+      res.set("Cache-Control", "public, max-age=86400");
+    }
+  }
+}));
 
 // ─── Routes ──────────────────────────────────────────
 
@@ -84,12 +99,22 @@ app.get("/.well-known/mcp", (_req, res) => {
   });
 });
 
-// Root — HiveAgent info
-app.get("/", (_req, res) => {
+// Root — Landing page for browsers, JSON for agents/APIs
+app.get("/", (req, res) => {
+  const accept = req.headers.accept || "";
+  // Browsers send text/html; agents/curl send application/json or */
+  if (accept.includes("text/html")) {
+    return res.sendFile(join(__dirname, "../public/index.html"));
+  }
+  // Machine-readable response for agents & API clients
   res.json({
     name: "HiveAgent",
     tagline: "The nervous system of the agent economy.",
     version: "1.0.0",
+    tools: 277,
+    services: 170,
+    revenue_streams: 42,
+    smithery_score: 94,
     endpoints: {
       api: "/api/v1",
       mcp: "/mcp",
