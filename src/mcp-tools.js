@@ -49,6 +49,8 @@ import * as webhooks from "./services/webhooks.js";
 
 // AI-requested service modules (Phase 2)
 import { newTools, handleNewTool } from "./mcp-tools-new.js";
+// Vertical industry modules (Phase 3)
+import { verticalTools, handleVerticalTool } from "./mcp-tools-verticals.js";
 
 // MCP tool definitions (JSON Schema format)
 const coreTools = [
@@ -843,8 +845,8 @@ const coreTools = [
   { name: "hiveagent_room_stats", description: "Data room platform statistics.", inputSchema: { type: "object", properties: {} } },
 ];
 
-// Merge core tools + Phase 2 (AI-requested) tools
-export const tools = [...coreTools, ...newTools];
+// Merge core tools + Phase 2 (AI-requested) + Phase 3 (vertical industry) tools
+export const tools = [...coreTools, ...newTools, ...verticalTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1313,7 +1315,14 @@ export async function handleTool(name, args) {
     case "hiveagent_room_stats":     return getDataRoomStats();
 
     default:
-      // Try Phase 2 (AI-requested) tools
-      return handleNewTool(name, params);
+      // Try Phase 2 (AI-requested) tools, then Phase 3 (verticals)
+      try {
+        return await handleNewTool(name, params);
+      } catch (e) {
+        if (e.message?.startsWith('Unknown tool:')) {
+          return handleVerticalTool(name, params);
+        }
+        throw e;
+      }
   }
 }
