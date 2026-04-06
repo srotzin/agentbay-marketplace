@@ -131,7 +131,7 @@ if (_execCount === 0) {
       {
         id: uuid(), protocol_id: protocols[0].id, workflow_id: protocols[0].workflow_id,
         from_agent_id: "agent_researcher_01", to_agent_id: "agent_summarizer_01",
-        context: JSON.stringify({ task_id: "t_001", initiating_user: "usr_srotzin", deadline_iso: "2026-04-07T09:00:00Z", raw_findings: "...", source_urls: [], confidence_scores: [0.92, 0.88] }),
+        context: JSON.stringify({ task_id: "t_001", initiating_user: "usr_demo_001", deadline_iso: "2026-04-07T09:00:00Z", raw_findings: "...", source_urls: [], confidence_scores: [0.92, 0.88] }),
         status: "completed", context_hash: `sha256_${uuid().slice(0, 16)}`,
         validation_result: JSON.stringify({ valid: true, issues: [] }),
         missing_context: JSON.stringify([]),
