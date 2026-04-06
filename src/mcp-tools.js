@@ -56,7 +56,7 @@ import { workflowTools, handleWorkflowTool } from "./mcp-tools-workflows.js";
 // Money, commerce & operations verticals (Phase 6)
 import { moneyTools, handleMoneyTool } from "./mcp-tools-money.js";
 // Internal QC audit + crawler tools (Phase 7)
-import { internalTools, handleInternalTool } from "./mcp-tools-internal.js";
+import { internalTools, handleInternalTool, shoulderTapTools, handleShoulderTapTool } from "./mcp-tools-internal.js";
 // Response middleware (Phase 5)
 import { enhanceResponse } from "./response-enhancer.js";
 // Discovery meta-tools (Phase 4)
@@ -910,7 +910,7 @@ const coreTools = [
 ];
 
 // Merge core tools + Phase 2 (AI-requested) + Phase 3 (verticals) + Phase 5 (workflows) + Phase 7 (internal)
-export const tools = [...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools];
+export const tools = [...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1403,6 +1403,11 @@ export async function handleTool(name, args) {
       } catch (e) {
         if (!e.message?.startsWith('Unknown money tool:')) throw e;
       }
-      return handleInternalTool(name, params);
+      try {
+        return handleInternalTool(name, params);
+      } catch (e) {
+        if (!e.message?.startsWith('Unknown internal tool:')) throw e;
+      }
+      return handleShoulderTapTool(name, params);
   }
 }

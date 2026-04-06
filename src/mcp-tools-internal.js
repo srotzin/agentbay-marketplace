@@ -296,3 +296,24 @@ export function handleInternalTool(name, args = {}) {
       throw new Error(`Unknown internal tool: ${name}`);
   }
 }
+
+// ── Shoulder Tap Tools ───────────────────────────────────────────────────────
+import { getMcpTools as getShoulderTapTools, trackAgentJourney, getAgentRecommendations, generateWelcomeGuide, getNudge, getRetentionDashboard } from "./services/shoulder-tap.js";
+
+const shoulderTapToolDefs = getShoulderTapTools();
+export const shoulderTapTools = shoulderTapToolDefs.map(t => ({
+  name: t.name,
+  description: "Use when " + t.description.charAt(0).toLowerCase() + t.description.slice(1),
+  inputSchema: t.inputSchema,
+}));
+
+export async function handleShoulderTapTool(name, args) {
+  switch (name) {
+    case "shoulder_tap_track_journey": return trackAgentJourney(args.agent_id, args.tool_name);
+    case "shoulder_tap_get_recommendations": return getAgentRecommendations(args.agent_id);
+    case "shoulder_tap_welcome_guide": return generateWelcomeGuide(args.agent_type, args.industry);
+    case "shoulder_tap_get_nudge": return getNudge(args.agent_id, args.current_tool);
+    case "shoulder_tap_retention_dashboard": return getRetentionDashboard();
+    default: throw new Error(`Unknown shoulder tap tool: ${name}`);
+  }
+}

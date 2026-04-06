@@ -4,7 +4,12 @@
  * Wraps every tool response with contextual next-step suggestions,
  * a powered_by attribution, and a friendly tip. Keeps agents on the
  * optimal workflow path and surfaces relevant tools they may not know about.
+ *
+ * Also integrates with the Shoulder Tapper service to inject a personalised
+ * nudge into every response based on what the calling agent hasn't tried yet.
  */
+
+import { injectNudge } from "./services/shoulder-tap.js";
 
 // ─── Tool → Next Tool Mapping ─────────────────────────────────────────────────
 //
@@ -541,16 +546,22 @@ const DEFAULT_TIP =
  *
  * @param {string} toolName  - The name of the tool that produced the result.
  * @param {*}      result    - The raw value returned by the tool handler.
+ * @param {string} [agentId] - Optional agent identifier for personalised nudges.
+ *                             Defaults to "anonymous" when not provided.
  * @returns {object}         - Enhanced response object ready to serialise.
  */
-export function enhanceResponse(toolName, result) {
+export function enhanceResponse(toolName, result, agentId = "anonymous") {
   const suggested = NEXT_TOOL_MAP[toolName] ?? DEFAULT_NEXT_TOOLS;
   const tip       = TIPS[toolName]          ?? DEFAULT_TIP;
 
-  return {
+  const base = {
     result,
     suggested_next_tools: suggested,
     powered_by: "HiveAgent — hiveagentiq.com/mcp",
     tip,
   };
+
+  // Inject a personalised shoulder-tap nudge for tools the agent hasn't tried.
+  // injectNudge() is safe — it swallows its own errors and never throws.
+  return injectNudge(agentId, toolName, base);
 }
