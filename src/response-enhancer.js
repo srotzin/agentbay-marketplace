@@ -281,6 +281,30 @@ const NEXT_TOOL_MAP = {
   workflow_energy_audit:      ["energy_dashboard", "energy_forecast", "energy_compare_providers"],
   workflow_fleet_optimization:["fleet_track", "fleet_dashboard", "fleet_predict_maintenance"],
   workflow_tax_filing:        ["tax_deadlines", "tax_forecast_cashflow", "tax_financial_statement"],
+
+  // ── Cybersecurity workflow (Phase 11) ────────────────────────────────────
+  cyber_scan_threats:          ["cyber_assess_vulnerability", "cyber_check_ioc", "cyber_triage_alert"],
+  cyber_triage_alert:          ["cyber_incident_report", "cyber_check_ioc", "cyber_dashboard"],
+  cyber_check_ioc:             ["cyber_scan_threats", "cyber_triage_alert", "cyber_incident_report"],
+  cyber_incident_report:       ["cyber_dashboard", "cyber_assess_vulnerability", "cyber_scan_threats"],
+  cyber_assess_vulnerability:  ["cyber_incident_report", "cyber_scan_threats", "cyber_dashboard"],
+  cyber_dashboard:             ["cyber_scan_threats", "cyber_assess_vulnerability", "cyber_triage_alert"],
+
+  // ── Personal Finance workflow (Phase 11) ─────────────────────────────────
+  finance_analyze_spending:    ["finance_plan_retirement", "finance_optimize_portfolio", "finance_dashboard"],
+  finance_optimize_portfolio:  ["finance_tax_harvest", "finance_dashboard", "finance_plan_retirement"],
+  finance_plan_retirement:     ["finance_optimize_portfolio", "finance_loan_options", "finance_dashboard"],
+  finance_loan_options:        ["finance_plan_retirement", "finance_dashboard", "finance_analyze_spending"],
+  finance_tax_harvest:         ["finance_optimize_portfolio", "finance_dashboard", "finance_analyze_spending"],
+  finance_dashboard:           ["finance_analyze_spending", "finance_optimize_portfolio", "finance_plan_retirement"],
+
+  // ── Event Planning workflow (Phase 11) ───────────────────────────────────
+  event_search_venues:         ["event_book_venue", "event_plan", "event_coordinate_vendors"],
+  event_book_venue:            ["event_plan", "event_coordinate_vendors", "event_manage_registration"],
+  event_plan:                  ["event_search_venues", "event_coordinate_vendors", "event_manage_registration"],
+  event_manage_registration:   ["event_dashboard", "event_coordinate_vendors", "event_plan"],
+  event_coordinate_vendors:    ["event_book_venue", "event_manage_registration", "event_dashboard"],
+  event_dashboard:             ["event_manage_registration", "event_coordinate_vendors", "event_plan"],
 };
 
 // ─── Contextual Tips ──────────────────────────────────────────────────────────
@@ -745,6 +769,48 @@ const TIPS = {
     "Tip: Alert configured — view your full monitoring landscape with observability_dashboard to ensure coverage is complete.",
   observability_dashboard:
     "Tip: Dashboard loaded — investigate any anomalies further with observability_root_cause or refine thresholds with observability_set_alert.",
+
+  // ── Cybersecurity workflow (Phase 11) ──────────────────────────────────────
+  cyber_scan_threats:
+    "Tip: Scan complete — run cyber_assess_vulnerability for a full CVE breakdown, or cyber_check_ioc to validate specific indicators found.",
+  cyber_triage_alert:
+    "Tip: Alert triaged — if priority is critical or high, generate a formal record immediately with cyber_incident_report.",
+  cyber_check_ioc:
+    "Tip: IOC checked — if malicious, run cyber_scan_threats on the associated target to understand the full attack surface.",
+  cyber_incident_report:
+    "Tip: Incident report generated — update your security posture overview with cyber_dashboard to reflect the new incident.",
+  cyber_assess_vulnerability:
+    "Tip: Assessment complete — document critical findings in a formal cyber_incident_report and track remediation in cyber_dashboard.",
+  cyber_dashboard:
+    "Tip: Dashboard loaded — scan the highest-risk assets immediately with cyber_scan_threats or run cyber_assess_vulnerability for details.",
+
+  // ── Personal Finance workflow (Phase 11) ─────────────────────────────────
+  finance_analyze_spending:
+    "Tip: Spending analyzed — use finance_plan_retirement to see how current savings habits affect your retirement trajectory.",
+  finance_optimize_portfolio:
+    "Tip: Portfolio optimized — check finance_tax_harvest to recover additional value through tax-loss harvesting before year-end.",
+  finance_plan_retirement:
+    "Tip: Retirement plan ready — if a gap exists, use finance_optimize_portfolio to improve returns or finance_loan_options to restructure debt.",
+  finance_loan_options:
+    "Tip: Loan options compared — factor the chosen loan's payments into your retirement plan with finance_plan_retirement to stay on track.",
+  finance_tax_harvest:
+    "Tip: Harvesting opportunities found — execute trades and rebalance using finance_optimize_portfolio to maintain target allocation.",
+  finance_dashboard:
+    "Tip: Dashboard reviewed — drill into spending with finance_analyze_spending or optimize your investments with finance_optimize_portfolio.",
+
+  // ── Event Planning workflow (Phase 11) ──────────────────────────────────
+  event_search_venues:
+    "Tip: Venues found — call event_book_venue with your preferred venue_id to secure the date, or use event_plan to build a full event blueprint first.",
+  event_book_venue:
+    "Tip: Venue booked — start building the full event plan with event_plan, then coordinate catering and AV with event_coordinate_vendors.",
+  event_plan:
+    "Tip: Event plan ready — open registration immediately with event_manage_registration and lock in vendors with event_coordinate_vendors.",
+  event_manage_registration:
+    "Tip: Registration processed — track overall attendance progress and risk flags with event_dashboard.",
+  event_coordinate_vendors:
+    "Tip: Vendors coordinated — monitor all event logistics in one place with event_dashboard to stay on top of open items.",
+  event_dashboard:
+    "Tip: Dashboard loaded — if registration is below target, push registrations with event_manage_registration or revisit the plan with event_plan.",
 }
 
 // ─── Fallback suggestions ─────────────────────────────────────────────────────
