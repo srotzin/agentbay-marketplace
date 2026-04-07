@@ -1433,7 +1433,7 @@ export async function handleTool(name, args) {
       try {
         return await handleLifecycleTool(name, args);
       } catch (e) {
-        if (!e.message?.startsWith('Unknown tool:')) throw e;
+        if (!e.message?.startsWith('Unknown lifecycle tool:') && !e.message?.startsWith('Unknown tool:')) throw e;
       }
       try {
         return await handleLoaderPaymentTool(name, args);
