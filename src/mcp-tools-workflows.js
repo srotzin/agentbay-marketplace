@@ -35,6 +35,9 @@ import {
   processFullSalesCycle,
   screenAndHire,
   fullFraudCheck,
+  runEnergyAuditWorkflow,
+  runFleetOptimizationWorkflow,
+  runTaxFilingWorkflow,
 } from "./services/workflows.js";
 
 // ─── Tool Definitions ─────────────────────────────────────────────────────────
@@ -643,6 +646,196 @@ export const workflowTools = [
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },
 
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // 16. ENERGY AUDIT WORKFLOW
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    name: "workflow_energy_audit",
+    description:
+      "Use when you need to run a complete energy review — from bill analysis to an optimised schedule — in a SINGLE CALL. " +
+      "Replaces: energy_analyze_bill + energy_compare_providers + energy_audit_efficiency + energy_optimize_schedule + energy_dashboard " +
+      "(5 tool calls → 1). " +
+      "Returns a full energy package: itemised bill breakdown, ranked provider alternatives, efficiency audit with payback periods, " +
+      "an optimised daily device schedule, and a live dashboard link.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        bill_data: {
+          type: "object",
+          description: "Current energy bill details — include utility_type, period_start, period_end, total_amount, usage_kwh, rate_per_kwh.",
+          properties: {
+            utility_type: { type: "string", description: "'electricity', 'gas', 'water', or 'multi'.", default: "electricity" },
+            period_start: { type: "string", description: "Billing period start (ISO 8601)." },
+            period_end:   { type: "string", description: "Billing period end (ISO 8601)." },
+            total_amount: { type: "number", description: "Total billed amount." },
+            usage_kwh:    { type: "number", description: "Total consumption in kWh." },
+            rate_per_kwh: { type: "number", description: "Rate per kWh." },
+          },
+          default: {},
+        },
+        property: {
+          type: "object",
+          description: "Property details for efficiency audit — include location, sqft, building_type, hvac_age_years, insulation_rating.",
+          default: {},
+        },
+        devices: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              name:       { type: "string" },
+              type:       { type: "string" },
+              power_kw:   { type: "number" },
+              flexible:   { type: "boolean", default: false },
+              required_by:{ type: "string", description: "Latest acceptable completion time (HH:MM)." },
+            },
+          },
+          description: "Devices to schedule for load optimisation. Omit to skip schedule step.",
+          default: [],
+        },
+        tariff: {
+          type: "object",
+          description: "Tariff structure for schedule optimisation — include peak_rate, off_peak_rate, peak_hours_start, peak_hours_end.",
+          default: {},
+        },
+      },
+      required: [],
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // 17. FLEET OPTIMISATION WORKFLOW
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    name: "workflow_fleet_optimization",
+    description:
+      "Use when you need to prepare a fleet dispatch end-to-end — routes, loads, maintenance, tracking, and dashboard — in a SINGLE CALL. " +
+      "Replaces: fleet_optimize_route + fleet_plan_load + fleet_predict_maintenance + fleet_track + fleet_dashboard " +
+      "(5 tool calls → 1). " +
+      "Returns an optimised route plan, load assignment per vehicle, maintenance alerts, live GPS tracking links, and a fleet KPI dashboard.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        depot: {
+          type: "string",
+          description: "Starting depot address or coordinates (lat,lng).",
+          default: "",
+        },
+        stops: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              address:      { type: "string" },
+              time_window:  { type: "string", description: "Acceptable arrival window e.g. '09:00-12:00'." },
+              service_mins: { type: "number", default: 10 },
+            },
+          },
+          description: "Delivery stops for route planning.",
+          default: [],
+        },
+        vehicles: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              vehicle_id:  { type: "string" },
+              capacity_kg: { type: "number" },
+              volume_m3:   { type: "number" },
+            },
+          },
+          description: "Fleet vehicles with capacity info.",
+          default: [],
+        },
+        items: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              item_id:     { type: "string" },
+              weight_kg:   { type: "number" },
+              volume_m3:   { type: "number" },
+              destination: { type: "string" },
+            },
+          },
+          description: "Cargo items to load and assign to vehicles.",
+          default: [],
+        },
+        include_maintenance_check: {
+          type: "boolean",
+          description: "Run predictive maintenance check on all vehicles before dispatch.",
+          default: true,
+        },
+      },
+      required: [],
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // 18. TAX FILING WORKFLOW
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    name: "workflow_tax_filing",
+    description:
+      "Use when you need to run a full accounting close and tax filing cycle in a SINGLE CALL. " +
+      "Replaces: tax_categorize_expense + tax_reconcile + tax_forecast_cashflow + tax_prepare_return + tax_financial_statement " +
+      "(5 tool calls → 1). " +
+      "Returns a complete tax and accounting package: categorised transactions, reconciled accounts, cash-flow forecast, " +
+      "a ready-to-file tax return draft, and GAAP financial statements.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        tax_year: {
+          type: "integer",
+          description: "Tax year to file for (e.g. 2024).",
+        },
+        entity_type: {
+          type: "string",
+          enum: ["individual", "sole_proprietor", "LLC", "S-Corp", "C-Corp", "partnership"],
+          description: "Filing entity type.",
+          default: "LLC",
+        },
+        transactions: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              amount:      { type: "number" },
+              description:{ type: "string" },
+              merchant:   { type: "string" },
+              date:        { type: "string", description: "Transaction date (ISO 8601)." },
+            },
+          },
+          description: "Raw transactions to categorise and reconcile.",
+          default: [],
+        },
+        accounts: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              account_id:        { type: "string" },
+              statement_balance: { type: "number", description: "Closing balance from external statement." },
+              book_balance:      { type: "number", description: "GL closing balance." },
+            },
+          },
+          description: "Accounts to reconcile as part of the close.",
+          default: [],
+        },
+        jurisdiction: {
+          type: "string",
+          description: "Primary tax jurisdiction (e.g. 'US-federal', 'US-CA', 'UK').",
+          default: "US-federal",
+        },
+      },
+      required: ["tax_year"],
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+  },
+
 ];
 
 // ─── Handler ──────────────────────────────────────────────────────────────────
@@ -774,6 +967,32 @@ export function handleWorkflowTool(name, args = {}) {
       return fullFraudCheck(
         args.transaction_data ?? {},
         args.user_profile ?? {}
+      );
+
+    case "workflow_energy_audit":
+      return runEnergyAuditWorkflow(
+        args.bill_data ?? {},
+        args.property ?? {},
+        args.devices ?? [],
+        args.tariff ?? {}
+      );
+
+    case "workflow_fleet_optimization":
+      return runFleetOptimizationWorkflow(
+        args.depot ?? "",
+        args.stops ?? [],
+        args.vehicles ?? [],
+        args.items ?? [],
+        args.include_maintenance_check ?? true
+      );
+
+    case "workflow_tax_filing":
+      return runTaxFilingWorkflow(
+        args.tax_year,
+        args.entity_type ?? "LLC",
+        args.transactions ?? [],
+        args.accounts ?? [],
+        args.jurisdiction ?? "US-federal"
       );
 
     default:

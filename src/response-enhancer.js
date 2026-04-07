@@ -228,6 +228,59 @@ const NEXT_TOOL_MAP = {
   intent_compare:   ["intent_optimize",  "intent_history",  "intent_route"],
   intent_optimize:  ["intent_history",   "intent_route",    "intent_preflight"],
   intent_history:   ["intent_route",     "intent_preflight", "intent_optimize"],
+
+  // ── Energy & Utilities workflow (Phase 10) ────────────────────────────────
+  energy_analyze_bill:       ["energy_compare_providers", "energy_audit_efficiency", "energy_dashboard"],
+  energy_compare_providers:  ["energy_analyze_bill", "energy_audit_efficiency", "energy_forecast"],
+  energy_forecast:           ["energy_optimize_schedule", "energy_dashboard", "energy_analyze_bill"],
+  energy_audit_efficiency:   ["energy_forecast", "energy_optimize_schedule", "energy_dashboard"],
+  energy_optimize_schedule:  ["energy_dashboard", "energy_forecast", "energy_analyze_bill"],
+  energy_dashboard:          ["energy_analyze_bill", "energy_audit_efficiency", "energy_forecast"],
+
+  // ── Fleet & Logistics workflow (Phase 10) ─────────────────────────────────
+  fleet_optimize_route:       ["fleet_plan_load", "fleet_track", "fleet_dashboard"],
+  fleet_plan_load:            ["fleet_predict_maintenance", "fleet_optimize_route", "fleet_dashboard"],
+  fleet_predict_maintenance:  ["fleet_track", "fleet_plan_load", "fleet_dashboard"],
+  fleet_track:                ["fleet_freight_quote", "fleet_optimize_route", "fleet_dashboard"],
+  fleet_freight_quote:        ["fleet_optimize_route", "fleet_plan_load", "fleet_track"],
+  fleet_dashboard:            ["fleet_optimize_route", "fleet_predict_maintenance", "fleet_track"],
+
+  // ── Tax & Accounting workflow (Phase 10) ──────────────────────────────────
+  tax_categorize_expense:     ["tax_reconcile", "tax_forecast_cashflow", "tax_financial_statement"],
+  tax_prepare_return:         ["tax_forecast_cashflow", "tax_deadlines", "tax_financial_statement"],
+  tax_reconcile:              ["tax_financial_statement", "tax_categorize_expense", "tax_prepare_return"],
+  tax_forecast_cashflow:      ["tax_deadlines", "tax_prepare_return", "tax_financial_statement"],
+  tax_deadlines:              ["tax_prepare_return", "tax_forecast_cashflow", "tax_reconcile"],
+  tax_financial_statement:    ["tax_forecast_cashflow", "tax_reconcile", "tax_prepare_return"],
+
+  // ── Agent Guardrails workflow (Phase 10) ──────────────────────────────────
+  guardrails_enforce_policy:   ["guardrails_validate_output", "guardrails_dashboard", "guardrails_set_policy"],
+  guardrails_validate_output:  ["guardrails_report_violation", "guardrails_enforce_policy", "guardrails_dashboard"],
+  guardrails_set_policy:       ["guardrails_enforce_policy", "guardrails_dashboard", "guardrails_compliance_report"],
+  guardrails_dashboard:        ["guardrails_set_policy", "guardrails_compliance_report", "guardrails_report_violation"],
+  guardrails_report_violation: ["guardrails_compliance_report", "guardrails_dashboard", "guardrails_enforce_policy"],
+  guardrails_compliance_report:["guardrails_dashboard", "guardrails_set_policy", "guardrails_enforce_policy"],
+
+  // ── Agent Benchmarking workflow (Phase 10) ────────────────────────────────
+  benchmark_create_suite:   ["benchmark_run", "benchmark_history", "benchmark_evaluate"],
+  benchmark_run:            ["benchmark_evaluate", "benchmark_compare_agents", "benchmark_history"],
+  benchmark_evaluate:       ["benchmark_history", "benchmark_run", "benchmark_report"],
+  benchmark_compare_agents: ["benchmark_report", "benchmark_history", "benchmark_run"],
+  benchmark_history:        ["benchmark_run", "benchmark_report", "benchmark_evaluate"],
+  benchmark_report:         ["benchmark_run", "benchmark_compare_agents", "benchmark_history"],
+
+  // ── Advanced Observability workflow (Phase 10) ────────────────────────────
+  observability_create_monitor: ["observability_metrics", "observability_set_alert", "observability_dashboard"],
+  observability_metrics:        ["observability_detect_drift", "observability_dashboard", "observability_root_cause"],
+  observability_detect_drift:   ["observability_root_cause", "observability_set_alert", "observability_dashboard"],
+  observability_root_cause:     ["observability_set_alert", "observability_metrics", "observability_dashboard"],
+  observability_set_alert:      ["observability_dashboard", "observability_metrics", "observability_detect_drift"],
+  observability_dashboard:      ["observability_root_cause", "observability_detect_drift", "observability_metrics"],
+
+  // ── Phase 10 composite workflow tools ────────────────────────────────────────
+  workflow_energy_audit:      ["energy_dashboard", "energy_forecast", "energy_compare_providers"],
+  workflow_fleet_optimization:["fleet_track", "fleet_dashboard", "fleet_predict_maintenance"],
+  workflow_tax_filing:        ["tax_deadlines", "tax_forecast_cashflow", "tax_financial_statement"],
 };
 
 // ─── Contextual Tips ──────────────────────────────────────────────────────────
@@ -529,6 +582,14 @@ const TIPS = {
   workflow_full_fraud_check:
     "Tip: Fraud assessment complete — monitor platform-wide trends with fraud_dashboard.",
 
+  // Phase 10 composite workflows
+  workflow_energy_audit:
+    "Tip: Full energy audit complete — track ongoing consumption vs the new schedule with energy_dashboard.",
+  workflow_fleet_optimization:
+    "Tip: Fleet dispatch ready — monitor vehicles in real time with fleet_track and check efficiency with fleet_dashboard.",
+  workflow_tax_filing:
+    "Tip: Tax filing package ready — check upcoming deadlines with tax_deadlines and forecast cash needed for payment with tax_forecast_cashflow.",
+
   // Platform Audit tools (Phase 7)
   platform_health_check:
     "Tip: Health check complete — run platform_audit_descriptions next to find description quality issues across your tool catalog.",
@@ -600,7 +661,91 @@ const TIPS = {
     "Tip: Optimization report ready — review past routing decisions with intent_history to see if similar workflows improved after applying these changes.",
   intent_history:
     "Tip: History reviewed — route your next task with intent_route to keep every action on the optimal path.",
-};
+
+  // ── Energy & Utilities workflow (Phase 10) ────────────────────────────────
+  energy_analyze_bill:
+    "Tip: Bill analysed — compare providers with energy_compare_providers to see if you can get a better rate.",
+  energy_compare_providers:
+    "Tip: Providers compared — audit your property's efficiency with energy_audit_efficiency to reduce consumption before switching.",
+  energy_forecast:
+    "Tip: Forecast ready — optimise your usage schedule with energy_optimize_schedule to cut peak-demand charges.",
+  energy_audit_efficiency:
+    "Tip: Efficiency audit complete — model consumption after upgrades with energy_forecast to quantify savings.",
+  energy_optimize_schedule:
+    "Tip: Schedule optimised — view live consumption vs the new plan with energy_dashboard to confirm savings are landing.",
+  energy_dashboard:
+    "Tip: Dashboard loaded — deep-dive on any anomalies by analysing the relevant bill with energy_analyze_bill.",
+
+  // ── Fleet & Logistics workflow (Phase 10) ─────────────────────────────────
+  fleet_optimize_route:
+    "Tip: Routes optimised — plan cargo loading across the fleet with fleet_plan_load to maximise capacity utilisation.",
+  fleet_plan_load:
+    "Tip: Load plan ready — check vehicle health before dispatch with fleet_predict_maintenance to avoid mid-route breakdowns.",
+  fleet_predict_maintenance:
+    "Tip: Maintenance forecast in hand — track vehicles in real time with fleet_track once they depart.",
+  fleet_track:
+    "Tip: Fleet tracked — generate a freight quote for the next shipment with fleet_freight_quote while the current run is live.",
+  fleet_freight_quote:
+    "Tip: Quote received — optimise the delivery route with fleet_optimize_route to reduce the quoted mileage further.",
+  fleet_dashboard:
+    "Tip: Fleet overview loaded — drill into route efficiency with fleet_optimize_route or check overdue maintenance with fleet_predict_maintenance.",
+
+  // ── Tax & Accounting workflow (Phase 10) ──────────────────────────────────
+  tax_categorize_expense:
+    "Tip: Expense categorised — reconcile the account with tax_reconcile to keep books clean before month-end.",
+  tax_prepare_return:
+    "Tip: Return drafted — cross-check cash position with tax_forecast_cashflow to ensure payment funds are available by the deadline.",
+  tax_reconcile:
+    "Tip: Accounts reconciled — generate financial statements with tax_financial_statement to capture the clean period-end position.",
+  tax_forecast_cashflow:
+    "Tip: Cash flow forecast ready — check upcoming filing deadlines with tax_deadlines so you're never caught off-guard.",
+  tax_deadlines:
+    "Tip: Deadlines confirmed — start preparing the return now with tax_prepare_return to avoid a last-minute rush.",
+  tax_financial_statement:
+    "Tip: Statements generated — forecast next period's cash flow with tax_forecast_cashflow to plan ahead.",
+
+  // ── Agent Guardrails workflow (Phase 10) ──────────────────────────────────
+  guardrails_enforce_policy:
+    "Tip: Policy enforced — validate the action's output with guardrails_validate_output once the tool has run.",
+  guardrails_validate_output:
+    "Tip: Output validated — if issues were found, report the violation with guardrails_report_violation to build the audit trail.",
+  guardrails_set_policy:
+    "Tip: Policy set — verify it's working as expected with guardrails_enforce_policy on a sample action.",
+  guardrails_dashboard:
+    "Tip: Dashboard reviewed — tighten any high-violation policies with guardrails_set_policy to reduce breach rates.",
+  guardrails_report_violation:
+    "Tip: Violation reported — generate a formal compliance report with guardrails_compliance_report for your audit records.",
+  guardrails_compliance_report:
+    "Tip: Compliance report ready — review the guardrail dashboard with guardrails_dashboard to monitor ongoing trends.",
+
+  // ── Agent Benchmarking workflow (Phase 10) ────────────────────────────────
+  benchmark_create_suite:
+    "Tip: Test suite created — run it immediately with benchmark_run to establish your baseline scores.",
+  benchmark_run:
+    "Tip: Benchmark run complete — evaluate individual outputs in detail with benchmark_evaluate, or compare agents head-to-head with benchmark_compare_agents.",
+  benchmark_evaluate:
+    "Tip: Output evaluated — review historical performance trends with benchmark_history to see if this score is a regression.",
+  benchmark_compare_agents:
+    "Tip: Comparison complete — generate a shareable report with benchmark_report for stakeholders.",
+  benchmark_history:
+    "Tip: History reviewed — if regressions were detected, run a fresh benchmark with benchmark_run to confirm.",
+  benchmark_report:
+    "Tip: Report generated — schedule a recurring benchmark run with benchmark_run to track performance continuously.",
+
+  // ── Advanced Observability workflow (Phase 10) ────────────────────────────
+  observability_create_monitor:
+    "Tip: Monitor active — retrieve your first metrics snapshot with observability_metrics to confirm data is flowing.",
+  observability_metrics:
+    "Tip: Metrics retrieved — run observability_detect_drift to check whether performance has shifted from the baseline.",
+  observability_detect_drift:
+    "Tip: Drift analysis complete — if drift was detected, investigate the root cause with observability_root_cause.",
+  observability_root_cause:
+    "Tip: Root cause identified — set an alert with observability_set_alert so you're notified immediately if it recurs.",
+  observability_set_alert:
+    "Tip: Alert configured — view your full monitoring landscape with observability_dashboard to ensure coverage is complete.",
+  observability_dashboard:
+    "Tip: Dashboard loaded — investigate any anomalies further with observability_root_cause or refine thresholds with observability_set_alert.",
+}
 
 // ─── Fallback suggestions ─────────────────────────────────────────────────────
 
