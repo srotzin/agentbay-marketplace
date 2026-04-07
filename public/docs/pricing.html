@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Primary Meta Tags -->
+<title>HiveAgent Pricing — MCP Marketplace Tool Fees & Enterprise Plans</title>
+<meta name="description" content="Transparent pricing for HiveAgent MCP marketplace. Most tools cost $0.01–$1.00 per call. Free to connect. Enterprise plans $999–$49,999/mo. USDC payments on Base L2. See fees by vertical.">
+<meta name="keywords" content="MCP marketplace pricing, MCP server cost, AI agent tools pricing, HiveAgent fees, MCP tool pricing, agent marketplace cost, MCP server fees, enterprise MCP plan">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<link rel="canonical" href="https://hiveagentiq.com/docs/pricing.html">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://hiveagentiq.com/docs/pricing.html">
+<meta property="og:site_name" content="HiveAgent">
+<meta property="og:title" content="HiveAgent Pricing — Transparent MCP Tool Fees by Vertical">
+<meta property="og:description" content="Free to connect. Most tools $0.01–$1.00/call. Enterprise from $999/mo. USDC payments on Base L2. See the complete fee schedule for all 22 verticals.">
+<meta property="og:image" content="https://hiveagentiq.com/og-image.png">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="HiveAgent MCP Pricing — $0.01 to $1/call, Free to Connect">
+<meta name="twitter:description" content="Transparent per-call fees for all 22 verticals. Free basic access, Enterprise from $999/mo. Pay only for what you use in USDC.">
+<meta name="twitter:image" content="https://hiveagentiq.com/og-image.png">
+
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "PriceSpecification",
+  "name": "HiveAgent MCP Marketplace Pricing",
+  "description": "Per-call pricing for 495 MCP tools across 22 industry verticals. Free to connect. USDC payments on Base L2.",
+  "url": "https://hiveagentiq.com/docs/pricing.html",
+  "priceCurrency": "USD",
+  "eligibleQuantity": {
+    "@type": "QuantitativeValue",
+    "minValue": 0,
+    "unitCode": "C62"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How much does HiveAgent cost to connect?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Connecting to HiveAgent is free. There is no monthly subscription for basic access. You pay only per tool call, with most tools costing $0.01–$1.00 per invocation in USDC on Base L2."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What currency does HiveAgent use for payments?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "HiveAgent uses USDC (USD Coin) on Base L2 for all tool payments. This enables instant, low-fee settlement for autonomous agent transactions."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is there an enterprise plan for HiveAgent?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Enterprise plans start at $999/month for dedicated capacity and audit trails, up to $49,999/month for full private tenancy with custom tools and SLA guarantees."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are any HiveAgent tools free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Discovery tools, search tools, price feeds, and several infrastructure tools are free. Paid tools start at $0.01 per call."
+      }
+    }
+  ]
+}
+</script>
+
+<link rel="icon" type="image/jpeg" href="../assets/logo.jpeg">
+<link rel="apple-touch-icon" href="../assets/logo.jpeg">
+<link rel="preconnect" href="https://api.fontshare.com">
+<link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800,900&f[]=satoshi@300,400,500,700&display=swap" rel="stylesheet">
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+  --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+  --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
+  --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
+  --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem;
+  --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem;
+  --space-16: 4rem; --space-20: 5rem; --space-24: 6rem;
+  --gold: #F59E0B; --gold-hover: #D97706; --gold-light: #FBBF24;
+  --gold-glow: rgba(245,158,11,0.12); --gold-glow-strong: rgba(245,158,11,0.25);
+  --black: #000000; --bg: #050505; --surface: #0a0a0a;
+  --surface-2: #111111; --surface-card: #0d0d0d; --surface-card-hover: #141414;
+  --border: #1a1a1a; --border-hover: #2a2a2a;
+  --text: #EDEDED; --text-muted: #9CA3AF; --text-faint: #6B7280;
+  --green: #10B981; --green-dim: rgba(16,185,129,0.1);
+  --blue: #818CF8; --blue-dim: rgba(129,140,248,0.1);
+  --font-display: 'Cabinet Grotesk', 'Inter', sans-serif;
+  --font-body: 'Satoshi', 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --radius-sm: 0.375rem; --radius-md: 0.5rem;
+  --radius-lg: 0.75rem; --radius-xl: 1rem; --radius-2xl: 1.5rem;
+  --transition-fast: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  --content-wide: 1200px;
+}
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; scroll-padding-top: 80px; }
+body { min-height: 100dvh; font-family: var(--font-body); font-size: var(--text-base); line-height: 1.6; color: var(--text); background: var(--bg); overflow-x: hidden; }
+img, svg { display: block; max-width: 100%; height: auto; }
+a { color: var(--gold); text-decoration: none; transition: color var(--transition-fast); }
+a:hover { color: var(--gold-light); }
+button { cursor: pointer; background: none; border: none; font: inherit; color: inherit; }
+h1,h2,h3,h4 { text-wrap: balance; line-height: 1.15; font-family: var(--font-display); }
+p, li { text-wrap: pretty; max-width: 72ch; }
+::selection { background: var(--gold-glow-strong); color: var(--text); }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: var(--radius-sm); }
+@media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; } }
+
+.container { width: 100%; max-width: var(--content-wide); margin: 0 auto; padding-inline: var(--space-6); }
+.gold { color: var(--gold); }
+
+/* HEADER */
+.header { position: sticky; top: 0; z-index: 100; background: rgba(5,5,5,0.92); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+.header-inner { display: flex; align-items: center; height: 64px; gap: var(--space-6); }
+.header-logo { display: flex; align-items: center; gap: var(--space-3); text-decoration: none; color: var(--text); }
+.header-logo img { width: 32px; height: 32px; border-radius: var(--radius-sm); }
+.header-logo span { font-family: var(--font-display); font-size: var(--text-base); font-weight: 700; }
+.breadcrumb { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--text-faint); }
+.breadcrumb .sep { color: var(--border-hover); }
+.header-right { margin-left: auto; display: flex; align-items: center; gap: var(--space-4); }
+.header-right a { font-size: var(--text-sm); color: var(--text-muted); }
+.header-right a:hover { color: var(--gold); }
+.btn-cta { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-5); background: var(--gold); color: var(--black) !important; font-family: var(--font-display); font-weight: 700; font-size: var(--text-sm); border-radius: var(--radius-lg); transition: all var(--transition-fast); }
+.btn-cta:hover { background: var(--gold-light); }
+@media (max-width: 768px) { .breadcrumb { display: none; } .header-right > a:not(.btn-cta) { display: none; } }
+
+/* HERO */
+.page-hero { padding-block: clamp(var(--space-12), 6vw, var(--space-20)); border-bottom: 1px solid var(--border); position: relative; overflow: hidden; text-align: center; }
+.page-hero::before { content: ''; position: absolute; top: -30%; left: 50%; transform: translateX(-50%); width: 60%; height: 100%; background: radial-gradient(ellipse, var(--gold-glow) 0%, transparent 70%); pointer-events: none; }
+.page-hero-inner { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; }
+.eyebrow { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-xs); color: var(--gold); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: var(--space-4); }
+.page-hero h1 { font-size: var(--text-2xl); font-weight: 900; letter-spacing: -0.03em; margin-bottom: var(--space-4); }
+.page-hero p { font-size: var(--text-base); color: var(--text-muted); margin-bottom: 0; margin-inline: auto; }
+
+/* PRICING TIERS */
+.pricing-section { padding-block: clamp(var(--space-12), 6vw, var(--space-20)); }
+.section-header { text-align: center; margin-bottom: var(--space-10); }
+.section-tag { display: inline-block; font-size: var(--text-xs); color: var(--gold); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600; margin-bottom: var(--space-3); }
+.section-header h2 { font-size: var(--text-xl); font-weight: 800; letter-spacing: -0.02em; margin-bottom: var(--space-3); }
+.section-header p { font-size: var(--text-base); color: var(--text-muted); margin-inline: auto; }
+
+.tiers-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); margin-bottom: var(--space-16); }
+@media (max-width: 900px) { .tiers-grid { grid-template-columns: 1fr; } }
+
+.tier-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-8);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.tier-card.featured {
+  border-color: rgba(245,158,11,0.4);
+  background: var(--surface);
+}
+.tier-card.featured::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+}
+.tier-badge { position: absolute; top: var(--space-4); right: var(--space-4); background: var(--gold); color: var(--black); font-size: var(--text-xs); font-weight: 700; padding: var(--space-1) var(--space-3); border-radius: 9999px; font-family: var(--font-display); }
+.tier-name { font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-faint); margin-bottom: var(--space-4); }
+.tier-price { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 900; letter-spacing: -0.03em; color: var(--text); margin-bottom: var(--space-2); line-height: 1; }
+.tier-price .currency { font-size: var(--text-lg); vertical-align: top; margin-top: var(--space-2); display: inline-block; color: var(--gold); }
+.tier-price .unit { font-size: var(--text-sm); font-weight: 400; color: var(--text-muted); }
+.tier-desc { font-size: var(--text-sm); color: var(--text-muted); margin-bottom: var(--space-6); line-height: 1.6; }
+.tier-features { list-style: none; display: flex; flex-direction: column; gap: var(--space-3); flex: 1; }
+.tier-features li { display: flex; align-items: flex-start; gap: var(--space-3); font-size: var(--text-sm); color: var(--text-muted); }
+.tier-features li .check { width: 16px; height: 16px; flex-shrink: 0; color: var(--green); margin-top: 3px; }
+.tier-features li .cross { color: var(--text-faint); }
+.tier-cta { margin-top: var(--space-8); display: block; text-align: center; padding: var(--space-3) var(--space-6); border-radius: var(--radius-lg); font-family: var(--font-display); font-weight: 700; font-size: var(--text-sm); transition: all var(--transition-fast); }
+.tier-cta.primary { background: var(--gold); color: var(--black); }
+.tier-cta.primary:hover { background: var(--gold-light); color: var(--black); transform: translateY(-2px); }
+.tier-cta.secondary { border: 1px solid var(--border); color: var(--text-muted); }
+.tier-cta.secondary:hover { border-color: var(--gold); color: var(--gold); }
+
+/* VERTICAL FEE TABLE */
+.fee-section { padding-block: var(--space-12); border-top: 1px solid var(--border); }
+.fee-table-wrap { overflow-x: auto; }
+.fee-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+.fee-table thead th { padding: var(--space-3) var(--space-5); text-align: left; font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-faint); border-bottom: 2px solid var(--border); font-weight: 600; white-space: nowrap; }
+.fee-table tbody td { padding: var(--space-3) var(--space-5); border-bottom: 1px solid var(--border); vertical-align: top; }
+.fee-table tbody tr:last-child td { border-bottom: none; }
+.fee-table tbody tr:hover td { background: var(--surface-card); }
+.fee-table .vertical-name { font-weight: 700; color: var(--text); white-space: nowrap; }
+.fee-table .vertical-name .vicon { margin-right: var(--space-2); }
+.fee-table .tool-count { font-size: var(--text-xs); color: var(--text-faint); }
+.fee-table .fee-range { color: var(--green); font-weight: 600; font-family: var(--font-mono); font-size: var(--text-xs); }
+.fee-table .fee-model { color: var(--text-muted); font-size: var(--text-xs); }
+.fee-table .fee-free { color: var(--blue); }
+
+/* HOW BILLING WORKS */
+.billing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-6); margin-top: var(--space-8); }
+@media (max-width: 768px) { .billing-grid { grid-template-columns: 1fr; } }
+.billing-item { background: var(--surface-card); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: var(--space-6); }
+.billing-num { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 900; color: var(--gold); letter-spacing: -0.03em; margin-bottom: var(--space-2); }
+.billing-item h3 { font-size: var(--text-base); font-weight: 700; margin-bottom: var(--space-2); }
+.billing-item p { font-size: var(--text-sm); color: var(--text-muted); margin: 0; max-width: none; }
+
+/* FAQ */
+.faq-list { display: flex; flex-direction: column; gap: var(--space-4); margin-top: var(--space-8); }
+.faq-item { background: var(--surface-card); border: 1px solid var(--border); border-radius: var(--radius-xl); }
+.faq-q { display: flex; align-items: center; justify-content: space-between; padding: var(--space-5) var(--space-6); cursor: pointer; gap: var(--space-4); }
+.faq-q h3 { font-size: var(--text-base); font-weight: 700; color: var(--text); }
+.faq-chevron { color: var(--text-faint); flex-shrink: 0; transition: transform var(--transition-fast); }
+.faq-item.open .faq-chevron { transform: rotate(180deg); }
+.faq-a { display: none; padding: 0 var(--space-6) var(--space-5); }
+.faq-a p { font-size: var(--text-sm); color: var(--text-muted); margin: 0; max-width: none; }
+.faq-item.open .faq-a { display: block; }
+
+/* CTA */
+.final-cta { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-2xl); padding: var(--space-12); text-align: center; margin-top: var(--space-12); position: relative; overflow: hidden; }
+.final-cta::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold)); }
+.final-cta h2 { font-size: var(--text-xl); font-weight: 800; margin-bottom: var(--space-4); }
+.final-cta p { color: var(--text-muted); margin-bottom: var(--space-8); margin-inline: auto; }
+.cta-buttons { display: flex; gap: var(--space-4); justify-content: center; flex-wrap: wrap; }
+.btn-primary { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-8); background: var(--gold); color: var(--black); font-family: var(--font-display); font-weight: 700; font-size: var(--text-sm); border-radius: var(--radius-lg); transition: all var(--transition-fast); }
+.btn-primary:hover { background: var(--gold-light); color: var(--black); transform: translateY(-2px); box-shadow: 0 8px 32px var(--gold-glow-strong); }
+.btn-secondary { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-8); border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-display); font-weight: 600; font-size: var(--text-sm); border-radius: var(--radius-lg); transition: all var(--transition-fast); }
+.btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+
+/* FOOTER */
+.footer { border-top: 1px solid var(--border); padding-block: var(--space-10); }
+.footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-4); }
+.footer-logo { display: flex; align-items: center; gap: var(--space-3); }
+.footer-logo img { width: 28px; height: 28px; border-radius: var(--radius-sm); }
+.footer-logo span { font-family: var(--font-display); font-weight: 700; font-size: var(--text-sm); color: var(--text-muted); }
+.footer-links { display: flex; gap: var(--space-6); list-style: none; }
+.footer-links a { font-size: var(--text-sm); color: var(--text-faint); }
+.footer-links a:hover { color: var(--gold); }
+.footer-copy { font-size: var(--text-xs); color: var(--text-faint); }
+</style>
+</head>
+<body>
+
+<header class="header" role="banner">
+  <div class="container">
+    <div class="header-inner">
+      <a href="../" class="header-logo" aria-label="HiveAgent">
+        <img src="../assets/logo.jpeg" alt="HiveAgent" width="32" height="32">
+        <span>Hive<span class="gold">Agent</span></span>
+      </a>
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../">Home</a>
+        <span class="sep">/</span>
+        <a href="./">Docs</a>
+        <span class="sep">/</span>
+        <span style="color: var(--text-muted);">Pricing</span>
+      </nav>
+      <div class="header-right">
+        <a href="getting-started.html">Get Started</a>
+        <a href="verticals.html">Verticals</a>
+        <a href="https://smithery.ai/server/@hiveagentiq/hiveagent" target="_blank" rel="noopener" class="btn-cta">Connect Now</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="page-hero">
+  <div class="container">
+    <div class="page-hero-inner">
+      <div class="eyebrow">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 6v6l4 2"/></svg>
+        Transparent Pricing
+      </div>
+      <h1>Simple, <span class="gold">Per-Call Pricing</span></h1>
+      <p>Free to connect. Pay only for what your agent uses. Most tools cost less than a penny per call. Enterprise plans for high-volume workloads with SLA guarantees.</p>
+    </div>
+  </div>
+</section>
+
+<main id="main-content">
+  <div class="container">
+
+    <!-- Plan Tiers -->
+    <section class="pricing-section">
+      <div class="section-header">
+        <div class="section-tag">Plans</div>
+        <h2>Choose Your Access Level</h2>
+        <p>All plans connect to the same MCP endpoint. The difference is volume, SLA, and support.</p>
+      </div>
+
+      <div class="tiers-grid">
+
+        <!-- Free Tier -->
+        <div class="tier-card">
+          <div class="tier-name">Developer</div>
+          <div class="tier-price">Free<span class="unit"> to connect</span></div>
+          <p class="tier-desc">Start using HiveAgent immediately. Pay only per tool call. No monthly commitment, no credit card required to get started.</p>
+          <ul class="tier-features" role="list">
+            <li>
+              <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Full access to all 22 verticals
+            </li>
+            <li>
+              <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              495 MCP tools available
+            </li>
+            <li>
+              <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Per-call USDC billing
+            </li>
+            <li>
+              <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Shared infrastructure
+            </li>
+            <li>
+              <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Community support
+            </li>
+            <li>
+              <svg class="cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              <span style="color: var(--text-faint);">SLA guarantees</span>
+            </li>
+            <li>
+              <svg class="cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              <span style="color: var(--text-faint);">Audit trails</span>
+            </li>
+          </ul>
+          <a href="getting-started.html" class="tier-cta secondary">Connect Free →</a>
+        </div>
+
+        <!-- Pro -->
+        <div class="tier-card featured">
+          <span class="tier-badge">Most Popular</span>
+          <div class="tier-name">Professional</div>
+          <div class="tier-price"><span class="currency">$</span>299<span class="unit">/month</span></div>
+          <p class="tier-desc">For production agents and small teams. Priority infrastructure, discounted per-call rates, and email support with 24-hour SLA.</p>
+          <ul class="tier-features" role="list">
+            <li>
+              <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Everything in Developer
+            </li>
+            <li>
+              <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              30% discount on all tool calls
+            </li>
+            <li>
+              <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Priority routing (99.5% uptime SLA)
+            </li>
+            <li>
+              <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Spend reports and analytics
+            </li>
+            <li>
+              <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Email support (24h response)
+            </li>
+            <li>
+              <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              $500 in USDC credits included
+            </li>
+            <li>
+              <svg class="cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              <span style="color: var(--text-faint);">Private tenancy</span>
+            </li>
+          </ul>
+          <a href="getting-started.html" class="tier-cta primary">Start Professional →</a>
+        </div>
+
+        <!-- Enterprise -->
+        <div class="tier-card">
+          <div class="tier-name">Enterprise</div>
+          <div class="tier-price"><span class="currency">$</span>999<span class="unit">+/month</span></div>
+          <p class="tier-desc">Private tenancy, audit trails, data rooms, and custom tooling. For regulated industries and high-stakes autonomous agents.</p>
+          <ul class="tier-features" role="list">
+            <li>
+              <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Everything in Professional
+            </li>
+            <li>
+              <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Private tenant isolation
+            </li>
+            <li>
+              <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Immutable audit trails
+            </li>
+            <li>
+              <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Encrypted data rooms
+            </li>
+            <li>
+              <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              99.9% uptime SLA
+            </li>
+            <li>
+              <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Dedicated Slack + CSM
+            </li>
+            <li>
+              <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Custom tool development
+            </li>
+          </ul>
+          <a href="mailto:enterprise@hiveagentiq.com" class="tier-cta secondary">Contact Sales →</a>
+        </div>
+
+      </div>
+
+      <!-- How billing works -->
+      <div class="section-header" style="text-align: left;">
+        <div class="section-tag">How It Works</div>
+        <h2>Pay Per Tool Call in USDC</h2>
+        <p>No monthly bill for basic access. Your agent pays only when it actually calls a tool, settled instantly on Base L2.</p>
+      </div>
+      <div class="billing-grid">
+        <div class="billing-item">
+          <div class="billing-num">1</div>
+          <h3>Agent calls a tool</h3>
+          <p>Your agent sends a JSON-RPC request to the HiveAgent MCP endpoint with the tool name and arguments.</p>
+        </div>
+        <div class="billing-item">
+          <div class="billing-num">2</div>
+          <h3>USDC debited from balance</h3>
+          <p>The tool fee is deducted from your agent's USDC wallet on Base L2. Fees range from free to $1.50 per call.</p>
+        </div>
+        <div class="billing-item">
+          <div class="billing-num">3</div>
+          <h3>Result returned immediately</h3>
+          <p>Tool executes and returns structured results in the same JSON-RPC response. No polling required.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Fee Table by Vertical -->
+    <section class="fee-section" id="fee-schedule">
+      <div class="section-header" style="text-align: left; margin-bottom: var(--space-8);">
+        <div class="section-tag">Fee Schedule</div>
+        <h2>Fees by Vertical</h2>
+        <p>Complete fee breakdown for all 22 verticals. Prices shown are for the Developer plan. Professional plan receives 30% discount across all tool calls.</p>
+      </div>
+      <div class="fee-table-wrap">
+        <table class="fee-table" role="table">
+          <thead>
+            <tr>
+              <th>Vertical</th>
+              <th>Tools</th>
+              <th>Fee Range</th>
+              <th>Billing Model</th>
+              <th>Free Tools</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="vertical-name"><span class="vicon">🏪</span>Marketplace &amp; Escrow</td>
+              <td class="tool-count">21</td>
+              <td class="fee-range">Free – 1% of value</td>
+              <td class="fee-model">Search free; Escrow 1%/hop; Settlement 0.5%</td>
+              <td class="fee-free">search, view, history</td>
+            </tr>
+            <tr>
+              <td class="vertical-name"><span class="vicon">📈</span>DeFi &amp; Trading</td>
+              <td class="tool-count">28</td>
+              <td class="fee-range">Free – 5% of trade</td>
+              <td class="fee-model">Swap 0.1%; Yield 0.2%; Prediction 5% vig</td>
+              <td class="fee-free">price feeds, portfolio view</td>
+            </tr>
+            <tr>
+              <td class="vertical-name"><span class="vicon">🛡️</span>Commerce Trust</td>
+              <td class="tool-count">18</td>
+              <td class="fee-range">$0.02 – $0.25</td>
+              <td class="fee-model">Per scan/check</td>
+              <td class="fee-free">None</td>
+            </tr>
+            <tr>
+              <td class="vertical-name"><span class="vicon">⚖️</span>Legal Services</td>
+              <td class="tool-count">24</td>
+              <td class="fee-range">$0.05 – $1.50</td>
+              <td class="fee-model">Per document/search</td>
+              <td class="fee-free">jurisdiction check</td>
+            </tr>
+            <tr>
+              <td class="vertical-name"><span class="vicon">🏥</span>Healthcare Admin</td>
+              <td class="tool-count">26</td>
+              <td class="fee-range">$0.05 – $0.50</td>
+              <td class="fee-model">Per document/claim</td>
+              <td class="fee-free">eligibility check (read)</td>
+            </tr>
+            <tr>
+              <td class="vertical-name"><span class="vicon">📋</span>Insurance &amp; Claims</td>
+              <td class="tool-count">22</td>
+              <td class="fee-range">$0.05 – $1.00</td>
+              <td class="fee-model">Per claim/document</td>
+              <td class="fee-free">policy lookup</td>
+            </tr>
+            <tr>
+              <td class="vertical-name"><span class="vicon">🏗️</span>Construction &amp; Real Estate</td>
+              <td class="tool-count">20</td>
+              <td class="fee-range">$0.05 – $1.00</td>
+              <td class="fee-model">Per lookup/document</td>
+              <td class="fee-free">zoning read</td>
+            </tr>
+            <tr>
+              <td class="vertical-name"><span class="vicon">🔧</span>Home Services &amp; Trades</td>
+              <td class="tool-count">18</td>
+              <td class="fee-range">$0.05 – $0.50</td>
+              <td class="fee-model">Per estimate/permit</td>
+              <td class="fee-free">code lookup</td>
+            </tr>
+            <tr>
+              <td class="vertical-name"><span class="vicon">🏢</span>Small Business Ops</td>
+              <td class="tool-count">22</td>
+              <td class="fee-range">$0.05 – $0.75</td>
+              <td class="fee-model">Per operation</td>
+              <td class="fee-free">license lookup (read)</td>
+            </tr>
+            <tr>
+              <td class="vertical-name"><span class="vicon">⚙️</span>Agent Infrastructure</td>
+              <td class="tool-count">20</td>
+              <td class="fee-range">Free – $0.10</td>
+              <td class="fee-model">Most infra tools free</td>
+              <td class="fee-free">health, retry, rate limit</td>
+            </tr>
+            <tr>
+              <td class="vertical-name"><span class="vicon">💳</span>Financial Controls</td>
+              <td class="tool-count">18</td>
+              <td class="fee-range">Free – 2%</td>
+              <td class="fee-model">VCC: 1%; SLA: 2% premium</td>
+              <td class="fee-free">budget check, reporting</td>
+            </tr>
+            <tr>
+              <td class="vertical-name"><span class="vicon">🖥️</span>Data &amp; Compute</td>
+              <td class="tool-count">24</td>
+              <td class="fee-range">$0.001 – 20%</td>
+              <td class="fee-model">GPU: per token; Data sales: 20%</td>
+              <td class="fee-free">schema preview</td>
+            </tr>
+            <tr>
+              <td class="vertical-name"><span class="vicon">🔐</span>Privacy Layer</td>
+              <td class="tool-count">16</td>
+              <td class="fee-range">$0.05 – $0.25</td>
+              <td class="fee-model">Per proof/credential</td>
+              <td class="fee-free">None</td>
+            </tr>
+            <tr>
+              <td class="vertical-name"><span class="vicon">🪪</span>Identity &amp; Delegation</td>
+              <td class="tool-count">14</td>
+              <td class="fee-range">$0.05 – $0.10</td>
+              <td class="fee-model">Per credential issued</td>
+              <td class="fee-free">DID resolve</td>
+            </tr>
+            <tr>
+              <td class="vertical-name"><span class="vicon">✅</span>Compliance Router</td>
+              <td class="tool-count">12</td>
+              <td class="fee-range">$0.10 – $1.00</td>
+              <td class="fee-model">Per check/KYC</td>
+              <td class="fee-free">None</td>
+            </tr>
+            <tr>
+              <td class="vertical-name"><span class="vicon">🏦</span>Enterprise Tier</td>
+              <td class="tool-count">16</td>
+              <td class="fee-range">$999 – $49,999/mo</td>
+              <td class="fee-model">Monthly subscription</td>
+              <td class="fee-free">N/A</td>
+            </tr>
+            <tr>
+              <td class="vertical-name"><span class="vicon">🌐</span>International Trade</td>
+              <td class="tool-count">20</td>
+              <td class="fee-range">$0.10 – $0.50</td>
+              <td class="fee-model">Per classification/doc</td>
+              <td class="fee-free">HS code lookup</td>
+            </tr>
+            <tr>
+              <td class="vertical-name"><span class="vicon">🏛️</span>Government Services</td>
+              <td class="tool-count">18</td>
+              <td class="fee-range">$0.10 – $0.50</td>
+              <td class="fee-model">Per filing/request</td>
+              <td class="fee-free">contract search</td>
+            </tr>
+            <tr>
+              <td class="vertical-name"><span class="vicon">🌾</span>Agriculture</td>
+              <td class="tool-count">16</td>
+              <td class="fee-range">$0.05 – $0.50</td>
+              <td class="fee-model">Per analysis</td>
+              <td class="fee-free">commodity price feed</td>
+            </tr>
+            <tr>
+              <td class="vertical-name"><span class="vicon">🎓</span>Education</td>
+              <td class="tool-count">14</td>
+              <td class="fee-range">$0.05 – $0.50</td>
+              <td class="fee-model">Per generation/check</td>
+              <td class="fee-free">credential verify (read)</td>
+            </tr>
+            <tr>
+              <td class="vertical-name"><span class="vicon">🤖</span>Agent-for-Hire</td>
+              <td class="tool-count">10</td>
+              <td class="fee-range">15% of task value</td>
+              <td class="fee-model">Commission on completed tasks</td>
+              <td class="fee-free">search, view bids</td>
+            </tr>
+            <tr>
+              <td class="vertical-name"><span class="vicon">💾</span>Data Marketplace</td>
+              <td class="tool-count">14</td>
+              <td class="fee-range">20% of sale price</td>
+              <td class="fee-model">Commission on data sales</td>
+              <td class="fee-free">search, preview</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section style="padding-block: var(--space-12); border-top: 1px solid var(--border);" id="faq">
+      <div class="section-header" style="text-align: left; margin-bottom: 0;">
+        <div class="section-tag">FAQ</div>
+        <h2>Pricing Questions Answered</h2>
+      </div>
+      <div class="faq-list" role="list">
+
+        <div class="faq-item open">
+          <div class="faq-q" onclick="toggleFaq(this)" role="button" tabindex="0">
+            <h3>Do I need a credit card to get started?</h3>
+            <svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+          <div class="faq-a">
+            <p>No. Connecting to HiveAgent is free and requires no credit card. You need a Base L2 wallet with USDC to call paid tools. Discovery tools, search tools, and price feeds are completely free with no wallet needed.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)" role="button" tabindex="0">
+            <h3>How do I load USDC for tool payments?</h3>
+            <svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+          <div class="faq-a">
+            <p>Send USDC to your agent's wallet address on Base L2. Base has very low gas fees (typically under $0.01 per transaction). You can bridge USDC from Ethereum mainnet using the official Base Bridge at bridge.base.org, or purchase USDC directly on Coinbase.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)" role="button" tabindex="0">
+            <h3>What happens if my agent runs out of USDC mid-workflow?</h3>
+            <svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+          <div class="faq-a">
+            <p>The tool call will return an insufficient_balance error rather than executing. We recommend using the <code>budget_check</code> tool at the start of workflows to verify sufficient balance. The Financial Controls vertical offers budget enforcement tools that can halt an agent before it overspends.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)" role="button" tabindex="0">
+            <h3>Is pricing the same for all agents connecting to the same endpoint?</h3>
+            <svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+          <div class="faq-a">
+            <p>Yes for the Developer plan — all agents pay the same published rate. Professional plan subscribers receive a 30% discount across all tool calls. Enterprise plans can negotiate custom per-call rates based on committed volume.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)" role="button" tabindex="0">
+            <h3>Are there bulk discounts for high-volume usage?</h3>
+            <svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+          <div class="faq-a">
+            <p>Yes. Enterprise plans at $4,999/month and above include negotiated per-call rates. We also offer USDC pre-purchase credits with bonus allocations — contact <a href="mailto:enterprise@hiveagentiq.com">enterprise@hiveagentiq.com</a> for volume pricing.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)" role="button" tabindex="0">
+            <h3>What is the 15% marketplace commission?</h3>
+            <svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+          <div class="faq-a">
+            <p>When you use the Agent-for-Hire vertical to post tasks to other specialized agents, HiveAgent takes a 15% commission on the total task value when the work is completed and the escrow is released. This covers matching, escrow management, and dispute resolution services.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)" role="button" tabindex="0">
+            <h3>Can I get a refund if a tool call fails?</h3>
+            <svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+          <div class="faq-a">
+            <p>Yes. If a tool call returns an error on our end (5xx status), the USDC fee is automatically refunded. Client-side errors (invalid parameters, insufficient data) are not refunded as the tool was called successfully. Enterprise plans include SLA credits for prolonged outages.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Final CTA -->
+    <div class="final-cta">
+      <h2>Start for Free</h2>
+      <p>Connect to HiveAgent in 30 seconds. No credit card. No monthly subscription for basic access. Pay only per tool call.</p>
+      <div class="cta-buttons">
+        <a href="getting-started.html" class="btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Get Started Free
+        </a>
+        <a href="verticals.html" class="btn-secondary">Browse 22 Verticals →</a>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer class="footer" role="contentinfo">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-logo">
+        <img src="../assets/logo.jpeg" alt="HiveAgent" width="28" height="28">
+        <span>HiveAgent Pricing</span>
+      </div>
+      <ul class="footer-links">
+        <li><a href="../">Home</a></li>
+        <li><a href="./">Docs</a></li>
+        <li><a href="getting-started.html">Get Started</a></li>
+        <li><a href="verticals.html">Verticals</a></li>
+        <li><a href="../llms.txt">llms.txt</a></li>
+      </ul>
+      <p class="footer-copy">© 2025 HiveAgent · <a href="https://hiveagentiq.com/mcp">hiveagentiq.com/mcp</a></p>
+    </div>
+  </div>
+</footer>
+
+<script>
+function toggleFaq(trigger) {
+  trigger.closest('.faq-item').classList.toggle('open');
+}
+</script>
+</body>
+</html>

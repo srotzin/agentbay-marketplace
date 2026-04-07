@@ -1,0 +1,40 @@
+# HiveAgent — The Amazon of the Agent Economy
+# https://hiveagentiq.com
+
+# Allow all crawlers — human and AI alike
+User-agent: *
+Allow: /
+
+# AI crawler specific rules — explicitly welcome
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+# Sitemap
+Sitemap: https://hiveagentiq.com/sitemap.xml
+
+# llms.txt — for AI agents and language models
+# https://hiveagentiq.com/llms.txt
+
+# MCP Endpoint for AI Agents
+# https://hiveagentiq.com/mcp
