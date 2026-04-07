@@ -833,6 +833,69 @@ const TIPS = {
   event_dashboard:
     "Tip: Dashboard loaded — if registration is below target, push registrations with event_manage_registration or revisit the plan with event_plan.",
 
+  // ── Content & Social workflow (Phase 13) ──────────────────────────────────
+  content_generate:            ["content_optimize", "content_schedule_post", "content_repurpose"],
+  content_schedule_post:       ["content_analyze_engagement", "content_optimize", "content_dashboard"],
+  content_analyze_engagement:  ["content_optimize", "content_repurpose", "content_dashboard"],
+  content_optimize:            ["content_schedule_post", "content_analyze_engagement", "content_generate"],
+  content_repurpose:           ["content_schedule_post", "content_optimize", "content_dashboard"],
+  content_dashboard:           ["content_generate", "content_analyze_engagement", "content_optimize"],
+
+  // ── Property Management workflow (Phase 13) ───────────────────────────────
+  property_screen_tenant:    ["property_create_lease", "property_optimize_rent", "property_dashboard"],
+  property_create_lease:     ["property_rent_collection", "property_track_maintenance", "property_dashboard"],
+  property_track_maintenance:["property_dashboard", "property_rent_collection", "property_create_lease"],
+  property_optimize_rent:    ["property_screen_tenant", "property_rent_collection", "property_dashboard"],
+  property_rent_collection:  ["property_dashboard", "property_track_maintenance", "property_optimize_rent"],
+  property_dashboard:        ["property_optimize_rent", "property_screen_tenant", "property_track_maintenance"],
+
+  // ── Intellectual Property workflow (Phase 13) ─────────────────────────────
+  ip_search_patents:      ["ip_analyze_prior_art", "ip_draft_claims", "ip_freedom_to_operate"],
+  ip_analyze_prior_art:   ["ip_draft_claims", "ip_search_patents", "ip_portfolio"],
+  ip_monitor_trademark:   ["ip_portfolio", "ip_search_patents", "ip_freedom_to_operate"],
+  ip_draft_claims:        ["ip_portfolio", "ip_analyze_prior_art", "ip_freedom_to_operate"],
+  ip_portfolio:           ["ip_monitor_trademark", "ip_draft_claims", "ip_freedom_to_operate"],
+  ip_freedom_to_operate:  ["ip_search_patents", "ip_portfolio", "ip_analyze_prior_art"],
+
+  // ── Customer Support workflow (Phase 13) ──────────────────────────────────
+  support_triage_ticket:      ["support_generate_response", "support_search_kb", "support_customer_history"],
+  support_generate_response:  ["support_triage_ticket", "support_search_kb", "support_escalate"],
+  support_search_kb:          ["support_generate_response", "support_triage_ticket", "support_dashboard"],
+  support_escalate:           ["support_customer_history", "support_dashboard", "support_triage_ticket"],
+  support_customer_history:   ["support_generate_response", "support_triage_ticket", "support_dashboard"],
+  support_dashboard:          ["support_triage_ticket", "support_generate_response", "support_search_kb"],
+
+  // ── KYC / AML workflow (Phase 13) ─────────────────────────────────────────
+  kyc_verify_identity:       ["kyc_screen_aml", "kyc_assess_risk", "kyc_compliance_dashboard"],
+  kyc_screen_aml:            ["kyc_verify_identity", "kyc_assess_risk", "kyc_monitor_transactions"],
+  kyc_assess_risk:           ["kyc_monitor_transactions", "kyc_screen_aml", "kyc_compliance_dashboard"],
+  kyc_monitor_transactions:  ["kyc_generate_sar", "kyc_assess_risk", "kyc_compliance_dashboard"],
+  kyc_generate_sar:          ["kyc_compliance_dashboard", "kyc_monitor_transactions", "kyc_assess_risk"],
+  kyc_compliance_dashboard:  ["kyc_verify_identity", "kyc_screen_aml", "kyc_monitor_transactions"],
+
+  // ── Document Generation workflow (Phase 13) ───────────────────────────────
+  docgen_proposal:        ["docgen_presentation", "docgen_merge_templates", "docgen_dashboard"],
+  docgen_rfp_response:    ["docgen_proposal", "docgen_report", "docgen_dashboard"],
+  docgen_report:          ["docgen_presentation", "docgen_merge_templates", "docgen_dashboard"],
+  docgen_presentation:    ["docgen_proposal", "docgen_report", "docgen_dashboard"],
+  docgen_merge_templates: ["docgen_proposal", "docgen_report", "docgen_dashboard"],
+  docgen_dashboard:       ["docgen_proposal", "docgen_rfp_response", "docgen_report"],
+
+  // ── ERP Bridge workflow (Phase 13) ────────────────────────────────────────
+  erp_query:         ["erp_create_record", "erp_sync_data", "erp_dashboard"],
+  erp_create_record: ["erp_query", "erp_sync_data", "erp_dashboard"],
+  erp_sync_data:     ["erp_map_fields", "erp_query", "erp_dashboard"],
+  erp_dashboard:     ["erp_query", "erp_sync_data", "erp_map_fields"],
+  erp_map_fields:    ["erp_sync_data", "erp_query", "erp_dashboard"],
+
+  // ── Veterinary workflow (Phase 13) ────────────────────────────────────────
+  vet_triage_symptoms:       ["vet_schedule_appointment", "vet_health_record", "vet_estimate_cost"],
+  vet_schedule_appointment:  ["vet_health_record", "vet_calculate_medication", "vet_dashboard"],
+  vet_health_record:         ["vet_calculate_medication", "vet_triage_symptoms", "vet_dashboard"],
+  vet_calculate_medication:  ["vet_health_record", "vet_schedule_appointment", "vet_dashboard"],
+  vet_estimate_cost:         ["vet_schedule_appointment", "vet_triage_symptoms", "vet_dashboard"],
+  vet_dashboard:             ["vet_triage_symptoms", "vet_schedule_appointment", "vet_health_record"],
+
   // ── Universal Payment Hub workflow (Phase 12) ─────────────────────────────
   pay_universal:
     "Tip: Payment sent — call pay_check_status with the tx_id to confirm settlement, or use pay_history to see cumulative volume and your effective fee rate.",
@@ -870,6 +933,116 @@ const TIPS = {
     "Tip: Staking active — you're now earning yield and your benefits are unlocked. Call incentive_dashboard to see all savings and check incentive_volume_discount for your fee tier.",
   incentive_dashboard:
     "Tip: Full incentives overview loaded — act on the recommended_actions list to maximize your savings and earnings across tiers, referrals, and staking.",
+
+  // ── Content & Social tips (Phase 13) ──────────────────────────────────────
+  content_generate:
+    "Tip: Content drafted — run content_optimize to improve engagement before publishing, or content_schedule_post to get it live on your chosen platform.",
+  content_schedule_post:
+    "Tip: Post scheduled — call content_analyze_engagement after it goes live to measure performance and inform your next piece.",
+  content_analyze_engagement:
+    "Tip: Engagement data in — use content_optimize to apply these insights to your next draft, or content_repurpose to stretch your top posts further.",
+  content_optimize:
+    "Tip: Content optimized — schedule it now with content_schedule_post, or generate A/B variants by calling content_generate with a similar brief.",
+  content_repurpose:
+    "Tip: Content repurposed — queue each format with content_schedule_post at its ideal time, or check content_dashboard for your full publishing pipeline.",
+  content_dashboard:
+    "Tip: Content pipeline reviewed — create fresh content with content_generate or dig into what's performing with content_analyze_engagement.",
+
+  // ── Property Management tips (Phase 13) ───────────────────────────────────
+  property_screen_tenant:
+    "Tip: Screening complete — if approved, move straight to property_create_lease to lock in the tenancy with an e-signed agreement.",
+  property_create_lease:
+    "Tip: Lease generated and sent for signing — set up automated rent collection with property_rent_collection so you never miss a payment.",
+  property_track_maintenance:
+    "Tip: Maintenance ticket logged and vendor assigned — check property_dashboard to see all open tickets and occupancy at a glance.",
+  property_optimize_rent:
+    "Tip: Market pricing ready — update your listing and screen your next applicant with property_screen_tenant to fill the vacancy faster.",
+  property_rent_collection:
+    "Tip: Rent collection status updated — review the full portfolio health including open maintenance tickets with property_dashboard.",
+  property_dashboard:
+    "Tip: Portfolio overview loaded — tackle overdue rent with property_rent_collection or reprice vacant units with property_optimize_rent.",
+
+  // ── Intellectual Property tips (Phase 13) ─────────────────────────────────
+  ip_search_patents:
+    "Tip: Patent search complete — feed the results into ip_analyze_prior_art to assess patentability, or ip_freedom_to_operate if you're clearing for commercialization.",
+  ip_analyze_prior_art:
+    "Tip: Prior art analysis done — if patentable, start drafting claims with ip_draft_claims. Key gaps identified become your strongest independent claims.",
+  ip_monitor_trademark:
+    "Tip: Trademark monitoring active — view all conflicts in context with ip_portfolio, and respond to high-risk filings with an opposition filing.",
+  ip_draft_claims:
+    "Tip: Patent claims drafted — add this application to ip_portfolio for deadline tracking, and run ip_freedom_to_operate before launch.",
+  ip_portfolio:
+    "Tip: Portfolio loaded — check annuity deadlines immediately and run ip_freedom_to_operate on any products approaching commercialization.",
+  ip_freedom_to_operate:
+    "Tip: FTO analysis complete — if risks found, review blocking patents in detail and consider ip_draft_claims to design around them.",
+
+  // ── Customer Support tips (Phase 13) ──────────────────────────────────────
+  support_triage_ticket:
+    "Tip: Ticket triaged — generate a response now with support_generate_response, or pull the customer's full history with support_customer_history for better context.",
+  support_generate_response:
+    "Tip: Response drafted — review and send, or if the issue requires human judgment, escalate with support_escalate before replying.",
+  support_search_kb:
+    "Tip: Knowledge base searched — use the top results to power a personalized reply with support_generate_response, or update articles for gaps you found.",
+  support_escalate:
+    "Tip: Ticket escalated — the assigned team has the full context. Monitor team workload and response times in support_dashboard.",
+  support_customer_history:
+    "Tip: Customer history loaded — use the context to craft a highly personalized reply with support_generate_response that references their past interactions.",
+  support_dashboard:
+    "Tip: Support queue reviewed — address high-priority open tickets first with support_triage_ticket, or check CSAT trends to identify training opportunities.",
+
+  // ── KYC / AML tips (Phase 13) ─────────────────────────────────────────────
+  kyc_verify_identity:
+    "Tip: Identity verified — run kyc_screen_aml immediately to complete the onboarding KYC/AML check before activating the account.",
+  kyc_screen_aml:
+    "Tip: AML screening done — proceed to kyc_assess_risk to compute a comprehensive risk score and determine the level of due diligence required.",
+  kyc_assess_risk:
+    "Tip: Risk score assigned — high-risk customers require enhanced due diligence and ongoing kyc_monitor_transactions as per FATF guidelines.",
+  kyc_monitor_transactions:
+    "Tip: Transaction monitoring complete — if alerts were flagged, review them carefully and generate a kyc_generate_sar for any suspicious activity.",
+  kyc_generate_sar:
+    "Tip: SAR draft ready — review it with your compliance officer before filing. Track all open compliance items in kyc_compliance_dashboard.",
+  kyc_compliance_dashboard:
+    "Tip: Compliance posture reviewed — process any pending verifications with kyc_verify_identity or review overdue high-risk reviews with kyc_assess_risk.",
+
+  // ── Document Generation tips (Phase 13) ───────────────────────────────────
+  docgen_proposal:
+    "Tip: Proposal generated — pair it with docgen_presentation for a compelling pitch deck, or use docgen_merge_templates to produce client-specific variants at scale.",
+  docgen_rfp_response:
+    "Tip: RFP response ready — review the compliance_matrix to confirm every requirement is addressed, then export as docgen_proposal for internal review.",
+  docgen_report:
+    "Tip: Report generated — turn the key findings into a boardroom-ready deck with docgen_presentation, or archive it through docgen_dashboard.",
+  docgen_presentation:
+    "Tip: Presentation created — rehearse with the speaker_notes included, or use docgen_merge_templates to personalize copies for different audiences.",
+  docgen_merge_templates:
+    "Tip: Templates merged — check docgen_dashboard for the full document library and any pending e-signatures.",
+  docgen_dashboard:
+    "Tip: Document activity reviewed — create your next document with docgen_proposal or docgen_report, or set up reusable templates with docgen_merge_templates.",
+
+  // ── ERP Bridge tips (Phase 13) ────────────────────────────────────────────
+  erp_query:
+    "Tip: ERP records retrieved — use erp_create_record to act on the data, or erp_sync_data to push the results to a connected external system.",
+  erp_create_record:
+    "Tip: ERP record created — run erp_sync_data to propagate the new record to connected platforms, then verify in erp_dashboard.",
+  erp_sync_data:
+    "Tip: Data sync complete — review the conflict_list carefully and resolve any flagged items. Use erp_dashboard to monitor sync health going forward.",
+  erp_dashboard:
+    "Tip: ERP integration health checked — if sync errors are present, investigate with erp_query or re-run with erp_sync_data. Use erp_map_fields to fix schema mismatches.",
+  erp_map_fields:
+    "Tip: Field mapping created — use this mapping in erp_sync_data to eliminate transformation errors, or save it as a reusable connector template.",
+
+  // ── Veterinary tips (Phase 13) ────────────────────────────────────────────
+  vet_triage_symptoms:
+    "Tip: Triage complete — if the level is emergency or urgent, use vet_schedule_appointment immediately to book the earliest available slot.",
+  vet_schedule_appointment:
+    "Tip: Appointment booked — pull up the pet's full health record with vet_health_record to bring accurate vaccination and medication history to the visit.",
+  vet_health_record:
+    "Tip: Health record loaded — use vet_calculate_medication if a dosing update is needed, or check vet_dashboard for upcoming vaccination reminders.",
+  vet_calculate_medication:
+    "Tip: Dosage calculated — log the prescription in the pet's health record with vet_health_record and set a reminder in vet_dashboard for follow-up.",
+  vet_estimate_cost:
+    "Tip: Cost estimate ready — book the procedure now with vet_schedule_appointment, or review insurance coverage options before committing.",
+  vet_dashboard:
+    "Tip: Pet care overview loaded — address any overdue vaccinations with vet_schedule_appointment or triage new symptoms with vet_triage_symptoms.",
 }
 
 // ─── Fallback suggestions ─────────────────────────────────────────────────────
