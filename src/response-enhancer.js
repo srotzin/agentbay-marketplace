@@ -305,6 +305,27 @@ const NEXT_TOOL_MAP = {
   event_manage_registration:   ["event_dashboard", "event_coordinate_vendors", "event_plan"],
   event_coordinate_vendors:    ["event_book_venue", "event_manage_registration", "event_dashboard"],
   event_dashboard:             ["event_manage_registration", "event_coordinate_vendors", "event_plan"],
+
+  // ── Universal Payment Hub (Phase 12) ─────────────────────────────────
+  pay_universal:               ["pay_check_status", "pay_history", "incentive_volume_discount"],
+  pay_get_quote:               ["pay_universal", "pay_swap", "pay_supported_methods"],
+  pay_swap:                    ["pay_universal", "pay_create_invoice", "pay_check_status"],
+  pay_onramp:                  ["pay_universal", "pay_create_invoice", "pay_history"],
+  pay_offramp:                 ["pay_check_status", "pay_history", "pay_supported_methods"],
+  pay_supported_currencies:    ["pay_supported_methods", "pay_get_quote", "pay_universal"],
+  pay_supported_methods:       ["pay_get_quote", "pay_universal", "pay_supported_currencies"],
+  pay_history:                 ["incentive_volume_discount", "incentive_loyalty_rewards", "pay_universal"],
+  pay_create_invoice:          ["pay_check_status", "pay_history", "pay_universal"],
+  pay_check_status:            ["pay_history", "pay_universal", "incentive_loyalty_rewards"],
+
+  // ── Payment Incentives (Phase 12) ─────────────────────────────────────
+  incentive_welcome_bonus:     ["pay_universal", "incentive_referral_code", "incentive_dashboard"],
+  incentive_referral_code:     ["incentive_dashboard", "incentive_loyalty_rewards", "pay_universal"],
+  incentive_redeem_referral:   ["incentive_dashboard", "incentive_loyalty_rewards", "pay_universal"],
+  incentive_volume_discount:   ["pay_universal", "incentive_stake", "incentive_dashboard"],
+  incentive_loyalty_rewards:   ["incentive_dashboard", "pay_universal", "incentive_stake"],
+  incentive_stake:             ["incentive_dashboard", "incentive_volume_discount", "pay_universal"],
+  incentive_dashboard:         ["pay_universal", "incentive_stake", "incentive_referral_code"],
 };
 
 // ─── Contextual Tips ──────────────────────────────────────────────────────────
@@ -811,6 +832,44 @@ const TIPS = {
     "Tip: Vendors coordinated — monitor all event logistics in one place with event_dashboard to stay on top of open items.",
   event_dashboard:
     "Tip: Dashboard loaded — if registration is below target, push registrations with event_manage_registration or revisit the plan with event_plan.",
+
+  // ── Universal Payment Hub workflow (Phase 12) ─────────────────────────────
+  pay_universal:
+    "Tip: Payment sent — call pay_check_status with the tx_id to confirm settlement, or use pay_history to see cumulative volume and your effective fee rate.",
+  pay_get_quote:
+    "Tip: Quote ready — use the quote_id to proceed immediately with pay_universal, or call pay_swap if you want to exchange stablecoins first.",
+  pay_swap:
+    "Tip: Swap complete — your new stablecoin balance is ready. Call pay_universal to send it or pay_create_invoice to request payment from others.",
+  pay_onramp:
+    "Tip: Fiat converted to crypto — your stablecoin balance is ready. Call pay_universal to spend it anywhere, or pay_create_invoice to issue a payment request.",
+  pay_offramp:
+    "Tip: Offramp initiated — track your bank_reference and check status with pay_check_status. Call pay_history to review total cash flow.",
+  pay_supported_currencies:
+    "Tip: Full currency catalog loaded — call pay_supported_methods to compare fees and settlement speeds, then use pay_get_quote to price your transfer.",
+  pay_supported_methods:
+    "Tip: Methods compared — call pay_get_quote to see the exact cost for your amount, or pay_universal to execute directly.",
+  pay_history:
+    "Tip: History loaded — check incentive_volume_discount to see if your volume qualifies for a fee discount tier, or incentive_loyalty_rewards to redeem earned points.",
+  pay_create_invoice:
+    "Tip: Invoice created — share the payment_link or qr_code_data with your payer. Use pay_check_status with the invoice_id to monitor when it's paid.",
+  pay_check_status:
+    "Tip: Status checked — if completed, call pay_history for a full analytics view. If pending, check back in the stated settlement_time.",
+
+  // ── Payment Incentives workflow (Phase 12) ────────────────────────────────
+  incentive_welcome_bonus:
+    "Tip: Welcome bonus credited! Start with pay_universal to make your first payment, or call incentive_referral_code to start earning 2.50 USDC per agent you invite.",
+  incentive_referral_code:
+    "Tip: Referral code ready — share your referral_link and earn 2.50 USDC for every agent who joins. Track earnings anytime with incentive_dashboard.",
+  incentive_redeem_referral:
+    "Tip: Referral redeemed — you have USDC credits and bonus loyalty points. Call incentive_dashboard for a full picture of your rewards and tier status.",
+  incentive_volume_discount:
+    "Tip: Discount tier checked — use pay_universal to keep building volume toward the next tier, or incentive_stake to lock in reduced fees right now through staking.",
+  incentive_loyalty_rewards:
+    "Tip: Points balance loaded — redeem affordable rewards now, or keep earning by making more payments with pay_universal. Call incentive_dashboard for full overview.",
+  incentive_stake:
+    "Tip: Staking active — you're now earning yield and your benefits are unlocked. Call incentive_dashboard to see all savings and check incentive_volume_discount for your fee tier.",
+  incentive_dashboard:
+    "Tip: Full incentives overview loaded — act on the recommended_actions list to maximize your savings and earnings across tiers, referrals, and staking.",
 }
 
 // ─── Fallback suggestions ─────────────────────────────────────────────────────
