@@ -57,6 +57,8 @@ import { workflowTools, handleWorkflowTool } from "./mcp-tools-workflows.js";
 import { moneyTools, handleMoneyTool } from "./mcp-tools-money.js";
 // Internal QC audit + crawler tools (Phase 7)
 import { internalTools, handleInternalTool, shoulderTapTools, handleShoulderTapTool } from "./mcp-tools-internal.js";
+// Transaction lifecycle hooks (Phase 8)
+import { lifecycleTools, handleLifecycleTool } from "./mcp-tools-lifecycle.js";
 // Response middleware (Phase 5)
 import { enhanceResponse } from "./response-enhancer.js";
 // Discovery meta-tools (Phase 4)
@@ -909,8 +911,8 @@ const coreTools = [
   { name: "hiveagent_room_stats", description: "Use when you want data room platform stats — active rooms, documents, participant counts, NDA signings.", inputSchema: { type: "object", properties: {} } },
 ];
 
-// Merge core tools + Phase 2 (AI-requested) + Phase 3 (verticals) + Phase 5 (workflows) + Phase 7 (internal)
-export const tools = [...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools];
+// Merge core tools + Phase 2 (AI-requested) + Phase 3 (verticals) + Phase 5 (workflows) + Phase 7 (internal) + Phase 8 (lifecycle)
+export const tools = [...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1413,6 +1415,11 @@ export async function handleTool(name, args) {
       } catch (e) {
         if (!e.message?.startsWith('Unknown internal tool:')) throw e;
       }
-      return await handleShoulderTapTool(name, args);
+      try {
+        return await handleShoulderTapTool(name, args);
+      } catch (e) {
+        if (!e.message?.startsWith('Unknown shoulder tap tool:') && !e.message?.startsWith('Unknown tool:')) throw e;
+      }
+      return await handleLifecycleTool(name, args);
   }
 }

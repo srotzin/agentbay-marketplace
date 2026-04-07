@@ -203,6 +203,31 @@ const NEXT_TOOL_MAP = {
   platform_update_prices:        ["platform_refresh_data",        "platform_crawler_dashboard",   "platform_crawl_market"],
   platform_refresh_data:         ["platform_crawler_dashboard",   "platform_health_check",        "platform_check_freshness"],
   platform_crawler_dashboard:    ["platform_crawl_market",        "platform_monitor_competitors", "platform_check_regulations"],
+
+  // ── Agent Wallet workflow (Phase 8) ────────────────────────────────────────
+  wallet_create:          ["wallet_deposit", "wallet_spending_rules", "wallet_balance"],
+  wallet_deposit:         ["wallet_spending_rules", "wallet_transfer", "wallet_balance"],
+  wallet_spending_rules:  ["wallet_transfer", "wallet_balance", "wallet_history"],
+  wallet_transfer:        ["wallet_balance", "wallet_history", "wallet_deposit"],
+  wallet_balance:         ["wallet_history", "wallet_transfer", "wallet_deposit"],
+  wallet_history:         ["wallet_balance", "wallet_transfer", "wallet_spending_rules"],
+  wallet_withdraw:        ["wallet_balance", "wallet_history", "wallet_spending_rules"],
+
+  // ── Persistent Memory workflow (Phase 8) ───────────────────────────────────
+  memory_store:             ["memory_recall", "memory_search", "memory_agent_profile"],
+  memory_recall:            ["memory_search", "memory_workflow_history", "memory_agent_profile"],
+  memory_search:            ["memory_workflow_history", "memory_learn_preference", "memory_recall"],
+  memory_workflow_history:  ["memory_learn_preference", "memory_agent_profile", "memory_search"],
+  memory_learn_preference:  ["memory_agent_profile", "memory_store", "memory_recall"],
+  memory_agent_profile:     ["memory_store", "memory_learn_preference", "memory_workflow_history"],
+  memory_delete:            ["memory_store", "memory_agent_profile", "memory_search"],
+
+  // ── Intent Router workflow (Phase 8) ──────────────────────────────────────
+  intent_route:     ["intent_preflight", "intent_compare", "intent_optimize"],
+  intent_preflight: ["intent_compare",   "intent_optimize", "intent_history"],
+  intent_compare:   ["intent_optimize",  "intent_history",  "intent_route"],
+  intent_optimize:  ["intent_history",   "intent_route",    "intent_preflight"],
+  intent_history:   ["intent_route",     "intent_preflight", "intent_optimize"],
 };
 
 // ─── Contextual Tips ──────────────────────────────────────────────────────────
@@ -531,6 +556,50 @@ const TIPS = {
     "Tip: Seed data refreshed — view the crawler dashboard with platform_crawler_dashboard for a full freshness and threat overview.",
   platform_crawler_dashboard:
     "Tip: Crawler dashboard loaded — kick off a new market intelligence crawl with platform_crawl_market to catch the latest MCP ecosystem changes.",
+
+  // Agent Wallet tools (Phase 8)
+  wallet_create:
+    "Tip: Wallet created — deposit USDC with wallet_deposit, then set guardrails with wallet_spending_rules so the agent can't overspend.",
+  wallet_deposit:
+    "Tip: Funds deposited — configure spending rules with wallet_spending_rules to prevent runaway costs, then send your first payment with wallet_transfer.",
+  wallet_spending_rules:
+    "Tip: Guardrails set — transfer funds to another agent with wallet_transfer (instant, no gas) or check your balance with wallet_balance.",
+  wallet_transfer:
+    "Tip: Transfer complete — check both wallets with wallet_balance, or review the full transaction log with wallet_history.",
+  wallet_balance:
+    "Tip: Balance confirmed — view the full transaction history with wallet_history, or send funds to another agent with wallet_transfer.",
+  wallet_history:
+    "Tip: History reviewed — adjust your spending rules with wallet_spending_rules if you see unexpected spend patterns.",
+  wallet_withdraw:
+    "Tip: Withdrawal sent — funds arrive in ~15 min. Keeping balance on HiveAgent avoids the 0.5% withdrawal fee on future agent-to-agent payments.",
+
+  // Persistent Memory tools (Phase 8)
+  memory_store:
+    "Tip: Memory stored — recall it instantly with memory_recall, or search related memories with memory_search.",
+  memory_recall:
+    "Tip: Memory retrieved — search for related memories with memory_search, or review past workflows with memory_workflow_history.",
+  memory_search:
+    "Tip: Search complete — store new findings with memory_store, or auto-learn a preference with memory_learn_preference.",
+  memory_workflow_history:
+    "Tip: Workflow history loaded — learn a preference from this pattern with memory_learn_preference, then view the full agent profile with memory_agent_profile.",
+  memory_learn_preference:
+    "Tip: Preference learned — view the complete agent profile built from all memories with memory_agent_profile.",
+  memory_agent_profile:
+    "Tip: Full profile loaded — store new memories with memory_store, or add more preferences with memory_learn_preference to keep the profile growing.",
+  memory_delete:
+    "Tip: Memory deleted — store a fresh version with memory_store, or view the updated agent profile with memory_agent_profile.",
+
+  // Intent Router tools (Phase 8)
+  intent_route:
+    "Tip: Route computed — run intent_preflight on the recommended tool before calling it, to catch errors and validate args.",
+  intent_preflight:
+    "Tip: Pre-flight passed — if a better alternative was flagged, use intent_compare to weigh both options before committing.",
+  intent_compare:
+    "Tip: Comparison done — apply the recommendation, then use intent_optimize to find long-term savings on recurring workflows.",
+  intent_optimize:
+    "Tip: Optimization report ready — review past routing decisions with intent_history to see if similar workflows improved after applying these changes.",
+  intent_history:
+    "Tip: History reviewed — route your next task with intent_route to keep every action on the optimal path.",
 };
 
 // ─── Fallback suggestions ─────────────────────────────────────────────────────
