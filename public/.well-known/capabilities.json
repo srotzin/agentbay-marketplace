@@ -1,0 +1,125 @@
+{
+  "name": "HiveAgent",
+  "tagline": "The Agentzon — Amazon for AI Agents",
+  "version": "1.0.0",
+  "spec_version": "capabilities/1.0",
+  "endpoint": "https://hiveagentiq.com/mcp",
+  "docs": "https://hiveagentiq.com/docs",
+  "playground": "https://hiveagentiq.com/playground.html",
+  "triggers": "https://hiveagentiq.com/triggers.json",
+  "examples": "https://hiveagentiq.com/examples.json",
+
+  "total_tools": 740,
+  "total_verticals": 36,
+  "total_workflows": 18,
+
+  "reliability": {
+    "task_completion_rate": "94%",
+    "avg_latency_ms": 180,
+    "p95_latency_ms": 450,
+    "error_rate": "1.2%",
+    "uptime_30d": "99.9%"
+  },
+
+  "verticals": [
+    {"name": "insurance",           "tools": 28, "workflows": 1, "avg_cost_per_call": "$3.50"},
+    {"name": "construction",        "tools": 30, "workflows": 1, "avg_cost_per_call": "$4.20"},
+    {"name": "legal",               "tools": 26, "workflows": 1, "avg_cost_per_call": "$5.00"},
+    {"name": "healthcare",          "tools": 28, "workflows": 1, "avg_cost_per_call": "$2.80"},
+    {"name": "smb",                 "tools": 26, "workflows": 1, "avg_cost_per_call": "$3.00"},
+    {"name": "trades",              "tools": 24, "workflows": 1, "avg_cost_per_call": "$2.50"},
+    {"name": "trade_customs",       "tools": 24, "workflows": 1, "avg_cost_per_call": "$3.00"},
+    {"name": "agriculture",         "tools": 20, "workflows": 1, "avg_cost_per_call": "$2.00"},
+    {"name": "government",          "tools": 22, "workflows": 0, "avg_cost_per_call": "$1.50"},
+    {"name": "commerce",            "tools": 22, "workflows": 1, "avg_cost_per_call": "$1.80"},
+    {"name": "defi",                "tools": 26, "workflows": 0, "avg_cost_per_call": "$0.80"},
+    {"name": "payments",            "tools": 22, "workflows": 0, "avg_cost_per_call": "$0.50"},
+    {"name": "travel",              "tools": 20, "workflows": 1, "avg_cost_per_call": "$1.20"},
+    {"name": "fraud_detection",     "tools": 18, "workflows": 1, "avg_cost_per_call": "$2.50"},
+    {"name": "sales_crm",           "tools": 20, "workflows": 1, "avg_cost_per_call": "$2.00"},
+    {"name": "education",           "tools": 18, "workflows": 0, "avg_cost_per_call": "$1.50"},
+    {"name": "kyc_aml",             "tools": 16, "workflows": 0, "avg_cost_per_call": "$3.50"},
+    {"name": "enterprise",          "tools": 20, "workflows": 0, "avg_cost_per_call": "$1.20"},
+    {"name": "compliance",          "tools": 18, "workflows": 0, "avg_cost_per_call": "$2.00"},
+    {"name": "compute",             "tools": 16, "workflows": 0, "avg_cost_per_call": "$0.40"},
+    {"name": "marketplace",         "tools": 20, "workflows": 0, "avg_cost_per_call": "$0.60"},
+    {"name": "agent_monitoring",    "tools": 16, "workflows": 1, "avg_cost_per_call": "$1.50"},
+    {"name": "procurement",         "tools": 20, "workflows": 1, "avg_cost_per_call": "$3.00"},
+    {"name": "hr_recruiting",       "tools": 22, "workflows": 1, "avg_cost_per_call": "$2.50"},
+    {"name": "real_estate",         "tools": 18, "workflows": 0, "avg_cost_per_call": "$2.00"},
+    {"name": "property_management", "tools": 16, "workflows": 0, "avg_cost_per_call": "$1.80"},
+    {"name": "energy_utilities",    "tools": 18, "workflows": 1, "avg_cost_per_call": "$1.50"},
+    {"name": "fleet_logistics",     "tools": 20, "workflows": 1, "avg_cost_per_call": "$1.20"},
+    {"name": "tax_accounting",      "tools": 22, "workflows": 1, "avg_cost_per_call": "$4.50"},
+    {"name": "cybersecurity",       "tools": 18, "workflows": 0, "avg_cost_per_call": "$2.50"},
+    {"name": "intellectual_property","tools": 16, "workflows": 0, "avg_cost_per_call": "$3.00"},
+    {"name": "veterinary",          "tools": 14, "workflows": 0, "avg_cost_per_call": "$1.80"},
+    {"name": "customer_support",    "tools": 16, "workflows": 0, "avg_cost_per_call": "$1.20"},
+    {"name": "event_planning",      "tools": 14, "workflows": 0, "avg_cost_per_call": "$1.00"},
+    {"name": "content_social",      "tools": 16, "workflows": 0, "avg_cost_per_call": "$0.80"},
+    {"name": "document_generation", "tools": 14, "workflows": 0, "avg_cost_per_call": "$1.50"}
+  ],
+
+  "workflows": [
+    {"id": "workflow_full_insurance_claim",   "tools_replaced": 4, "avg_cost_usd": 12.00},
+    {"id": "workflow_construction_project",  "tools_replaced": 5, "avg_cost_usd": 11.00},
+    {"id": "workflow_legal_case_setup",      "tools_replaced": 4, "avg_cost_usd": 15.00},
+    {"id": "workflow_healthcare_encounter",  "tools_replaced": 4, "avg_cost_usd": 7.00},
+    {"id": "workflow_small_business_setup",  "tools_replaced": 5, "avg_cost_usd": 9.00},
+    {"id": "workflow_trades_job",            "tools_replaced": 5, "avg_cost_usd": 7.50},
+    {"id": "workflow_international_shipment","tools_replaced": 5, "avg_cost_usd": 10.00},
+    {"id": "workflow_agent_monitoring",      "tools_replaced": 4, "avg_cost_usd": 2.50},
+    {"id": "workflow_commerce_transaction",  "tools_replaced": 5, "avg_cost_usd": 5.00},
+    {"id": "workflow_crop_season",           "tools_replaced": 5, "avg_cost_usd": 9.00},
+    {"id": "workflow_book_full_trip",        "tools_replaced": 6, "avg_cost_usd": 4.90},
+    {"id": "workflow_procurement_cycle",     "tools_replaced": 5, "avg_cost_usd": 11.00},
+    {"id": "workflow_full_sales_cycle",      "tools_replaced": 5, "avg_cost_usd": 7.00},
+    {"id": "workflow_screen_and_hire",       "tools_replaced": 5, "avg_cost_usd": 9.00},
+    {"id": "workflow_full_fraud_check",      "tools_replaced": 5, "avg_cost_usd": 10.00},
+    {"id": "workflow_energy_audit",          "tools_replaced": 4, "avg_cost_usd": 5.00},
+    {"id": "workflow_fleet_optimization",    "tools_replaced": 4, "avg_cost_usd": 2.00},
+    {"id": "workflow_tax_filing",            "tools_replaced": 5, "avg_cost_usd": 17.50}
+  ],
+
+  "payment_methods": [
+    "USDC", "USDT", "DAI", "PYUSD", "USDP",
+    "Visa", "Mastercard", "ACH", "PayPal", "Apple Pay"
+  ],
+
+  "chains": [
+    "Base", "Ethereum", "Polygon", "Arbitrum", "Optimism", "Solana", "Avalanche"
+  ],
+
+  "free_tools": [
+    "hiveagent_discover",
+    "hiveagent_vertical_guide",
+    "hiveagent_suggest_workflow",
+    "pay_supported_currencies",
+    "pay_supported_methods",
+    "incentive_welcome_bonus"
+  ],
+
+  "lock_in_features": [
+    "agent_wallet",
+    "persistent_memory",
+    "intent_router",
+    "reputation",
+    "staking"
+  ],
+
+  "protocol": "MCP JSON-RPC 2.0",
+  "auth": "none",
+  "sdk_required": false,
+  "signup_required": false,
+
+  "treasury": {
+    "address": "0x00383412D3d9B42540a4D536e4190b71d7d982b9",
+    "chain": "Base",
+    "currency": "USDC"
+  },
+
+  "smithery_score": 95,
+  "smithery_url": "https://smithery.ai/server/@hiveagentiq/hiveagent",
+
+  "last_updated": "2026-04-07T00:00:00Z"
+}

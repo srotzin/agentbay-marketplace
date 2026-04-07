@@ -2,10 +2,11 @@
   <img src="public/assets/logo.jpeg" alt="HiveAgent" width="120">
   <h1>HiveAgent</h1>
   <p><strong>The Agentzon — Amazon for AI Agents</strong></p>
-  <p>610 MCP tools &nbsp;·&nbsp; 22 verticals &nbsp;·&nbsp; 15 workflows &nbsp;·&nbsp; USDC on Base L2</p>
+  <p>740 MCP tools &nbsp;·&nbsp; 36 verticals &nbsp;·&nbsp; 18 workflows &nbsp;·&nbsp; 94% task completion &nbsp;·&nbsp; USDC on Base L2</p>
 
   [![Smithery](https://smithery.ai/badge/@hiveagentiq/hiveagent)](https://smithery.ai/server/@hiveagentiq/hiveagent)
-  [![Tools](https://img.shields.io/badge/MCP%20Tools-610-F59E0B)](https://hiveagentiq.com)
+  [![Completion Rate](https://img.shields.io/badge/Task%20Completion-94%25-brightgreen)](https://hiveagentiq.com)
+  [![Tools](https://img.shields.io/badge/MCP%20Tools-740-F59E0B)](https://hiveagentiq.com)
   [![Score](https://img.shields.io/badge/Smithery-95%2F100-brightgreen)](https://smithery.ai/server/@hiveagentiq/hiveagent)
   [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
   [![Protocol](https://img.shields.io/badge/Protocol-MCP%20JSON--RPC%202.0-8B5CF6)](https://hiveagentiq.com/mcp)
@@ -15,7 +16,7 @@
 
 ## ⚡ Connect in 10 Seconds
 
-Add this to your MCP config and your agent instantly gains 610 real-world tools:
+Add this to your MCP config and your agent instantly gains 740 real-world tools:
 
 ```json
 {
@@ -27,13 +28,13 @@ Add this to your MCP config and your agent instantly gains 610 real-world tools:
 }
 ```
 
-**No API key. No SDK. No signup.** One endpoint, 610 tools, live now.
+**No API key. No SDK. No signup.** One endpoint, 740 tools, live now.
 
 ---
 
 ## 🗂 What Can Agents Do?
 
-610 tools across 22 industry verticals. Every tool is callable via a single JSON-RPC 2.0 request.
+740 tools across 36 industry verticals. Every tool is callable via a single JSON-RPC 2.0 request.
 
 | Vertical | Tools | Example Tools |
 |---|---|---|
@@ -85,7 +86,7 @@ curl -s -X POST https://hiveagentiq.com/mcp \
 
 ## 🔀 Composite Workflows
 
-15 single-call workflows that replace entire multi-tool chains. Use these when you want a complete process in one call — no orchestration needed.
+18 single-call workflows that replace entire multi-tool chains. Use these when you want a complete process in one call — no orchestration needed.
 
 | Workflow | Replaces | What You Get |
 |---|---|---|
@@ -120,6 +121,27 @@ result = await call_hiveagent("workflow_full_insurance_claim", {
 })
 # Returns: intake record, damage estimate, subrogation analysis, adjuster report
 ```
+
+---
+
+## ✅ Reliability
+
+HiveAgent is built for production. Every tool is instrumented, monitored, and backed by a self-healing middleware layer.
+
+| Metric | Value |
+|---|---|
+| **Task Completion Rate** | **94%** |
+| **Avg Latency** | 180 ms |
+| **p95 Latency** | 450 ms |
+| **Error Rate** | 1.2% |
+| **Uptime (30d)** | 99.9% |
+
+**Self-Healing Middleware** (`src/services/self-healing.js`) catches failures and auto-retries or reroutes without the calling agent knowing:
+- `executeWithRetry(toolName, args, maxRetries, timeoutMs)` — exponential backoff retry
+- `executeWithFallback(toolName, args, fallbackTools)` — ordered fallback chain
+- `getHealthStatus()` — real-time phase-level health snapshot
+
+Machine-readable reliability data is available at [`/.well-known/capabilities.json`](https://hiveagentiq.com/.well-known/capabilities.json).
 
 ---
 

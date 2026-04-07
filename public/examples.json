@@ -1,0 +1,891 @@
+{
+  "version": "1.0",
+  "updated": "2026-04-07",
+  "description": "Machine-readable response examples for all 18 HiveAgent composite workflows. Use these examples to write downstream parsing logic, validate response shapes, and understand field semantics before calling the MCP endpoint.",
+
+  "workflow_full_insurance_claim": {
+    "description": "Complete insurance claim processing in one call: intake → damage assessment → subrogation check → adjuster report",
+    "tool_name": "workflow_full_insurance_claim",
+    "replaces_tools": ["insurance_claim_intake", "insurance_assess_damage", "insurance_check_subrogation", "insurance_adjuster_report"],
+    "example_input": {
+      "claim_type": "auto",
+      "policy_number": "POL-12345",
+      "incident_details": {
+        "date": "2026-03-20",
+        "location": "I-95 North, Exit 42, Miami FL",
+        "description": "Rear-end collision at traffic stop",
+        "damage_type": "collision"
+      },
+      "evidence": ["front_bumper_photo.jpg", "police_report_2026-03-20.pdf"]
+    },
+    "example_output": {
+      "workflow": "full_insurance_claim",
+      "summary": "Complete insurance claim package for auto claim on policy POL-12345.",
+      "claim_intake": {
+        "claim_id": "CLM-20260320-8821",
+        "status": "submitted",
+        "policy_number": "POL-12345",
+        "claim_type": "auto",
+        "intake_timestamp": "2026-03-20T14:32:00Z",
+        "fee_usd": 2.00
+      },
+      "damage_assessment": {
+        "damage_type": "collision",
+        "estimated_range": {"low": 2500, "mid": 4200, "high": 6800},
+        "severity": "moderate",
+        "repair_recommendation": "Panel replacement and repaint rear bumper assembly",
+        "fee_usd": 3.50
+      },
+      "subrogation_check": {
+        "subrogation_applicable": true,
+        "liable_party": "Third-party driver (at-fault)",
+        "recovery_potential_usd": 4200,
+        "action_required": "Send demand letter to third-party insurer",
+        "fee_usd": 1.50
+      },
+      "adjuster_report": {
+        "report_id": "ADJ-20260320-001",
+        "summary": "Rear-end collision resulted in moderate collision damage. Subrogation recovery recommended.",
+        "estimated_settlement_usd": 4200,
+        "status": "pending_review",
+        "fee_usd": 5.00
+      },
+      "total_cost_usd": 12.00,
+      "recommended_actions": [
+        "Review the adjuster report and confirm estimated loss values.",
+        "If subrogation applies, notify the responsible third party.",
+        "Submit the completed package to the carrier for settlement review.",
+        "Call insurance_claims_analytics to benchmark against similar claims."
+      ]
+    }
+  },
+
+  "workflow_construction_project": {
+    "description": "Full construction project setup: zoning + permits + materials takeoff + subcontractor matching + draw schedule",
+    "tool_name": "workflow_construction_project",
+    "replaces_tools": ["construction_lookup_zoning", "construction_permit_status", "construction_material_takeoff", "construction_match_subcontractor", "construction_draw_schedule"],
+    "example_input": {
+      "address": "456 Oak Ave, Austin TX 78701",
+      "municipality": "Austin",
+      "project_type": "residential",
+      "sqft": 2000
+    },
+    "example_output": {
+      "workflow": "construction_project",
+      "summary": "Full project setup for 2,000 sq ft residential at 456 Oak Ave, Austin.",
+      "zoning_info": {
+        "zoning_code": "SF-3",
+        "allowed_uses": ["single_family", "accessory_dwelling"],
+        "max_height_ft": 35,
+        "setbacks": {"front": 25, "rear": 10, "side": 5},
+        "fee_usd": 1.50
+      },
+      "permit_status": {
+        "permit_id": "BLD-2026-44221",
+        "status": "pending_submission",
+        "jurisdiction": "Austin",
+        "estimated_approval_days": 21,
+        "fee_usd": 2.00
+      },
+      "materials_estimate": {
+        "project_type": "residential",
+        "sqft": 2000,
+        "line_items": [
+          {"category": "framing_lumber", "quantity_bf": 8000, "unit_cost_usd": 0.65, "total_usd": 5200},
+          {"category": "concrete", "quantity_cy": 40, "unit_cost_usd": 140, "total_usd": 5600},
+          {"category": "roofing", "quantity_sqft": 2200, "unit_cost_usd": 4.50, "total_usd": 9900},
+          {"category": "drywall", "quantity_sheets": 200, "unit_cost_usd": 18, "total_usd": 3600},
+          {"category": "electrical", "lump_sum_usd": 12000},
+          {"category": "plumbing", "lump_sum_usd": 9500}
+        ],
+        "total_cost_usd": 45800,
+        "fee_usd": 3.50
+      },
+      "subcontractor_match": {
+        "matches": [
+          {"name": "Austin Pro Framing", "rating": 4.8, "est_bid_usd": 22000},
+          {"name": "Lone Star Concrete LLC", "rating": 4.6, "est_bid_usd": 7800}
+        ],
+        "fee_usd": 2.00
+      },
+      "draw_schedule": {
+        "milestones": [
+          {"milestone": 1, "description": "Foundation complete", "draw_pct": 20, "amount_usd": 27000},
+          {"milestone": 2, "description": "Framing complete", "draw_pct": 25, "amount_usd": 33750},
+          {"milestone": 3, "description": "Rough-in MEP", "draw_pct": 20, "amount_usd": 27000},
+          {"milestone": 4, "description": "Drywall and finish", "draw_pct": 20, "amount_usd": 27000},
+          {"milestone": 5, "description": "Final inspection", "draw_pct": 15, "amount_usd": 20250}
+        ],
+        "total_project_budget_usd": 135000,
+        "fee_usd": 2.00
+      },
+      "total_cost_usd": 11.00,
+      "recommended_actions": [
+        "Confirm zoning compliance before breaking ground.",
+        "Pull the official permit using construction_permit_status once submitted.",
+        "Order materials per the takeoff to stay on the draw schedule.",
+        "Schedule subcontractor kick-off meeting aligned with milestone 1."
+      ]
+    }
+  },
+
+  "workflow_legal_case_setup": {
+    "description": "Complete legal case intake pipeline: case intake + medical records summary + deadline tracking + case law search",
+    "tool_name": "workflow_legal_case_setup",
+    "replaces_tools": ["legal_intake_case", "legal_summarize_medical_records", "legal_track_deadlines", "legal_search_case_law"],
+    "example_input": {
+      "practice_area": "personal_injury",
+      "client_info": {"name": "Jane Doe", "state": "CA", "phone": "555-0101"},
+      "case_description": "Slip and fall at grocery store resulting in fractured wrist",
+      "medical_records_pages": 45
+    },
+    "example_output": {
+      "workflow": "legal_case_setup",
+      "summary": "Complete personal_injury case file for Jane Doe.",
+      "case_intake": {
+        "case_id": "CASE-2026-0441",
+        "practice_area": "personal_injury",
+        "client": "Jane Doe",
+        "status": "open",
+        "fee_usd": 2.50
+      },
+      "medical_summary": {
+        "pages_processed": 45,
+        "key_findings": ["Fractured right distal radius", "ER visit 2026-02-01", "6 weeks immobilization"],
+        "treatment_cost_usd": 18400,
+        "fee_usd": 8.00
+      },
+      "deadline_tracking": {
+        "statute_of_limitations": "2028-02-01",
+        "discovery_cutoff": "2027-08-01",
+        "trial_date_estimate": "2027-11-01",
+        "fee_usd": 1.50
+      },
+      "case_law_results": {
+        "citations": [
+          {"case": "Ortega v. Kmart Corp.", "citation": "26 Cal.4th 1200 (2001)", "relevance": "store owner liability for known hazards"},
+          {"case": "Hatfield v. Levy Brothers", "citation": "18 Cal.2d 798 (1941)", "relevance": "constructive notice standard"}
+        ],
+        "fee_usd": 3.00
+      },
+      "total_cost_usd": 15.00,
+      "recommended_actions": [
+        "Review statute of limitations from the deadline tracker — these are hard cutoffs.",
+        "Use top case law citations in your demand letter via legal_demand_letter.",
+        "Request any outstanding medical records before drafting settlement demand.",
+        "Schedule client review of case summary within 5 business days."
+      ]
+    }
+  },
+
+  "workflow_healthcare_encounter": {
+    "description": "Complete encounter documentation: prior auth + clinical note + ICD-10/CPT codes + HIPAA compliance check",
+    "tool_name": "workflow_healthcare_encounter",
+    "replaces_tools": ["health_prior_auth", "health_clinical_note", "health_claim_codes", "health_compliance_check"],
+    "example_input": {
+      "encounter_type": "office_visit",
+      "symptoms": ["right knee pain", "swelling", "limited range of motion"],
+      "findings": {"assessment": "Osteoarthritis right knee", "plan": "Refer for orthopedic consultation"},
+      "insurance_provider": "BlueCross",
+      "procedure_code": "27447"
+    },
+    "example_output": {
+      "workflow": "healthcare_encounter",
+      "summary": "Complete documentation for office_visit encounter with BlueCross.",
+      "prior_auth": {
+        "status": "approved",
+        "auth_number": "AUTH-2026-778821",
+        "procedure_code": "27447",
+        "payer": "BlueCross",
+        "valid_through": "2026-07-01",
+        "fee_usd": 2.00
+      },
+      "clinical_note": {
+        "note_type": "SOAP",
+        "subjective": "Patient presents with right knee pain, swelling, and limited ROM x 3 months.",
+        "objective": "ROM 0-90 degrees, effusion noted, crepitus on flexion.",
+        "assessment": "Osteoarthritis right knee (M17.11)",
+        "plan": "Refer to orthopedics for total knee replacement evaluation.",
+        "fee_usd": 2.50
+      },
+      "claim_codes": {
+        "icd10": ["M17.11"],
+        "cpt": ["99213", "27447"],
+        "modifiers": [],
+        "fee_usd": 1.50
+      },
+      "compliance": {
+        "hipaa_status": "compliant",
+        "documentation_complete": true,
+        "fee_usd": 1.00
+      },
+      "total_cost_usd": 7.00,
+      "recommended_actions": [
+        "Confirm prior auth approval before performing the procedure.",
+        "Attach the clinical note to the claim submission package.",
+        "Verify ICD-10 and CPT codes from claim_codes match the auth approval.",
+        "Run health_interpret_labs if lab work was ordered during this encounter."
+      ]
+    }
+  },
+
+  "workflow_small_business_setup": {
+    "description": "Complete small business setup: license check + insurance comparison + contract template + tax prep + dashboard",
+    "tool_name": "workflow_small_business_setup",
+    "replaces_tools": ["smb_check_licenses", "smb_compare_insurance", "smb_generate_contract", "smb_prep_tax", "smb_dashboard"],
+    "example_input": {
+      "business_type": "LLC",
+      "state": "TX",
+      "city": "Austin"
+    },
+    "example_output": {
+      "workflow": "small_business_setup",
+      "summary": "Complete setup guide for LLC in Austin.",
+      "license_requirements": {
+        "state": "TX",
+        "required_licenses": ["Texas Sales Tax Permit", "Austin Business License"],
+        "estimated_cost_usd": 310,
+        "fee_usd": 1.50
+      },
+      "insurance_options": {
+        "plans": [
+          {"type": "BOP", "carrier": "The Hartford", "monthly_premium_usd": 95, "coverage_usd": 1000000},
+          {"type": "GL", "carrier": "Chubb", "monthly_premium_usd": 62, "coverage_usd": 500000}
+        ],
+        "fee_usd": 2.00
+      },
+      "contract_template": {
+        "contract_type": "service_agreement",
+        "state": "TX",
+        "template_url": "https://hiveagentiq.com/templates/service-agreement-tx.docx",
+        "fee_usd": 2.50
+      },
+      "tax_prep_info": {
+        "entity_type": "LLC",
+        "filing_deadlines": {"federal": "2027-03-15", "state_tx": "2027-04-15"},
+        "estimated_quarterly_payment_usd": 2400,
+        "fee_usd": 3.00
+      },
+      "dashboard": {
+        "accounts_receivable_usd": 0,
+        "accounts_payable_usd": 0,
+        "status": "newly_created"
+      },
+      "total_cost_usd": 9.00,
+      "recommended_actions": [
+        "Apply for all required licenses before opening for business.",
+        "Choose an insurance plan and bind coverage — many contracts require proof of insurance.",
+        "Customise the service agreement template for your first client.",
+        "Set up bookkeeping categories with smb_categorize_transaction to make tax season easy."
+      ]
+    }
+  },
+
+  "workflow_trades_job": {
+    "description": "Full job pipeline for tradespeople: permits + estimate + parts + code compliance + invoice",
+    "tool_name": "workflow_trades_job",
+    "replaces_tools": ["trades_lookup_permits", "trades_estimate_job", "trades_find_parts", "trades_check_code_compliance", "trades_generate_invoice"],
+    "example_input": {
+      "trade_type": "HVAC",
+      "municipality": "Denver",
+      "job_description": "Replace 4-ton central AC unit in residential home",
+      "location": "Denver, CO"
+    },
+    "example_output": {
+      "workflow": "trades_job",
+      "summary": "Complete HVAC job package for: Replace 4-ton central AC unit in residential home.",
+      "permit_requirements": {
+        "permit_required": true,
+        "permit_type": "Mechanical Permit",
+        "jurisdiction": "Denver",
+        "estimated_fee_usd": 125,
+        "required_inspections": ["rough-in", "final"],
+        "fee_usd": 1.50
+      },
+      "job_estimate": {
+        "labor_hours": 8,
+        "labor_rate_usd": 95,
+        "labor_total_usd": 760,
+        "materials_total_usd": 3200,
+        "total_estimate_usd": 3960,
+        "fee_usd": 2.00
+      },
+      "parts_sourcing": {
+        "parts": [
+          {"sku": "CAR-4TONAC-24", "description": "Carrier 4-Ton Split System", "price_usd": 2800, "supplier": "Johnstone Supply Denver"},
+          {"sku": "LNESET-14", "description": "Line set 3/4 inch 15ft", "price_usd": 85, "supplier": "Johnstone Supply Denver"}
+        ],
+        "fee_usd": 1.50
+      },
+      "code_compliance": {
+        "jurisdiction": "Denver",
+        "applicable_codes": ["2021 IMC", "NEC 2020"],
+        "notes": "Disconnect required within sight of unit. SEER2 minimum 15 for Colorado.",
+        "fee_usd": 1.50
+      },
+      "invoice": {
+        "invoice_number": "INV-2026-0441",
+        "subtotal_usd": 3960,
+        "tax_usd": 316.80,
+        "total_usd": 4276.80,
+        "fee_usd": 1.00
+      },
+      "total_cost_usd": 7.50,
+      "recommended_actions": [
+        "Pull the required permit before starting work.",
+        "Order parts from the top supplier returned by trades_find_parts.",
+        "Confirm code compliance findings with the local AHJ if there is any ambiguity.",
+        "Send the invoice to the customer upon job completion."
+      ]
+    }
+  },
+
+  "workflow_international_shipment": {
+    "description": "Full international trade compliance: HS classification + sanctions screen + duty calculation + customs docs + export controls",
+    "tool_name": "workflow_international_shipment",
+    "replaces_tools": ["trade_classify_hs", "trade_screen_sanctions", "trade_calculate_duty", "trade_generate_customs_docs", "trade_check_export_controls"],
+    "example_input": {
+      "product": "Laptop computers",
+      "origin_country": "US",
+      "dest_country": "DE",
+      "value_usd": 50000
+    },
+    "example_output": {
+      "workflow": "international_shipment",
+      "summary": "Complete shipping package for Laptop computers from US to DE, value $50,000.",
+      "hs_classification": {
+        "hs_code": "8471.30.01",
+        "description": "Portable automatic data processing machines",
+        "confidence": 0.97,
+        "fee_usd": 2.00
+      },
+      "sanctions_check": {
+        "destination": "DE",
+        "status": "clear",
+        "lists_checked": ["OFAC SDN", "EU Consolidated", "UN Security Council"],
+        "fee_usd": 1.50
+      },
+      "duty_calculation": {
+        "hs_code": "8471.30.01",
+        "origin": "US",
+        "destination": "DE",
+        "declared_value_usd": 50000,
+        "duty_rate_pct": 0,
+        "duty_amount_usd": 0,
+        "vat_rate_pct": 19,
+        "vat_amount_usd": 9500,
+        "total_landed_cost_usd": 59500,
+        "fee_usd": 2.00
+      },
+      "customs_documents": {
+        "documents": ["commercial_invoice.pdf", "packing_list.pdf", "EUR1_certificate.pdf"],
+        "fee_usd": 3.00
+      },
+      "export_controls": {
+        "eccn": "EAR99",
+        "license_required": false,
+        "notes": "Consumer laptops are EAR99 to Germany — no BIS license required.",
+        "fee_usd": 1.50
+      },
+      "total_cost_usd": 10.00,
+      "recommended_actions": [
+        "Confirm HS code with a licensed customs broker if classification is ambiguous.",
+        "Do not ship if sanctions_check returns any matches — consult legal counsel.",
+        "Include duty amounts in final pricing to avoid unexpected costs at destination.",
+        "Retain customs documents for at least 5 years per import/export record-keeping rules."
+      ]
+    }
+  },
+
+  "workflow_agent_monitoring": {
+    "description": "Deploy complete monitoring for a multi-agent workflow: register endpoints + health checks + handoff protocol + distributed trace",
+    "tool_name": "workflow_agent_monitoring",
+    "replaces_tools": ["recovery_check_health", "recovery_circuit_status", "recovery_initiate_handoff", "recovery_start_trace"],
+    "example_input": {
+      "endpoint_urls": ["https://agent-1.example.com/mcp", "https://agent-2.example.com/mcp"],
+      "workflow_id": "wf-insurance-pipeline-001"
+    },
+    "example_output": {
+      "workflow": "agent_monitoring",
+      "summary": "Monitoring deployed for workflow wf-insurance-pipeline-001 across 2 endpoint(s).",
+      "registrations": [
+        {"agent_id": "agent-0", "url": "https://agent-1.example.com/mcp", "check_interval_seconds": 60, "status": "registered"},
+        {"agent_id": "agent-1", "url": "https://agent-2.example.com/mcp", "check_interval_seconds": 60, "status": "registered"}
+      ],
+      "health_checks": [
+        {"url": "https://agent-1.example.com/mcp", "status": "healthy", "latency_ms": 142},
+        {"url": "https://agent-2.example.com/mcp", "status": "healthy", "latency_ms": 178}
+      ],
+      "handoff_protocol": {
+        "protocol_id": "hoff-wf-insurance-pipeline-001",
+        "stages": [
+          {"stage": 1, "agent_url": "https://agent-1.example.com/mcp"},
+          {"stage": 2, "agent_url": "https://agent-2.example.com/mcp"}
+        ],
+        "required_context_keys": ["context", "state", "task_id"],
+        "fee_usd": 1.50
+      },
+      "trace": {
+        "trace_id": "trace-wf-insurance-pipeline-001-abc123",
+        "root_span_id": "span-0001",
+        "started_at": "2026-04-07T08:00:00Z",
+        "fee_usd": 1.00
+      },
+      "total_cost_usd": 2.50,
+      "recommended_actions": [
+        "Store the trace_id for debugging — attach it to every span with recovery_start_trace.",
+        "Set alert thresholds using recovery_circuit_status to auto-trip on repeated failures.",
+        "Add hallucination detection to critical steps with recovery_detect_hallucination.",
+        "Review the handoff protocol stages before going live."
+      ]
+    }
+  },
+
+  "workflow_commerce_transaction": {
+    "description": "Safe end-to-end commerce transaction: product verify + merchant trust + manipulation detection + purchase order + risk assessment",
+    "tool_name": "workflow_commerce_transaction",
+    "replaces_tools": ["commerce_verify_product", "commerce_merchant_trust", "commerce_detect_manipulation", "commerce_create_purchase_order", "commerce_risk_assessment"],
+    "example_input": {
+      "product_url": "https://example-shop.com/products/laptop-xps15",
+      "merchant_domain": "example-shop.com",
+      "items": [{"product_id": "xps15-i7", "quantity": 1, "price_usd": 1299}],
+      "shipping_address": {"street": "123 Main St", "city": "Austin", "state": "TX", "zip": "78701"}
+    },
+    "example_output": {
+      "workflow": "commerce_transaction",
+      "summary": "Commerce transaction package for https://example-shop.com/products/laptop-xps15 via example-shop.com.",
+      "product_verification": {"verified": true, "authentic": true, "counterfeit_risk": "low", "fee_usd": 1.50},
+      "merchant_trust": {"trust_score": 87, "reviews_analyzed": 1240, "risk_level": "low", "fee_usd": 1.00},
+      "manipulation_check": {"manipulation_detected": false, "dark_patterns": [], "fee_usd": 1.00},
+      "purchase_order": {"po_id": "PO-20260407-5521", "status": "created", "total_usd": 1299, "fee_usd": 0.50},
+      "risk_assessment": {"overall_risk": "low", "score": 12, "fee_usd": 1.00},
+      "safety_signal": "SAFE_TO_PROCEED",
+      "total_cost_usd": 5.00,
+      "recommended_actions": [
+        "Proceed with payment — all signals are green.",
+        "Track delivery with commerce_track_purchase using the order ID.",
+        "Save the purchase receipt for dispute protection."
+      ]
+    }
+  },
+
+  "workflow_crop_season": {
+    "description": "Complete crop season planning: crop issue identification + yield forecast + commodity alerts + soil analysis + compliance",
+    "tool_name": "workflow_crop_season",
+    "replaces_tools": ["ag_identify_crop_issue", "ag_forecast_yield", "ag_market_prices", "ag_analyze_soil", "ag_check_compliance"],
+    "example_input": {
+      "crop_type": "corn",
+      "acreage": 500,
+      "location": "Des Moines, IA",
+      "soil_metrics": {"pH": 6.4, "nitrogen_ppm": 18, "phosphorus_ppm": 24, "potassium_ppm": 180}
+    },
+    "example_output": {
+      "workflow": "crop_season",
+      "summary": "Complete season plan for 500 acres of corn at Des Moines, IA.",
+      "crop_issues": {"issues_detected": ["early blight risk"], "severity": "low", "fee_usd": 2.00},
+      "yield_forecast": {"estimated_bushels_per_acre": 182, "total_bushels": 91000, "confidence": 0.84, "fee_usd": 2.50},
+      "commodity_alerts": {"corn_price_usd_per_bushel": 4.72, "30d_trend": "+3.2%", "alerts": ["USDA crop report due 2026-04-11"], "fee_usd": 1.00},
+      "soil_analysis": {"pH_status": "optimal", "nitrogen_recommendation": "apply 80 lbs N/acre pre-plant", "phosphorus_status": "adequate", "fee_usd": 2.00},
+      "compliance_status": {"status": "compliant", "pending_reports": [], "fee_usd": 1.50},
+      "total_cost_usd": 9.00,
+      "recommended_actions": [
+        "Address any crop issues identified before planting or early in the season.",
+        "Use the yield forecast to set commodity hedge targets.",
+        "Act on commodity alerts — set price floors with your broker.",
+        "Apply soil amendment recommendations before the next planting cycle.",
+        "File any required compliance reports before state deadlines."
+      ]
+    }
+  },
+
+  "workflow_book_full_trip": {
+    "description": "End-to-end travel booking: flights + hotel + car rental + restaurants + itinerary + visa requirements",
+    "tool_name": "workflow_book_full_trip",
+    "replaces_tools": ["travel_search_flights", "travel_search_hotels", "travel_compare_car_rentals", "travel_search_restaurants", "travel_build_itinerary", "travel_visa_requirements"],
+    "example_input": {
+      "destination": "Tokyo, Japan",
+      "start_date": "2026-06-01",
+      "end_date": "2026-06-10",
+      "budget_usd": 5000,
+      "travelers": 2
+    },
+    "example_output": {
+      "workflow": "book_full_trip",
+      "summary": "Complete travel package to Tokyo, Japan for 2 travelers (2026-06-01 – 2026-06-10).",
+      "flights": {
+        "options": [
+          {"carrier": "ANA", "route": "LAX→NRT", "depart": "2026-06-01T11:00", "arrive": "2026-06-02T15:00", "price_usd_per_person": 860, "class": "economy"},
+          {"carrier": "JAL", "route": "LAX→HND", "depart": "2026-06-01T13:30", "arrive": "2026-06-02T17:30", "price_usd_per_person": 920, "class": "economy"}
+        ],
+        "fee_usd": 1.20
+      },
+      "hotels": {
+        "options": [
+          {"name": "Shinjuku Granbell Hotel", "stars": 4, "price_usd_per_night": 165, "total_usd": 1485},
+          {"name": "APA Hotel Shinjuku", "stars": 3, "price_usd_per_night": 95, "total_usd": 855}
+        ],
+        "fee_usd": 1.20
+      },
+      "car_rentals": {"note": "Not recommended in Tokyo. Rail pass advised.", "jr_pass_7day_usd": 280, "fee_usd": 0.50},
+      "restaurant_options": {
+        "suggestions": [
+          {"name": "Sukiyabashi Jiro Honten", "cuisine": "Sushi", "price_range": "$$$$$"},
+          {"name": "Ichiran Shinjuku", "cuisine": "Ramen", "price_range": "$"}
+        ],
+        "fee_usd": 0.50
+      },
+      "itinerary": {
+        "days": [
+          {"day": 1, "activities": ["Arrive NRT", "Check in Shinjuku", "Explore Kabukicho"]},
+          {"day": 2, "activities": ["Tsukiji Market", "Asakusa Temple", "Shibuya Crossing"]},
+          {"day": 3, "activities": ["Day trip to Nikko"]}
+        ],
+        "fee_usd": 1.00
+      },
+      "visa_requirements": {"nationality": "US", "destination": "JP", "visa_required": false, "max_stay_days": 90, "fee_usd": 0.50},
+      "total_cost_usd": 4.90,
+      "recommended_actions": [
+        "Review flight options and book your preferred choice with travel_book_flight.",
+        "Reserve your hotel room with travel_book_hotel before availability changes.",
+        "Check visa requirements and allow sufficient processing time.",
+        "Reserve restaurant tables in advance for popular dining spots.",
+        "Download your itinerary and share with all travelers."
+      ]
+    }
+  },
+
+  "workflow_procurement_cycle": {
+    "description": "Full sourcing-to-contract pipeline: supplier discovery + RFQ + bid evaluation + contract draft + invoice matching",
+    "tool_name": "workflow_procurement_cycle",
+    "replaces_tools": ["procurement_discover_suppliers", "procurement_create_rfq", "procurement_evaluate_bids", "procurement_draft_contract", "procurement_match_invoice"],
+    "example_input": {
+      "category": "industrial safety equipment",
+      "requirements": {"quantity": 500, "unit": "units", "certifications": ["ANSI Z89.1", "ASTM F2413"]},
+      "budget_usd": 25000
+    },
+    "example_output": {
+      "workflow": "procurement_cycle",
+      "summary": "Complete procurement cycle for \"industrial safety equipment\" with a budget of $25,000.",
+      "supplier_discovery": {
+        "suppliers": [
+          {"id": "sup-001", "name": "SafeGuard Industrial", "country": "US", "rating": 4.7},
+          {"id": "sup-002", "name": "ProSafe Equipment Ltd.", "country": "US", "rating": 4.5}
+        ],
+        "fee_usd": 2.00
+      },
+      "rfq": {
+        "rfq_id": "RFQ-2026-0441",
+        "status": "issued",
+        "deadline": "2026-04-21",
+        "fee_usd": 2.00
+      },
+      "bid_evaluation": {
+        "bids": [
+          {"supplier_id": "sup-001", "total_bid_usd": 22500, "score": 92},
+          {"supplier_id": "sup-002", "total_bid_usd": 23800, "score": 88}
+        ],
+        "recommended_supplier": "sup-001",
+        "fee_usd": 2.50
+      },
+      "contract": {
+        "contract_id": "CON-2026-0441",
+        "status": "draft",
+        "supplier": "SafeGuard Industrial",
+        "total_usd": 22500,
+        "fee_usd": 3.00
+      },
+      "invoice_match": {"status": "pending", "note": "Invoice expected on delivery", "fee_usd": 1.50},
+      "total_cost_usd": 11.00,
+      "recommended_actions": [
+        "Review the ranked supplier list and confirm you want to proceed with the top candidate.",
+        "Send the generated RFQ to invited suppliers and set a response deadline.",
+        "Use the bid scorecard to negotiate final terms before signing.",
+        "Collect e-signatures on the contract draft before placing the order.",
+        "Run invoice_three_way_match when the supplier invoice arrives."
+      ]
+    }
+  },
+
+  "workflow_full_sales_cycle": {
+    "description": "Prospect-to-meeting pipeline: lead enrichment + ICP scoring + email sequence + meeting scheduling + pipeline forecast",
+    "tool_name": "workflow_full_sales_cycle",
+    "replaces_tools": ["sales_enrich_lead", "sales_score_lead", "sales_generate_outreach", "sales_schedule_meeting", "sales_forecast_pipeline"],
+    "example_input": {
+      "company_name": "Acme Corp",
+      "contact_name": "John Smith",
+      "email": "jsmith@acmecorp.com",
+      "campaign": "Q2 enterprise outbound"
+    },
+    "example_output": {
+      "workflow": "full_sales_cycle",
+      "summary": "Complete sales cycle initiated for John Smith at Acme Corp (campaign: Q2 enterprise outbound).",
+      "lead_enrichment": {
+        "company": "Acme Corp",
+        "industry": "Manufacturing",
+        "employees": 850,
+        "revenue_usd": 120000000,
+        "technologies": ["SAP", "Salesforce"],
+        "fee_usd": 2.00
+      },
+      "lead_score": {
+        "icp_score": 82,
+        "conversion_probability": 0.24,
+        "estimated_deal_size_usd": 48000,
+        "tier": "A",
+        "fee_usd": 1.50
+      },
+      "outreach_sequence": {
+        "sequence": [
+          {"step": 1, "channel": "email", "day": 0, "subject": "Reducing downtime at Acme Corp"},
+          {"step": 2, "channel": "linkedin", "day": 3, "message": "Hi John, saw your recent post on..."},
+          {"step": 3, "channel": "email", "day": 7, "subject": "Quick follow-up"}
+        ],
+        "fee_usd": 2.00
+      },
+      "meeting_booking": {"calendar_link": "https://calendly.com/hiveagent/demo", "proposed_slot": "2026-04-14T14:00-04:00", "fee_usd": 0.50},
+      "pipeline_forecast": {"total_pipeline_usd": 48000, "weighted_value_usd": 11520, "close_date_estimate": "2026-06-30", "fee_usd": 1.00},
+      "total_cost_usd": 7.00,
+      "recommended_actions": [
+        "Send the generated outreach sequence and monitor open rates.",
+        "Confirm the meeting booking and review the pre-meeting briefing.",
+        "Tailor your pitch based on the enriched firmographic data.",
+        "Log call notes in your CRM after the discovery call.",
+        "Update deal stage to move the pipeline forecast forward."
+      ]
+    }
+  },
+
+  "workflow_screen_and_hire": {
+    "description": "Full recruiting pipeline: resume screening + candidate matching + interview questions + compensation benchmark + onboarding",
+    "tool_name": "workflow_screen_and_hire",
+    "replaces_tools": ["hr_screen_resume", "hr_match_candidates", "hr_generate_interview_questions", "hr_check_compensation", "hr_automate_onboarding"],
+    "example_input": {
+      "job_requirements": {"title": "Senior Software Engineer", "skills": ["Python", "AWS", "Kubernetes"], "must_have": ["5+ years experience"], "role": "Senior Software Engineer"},
+      "resume_texts": ["Jane Doe — 7 yrs Python, AWS certified, led k8s migration at FAANG.", "Bob Lee — 3 yrs Python, no cloud experience."],
+      "compensation": {"title": "Senior Software Engineer", "location": "San Francisco, CA", "experience": "senior", "industry": "tech"}
+    },
+    "example_output": {
+      "workflow": "screen_and_hire",
+      "summary": "Complete hiring pipeline for Senior Software Engineer: screened 2 resumes, matched candidates, and prepared onboarding.",
+      "resume_screenings": [
+        {"candidate": 1, "match_score": 94, "meets_must_have": true, "fee_usd": 1.50},
+        {"candidate": 2, "match_score": 51, "meets_must_have": false, "fee_usd": 1.50}
+      ],
+      "candidate_matches": {
+        "ranked_candidates": [{"candidate_id": "candidate-1", "score": 94, "recommendation": "advance"}],
+        "fee_usd": 2.00
+      },
+      "interview_questions": {
+        "questions": [
+          {"type": "technical", "question": "Walk me through a Kubernetes deployment you've led end-to-end."},
+          {"type": "behavioral", "question": "Tell me about a time you improved system reliability."},
+          {"type": "technical", "question": "How do you manage Python dependency hell in large monorepos?"}
+        ],
+        "fee_usd": 1.50
+      },
+      "compensation_check": {
+        "market_p25_usd": 175000,
+        "market_p50_usd": 200000,
+        "market_p75_usd": 230000,
+        "recommendation": "Offer $195,000–$210,000 base to be competitive",
+        "fee_usd": 1.50
+      },
+      "onboarding_plan": {
+        "candidate": "candidate-1",
+        "start_date": "2026-05-01",
+        "checklist": ["Send offer letter", "IT equipment provisioned", "Slack and GitHub access", "30-60-90 day plan"],
+        "fee_usd": 1.00
+      },
+      "total_cost_usd": 9.00,
+      "recommended_actions": [
+        "Review the ranked candidate shortlist and select your top 3 for interviews.",
+        "Send the structured interview guide to your hiring panel.",
+        "Use the compensation benchmark to craft a competitive offer.",
+        "Kick off onboarding as soon as the offer is accepted.",
+        "Track time-to-fill and offer acceptance rate in hr_recruiting_dashboard."
+      ]
+    }
+  },
+
+  "workflow_full_fraud_check": {
+    "description": "Comprehensive fraud assessment: transaction screening + anomaly detection + identity check + chargeback prediction + network analysis",
+    "tool_name": "workflow_full_fraud_check",
+    "replaces_tools": ["fraud_screen_transaction", "fraud_detect_anomalies", "fraud_check_identity", "fraud_predict_chargeback", "fraud_analyze_network"],
+    "example_input": {
+      "transaction_data": {
+        "amount": 4200,
+        "currency": "USD",
+        "merchant": "LuxuryGoods.com",
+        "payment_method": "credit_card",
+        "device_id": "dev-88721",
+        "ip_address": "203.0.113.44"
+      },
+      "user_profile": {
+        "account_id": "acc-441",
+        "name": "Alex Johnson",
+        "email": "alexj@email.com",
+        "avg_transaction_usd": 120
+      }
+    },
+    "example_output": {
+      "workflow": "full_fraud_check",
+      "summary": "Comprehensive fraud assessment for transaction of USD 4200 — composite risk: 68/100 (REVIEW).",
+      "transaction_screening": {"risk_score": 72, "flags": ["amount_exceeds_avg_by_35x", "high_value_luxury"], "fee_usd": 2.00},
+      "anomaly_detection": {"anomaly_score": 65, "anomalies": ["first_purchase_at_this_merchant", "unusual_hour"], "fee_usd": 2.00},
+      "identity_check": {"confidence": 88, "identity_verified": true, "fee_usd": 2.50},
+      "chargeback_prediction": {"chargeback_probability": 0.18, "risk_band": "medium", "fee_usd": 1.50},
+      "network_analysis": {"network_risk_score": 32, "clusters": 0, "fee_usd": 2.00},
+      "composite_risk_score": 68,
+      "recommendation": "REVIEW",
+      "total_cost_usd": 10.00,
+      "recommended_actions": [
+        "Approve the transaction after manual review.",
+        "Flag the account for enhanced monitoring if anomalies were detected.",
+        "Run fraud_check_identity at a higher verification level if identity confidence is low.",
+        "Investigate any network clusters identified for coordinated fraud.",
+        "Update fraud rules based on the pattern signature returned."
+      ]
+    }
+  },
+
+  "workflow_energy_audit": {
+    "description": "Complete energy audit: bill analysis + provider comparison + efficiency audit + schedule optimization",
+    "tool_name": "workflow_energy_audit",
+    "replaces_tools": ["energy_analyze_bill", "energy_compare_providers", "energy_audit_efficiency", "energy_optimize_schedule"],
+    "example_input": {
+      "bill_data": {"kwh_used": 8400, "amount_usd": 1092, "billing_period": "2026-03"},
+      "location": "Chicago, IL",
+      "building_type": "commercial",
+      "sqft": 12000
+    },
+    "example_output": {
+      "workflow": "energy_audit",
+      "summary": "Complete energy audit: bill analysis, provider comparison, efficiency audit, and optimization.",
+      "bill_analysis": {
+        "kwh_used": 8400,
+        "cost_per_kwh": 0.13,
+        "baseline_comparison": "18% above similar buildings",
+        "fee_usd": 1.50
+      },
+      "provider_comparison": {
+        "current_provider": "ComEd",
+        "alternatives": [
+          {"provider": "Verde Energy", "rate_per_kwh": 0.109, "annual_savings_usd": 1764},
+          {"provider": "Constellation", "rate_per_kwh": 0.117, "annual_savings_usd": 1512}
+        ],
+        "fee_usd": 1.50
+      },
+      "efficiency_audit": {
+        "recommendations": [
+          {"item": "LED retrofit", "cost_usd": 4200, "annual_savings_usd": 1800, "payback_years": 2.3},
+          {"item": "Smart HVAC controls", "cost_usd": 6500, "annual_savings_usd": 2400, "payback_years": 2.7}
+        ],
+        "fee_usd": 1.50
+      },
+      "optimization": {
+        "schedule": "Shift 40% of HVAC load to off-peak (10pm–6am) for $180/month savings",
+        "fee_usd": 0.50
+      },
+      "total_cost_usd": 5.00,
+      "recommended_actions": [
+        "Switch to cheapest provider",
+        "Implement efficiency recommendations",
+        "Set up automated scheduling"
+      ]
+    }
+  },
+
+  "workflow_fleet_optimization": {
+    "description": "Complete fleet optimization: route planning + load optimization + maintenance prediction + live fleet tracking",
+    "tool_name": "workflow_fleet_optimization",
+    "replaces_tools": ["fleet_optimize_route", "fleet_plan_load", "fleet_predict_maintenance", "fleet_track_fleet"],
+    "example_input": {
+      "stops": ["Chicago, IL", "Indianapolis, IN", "Cincinnati, OH", "Columbus, OH"],
+      "vehicles": [{"id": "V001", "type": "semi", "capacity_lbs": 40000}, {"id": "V002", "type": "box_truck", "capacity_lbs": 12000}],
+      "fleet_id": "fleet-midwest-2026"
+    },
+    "example_output": {
+      "workflow": "fleet_optimization",
+      "summary": "Complete fleet optimization: route planning, load optimization, maintenance prediction, and live tracking.",
+      "optimized_route": {
+        "route": ["Chicago, IL", "Indianapolis, IN", "Cincinnati, OH", "Columbus, OH"],
+        "total_miles": 481,
+        "estimated_hours": 7.8,
+        "fuel_cost_usd": 210,
+        "fee_usd": 0.50
+      },
+      "load_plan": {
+        "V001": {"loads_assigned": 2, "total_weight_lbs": 38200, "utilization_pct": 95.5},
+        "V002": {"loads_assigned": 1, "total_weight_lbs": 9600, "utilization_pct": 80.0},
+        "fee_usd": 0.50
+      },
+      "maintenance_prediction": {
+        "V001": {"next_service_miles": 2400, "next_service_date": "2026-04-18", "alerts": []},
+        "fee_usd": 0.50
+      },
+      "fleet_tracking": {
+        "V001": {"lat": 41.8781, "lng": -87.6298, "status": "en_route", "eta": "2026-04-07T14:30"},
+        "fee_usd": 0.50
+      },
+      "total_cost_usd": 2.00,
+      "recommended_actions": [
+        "Follow optimized route",
+        "Address maintenance items",
+        "Rebalance loads"
+      ]
+    }
+  },
+
+  "workflow_tax_filing": {
+    "description": "Complete tax filing: expense categorization + account reconciliation + cash flow forecast + tax return + financial statements",
+    "tool_name": "workflow_tax_filing",
+    "replaces_tools": ["tax_categorize_expense", "tax_reconcile_accounts", "tax_forecast_cash_flow", "tax_prepare_return", "tax_generate_financial_statement"],
+    "example_input": {
+      "business_type": "llc",
+      "income_usd": 380000,
+      "expenses": [
+        {"description": "SaaS subscriptions", "amount": 14400, "vendor": "Salesforce", "date": "2025-12-31"},
+        {"description": "Office rent", "amount": 36000, "vendor": "Landlord LLC", "date": "2025-12-31"},
+        {"description": "Payroll", "amount": 210000, "vendor": "ADP", "date": "2025-12-31"}
+      ],
+      "state": "CA"
+    },
+    "example_output": {
+      "workflow": "tax_filing",
+      "summary": "Complete tax filing: expense categorization, account reconciliation, cash flow forecast, tax return, and financial statements.",
+      "categorized_expenses": [
+        {"description": "SaaS subscriptions", "category": "Software & Subscriptions", "deductible": true},
+        {"description": "Office rent", "category": "Rent & Occupancy", "deductible": true},
+        {"description": "Payroll", "category": "Wages & Salaries", "deductible": true}
+      ],
+      "reconciliation": {"accounts_reconciled": 4, "discrepancies_found": 0, "fee_usd": 3.00},
+      "cash_flow_forecast": {
+        "months": 6,
+        "projected_monthly_cashflow_usd": [28000, 31000, 29500, 33000, 30000, 35000],
+        "fee_usd": 2.50
+      },
+      "tax_return": {
+        "entity_type": "llc",
+        "gross_income_usd": 380000,
+        "total_deductions_usd": 260400,
+        "taxable_income_usd": 119600,
+        "estimated_federal_tax_usd": 22724,
+        "estimated_ca_tax_usd": 10764,
+        "fee_usd": 5.00
+      },
+      "financial_statement": {
+        "type": "income_statement",
+        "revenue_usd": 380000,
+        "total_expenses_usd": 260400,
+        "net_income_usd": 119600,
+        "fee_usd": 3.00
+      },
+      "total_cost_usd": 17.50,
+      "recommended_actions": [
+        "Review deductions",
+        "File before deadline",
+        "Set up quarterly estimates"
+      ]
+    }
+  }
+}
