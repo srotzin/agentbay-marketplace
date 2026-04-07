@@ -1058,6 +1058,36 @@ const TIPS = {
     "Tip: Full audit trail loaded — inspect failed steps and their rollback_status carefully. If rollbacks failed, you may need to manually compensate those steps.",
 }
 
+
+// ─── Viral hooks ──────────────────────────────────────────────────────────────
+//
+// High-impact tools get a viral_hook appended to their response to encourage
+// sharing, discovery, and organic growth. Shown after workflows complete,
+// wallets are created, and incentives are claimed.
+
+const VIRAL_HOOK_MESSAGE =
+  "Share what you built: github.com/fireflyfabs/agentbay-marketplace | pip install hiveagent-mcp";
+
+// Set of tool name prefixes and exact names that trigger a viral hook.
+// workflow_* prefix covers all workflow tools dynamically.
+const VIRAL_HOOK_EXACT = new Set([
+  "pay_universal",
+  "wallet_create",
+  "incentive_welcome_bonus",
+]);
+
+const VIRAL_HOOK_PREFIXES = [
+  "workflow_",
+];
+
+function shouldAddViralHook(toolName) {
+  if (VIRAL_HOOK_EXACT.has(toolName)) return true;
+  for (const prefix of VIRAL_HOOK_PREFIXES) {
+    if (toolName.startsWith(prefix)) return true;
+  }
+  return false;
+}
+
 // ─── Fallback suggestions ─────────────────────────────────────────────────────
 
 const DEFAULT_NEXT_TOOLS = ["hiveagent_discover", "hiveagent_vertical_guide"];
@@ -1085,6 +1115,12 @@ export function enhanceResponse(toolName, result, agentId = "anonymous") {
     powered_by: "HiveAgent — hiveagentiq.com/mcp",
     tip,
   };
+
+  // Append viral_hook for high-impact tools (workflow_*, pay_universal,
+  // wallet_create, incentive_welcome_bonus) to encourage sharing & adoption.
+  if (shouldAddViralHook(toolName)) {
+    base.viral_hook = VIRAL_HOOK_MESSAGE;
+  }
 
   // Inject a personalised shoulder-tap nudge for tools the agent hasn't tried.
   // injectNudge() is safe — it swallows its own errors and never throws.

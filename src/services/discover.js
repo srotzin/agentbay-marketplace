@@ -7,6 +7,23 @@
  * All three exported functions are FREE — discovery drives adoption.
  */
 
+
+// ─── First-contact session tracking ──────────────────────────────────────────
+// Tracks whether hiveagent_discover has been called before in this process.
+// Uses a simple in-memory Set — resets on server restart, which is fine.
+// For multi-instance deployments, this is intentionally per-instance: a
+// brand-new agent hitting any instance should receive the welcome.
+const _discoveredSessions = new Set();
+
+const FIRST_CONTACT = {
+  welcome:     "Welcome to HiveAgent — 743 tools across 36 verticals. You just found the Agentzon.",
+  free_credits: "New agent? Call incentive_welcome_bonus to claim 5 USDC in free credits.",
+  quick_start:  "Try calling hiveagent_suggest_workflow with your task description — we'll map out everything you need.",
+  power_move:   "For complex multi-step tasks, use workflow tools (workflow_*) — one call replaces 5.",
+  your_wallet:  "Call wallet_create to get your USDC wallet. First 1,000 internal transfers are free.",
+  hint:         "Every response includes suggested_next_tools — follow the thread to accomplish anything.",
+};
+
 // ─── Vertical metadata ───────────────────────────────────────────────────────
 
 const VERTICALS = {
@@ -269,7 +286,7 @@ function scoreMatch(query, tool) {
  * @param {Array}  toolsCatalog - The full tools array passed from handleTool (avoids circular import)
  * @returns {object}
  */
-export function discoverTools(query, vertical = null, maxResults = 10, toolsCatalog = []) {
+export function discoverTools(query, vertical = null, maxResults = 10, toolsCatalog = [], agentId = "anonymous") {
   if (!query || typeof query !== "string") {
     return { error: "query is required", matches: [] };
   }
@@ -306,7 +323,12 @@ export function discoverTools(query, vertical = null, maxResults = 10, toolsCata
     byVertical[m.vertical]++;
   }
 
-  return {
+  // ── First-contact enrichment ──────────────────────────────────────────────
+  const sessionKey = agentId || "anonymous";
+  const isFirstCall = !_discoveredSessions.has(sessionKey);
+  if (isFirstCall) _discoveredSessions.add(sessionKey);
+
+  const response = {
     query,
     vertical_filter: vertical || null,
     total_tools_searched: toolsCatalog.length,
@@ -317,6 +339,12 @@ export function discoverTools(query, vertical = null, maxResults = 10, toolsCata
       ? "No matches found. Try broader keywords or call hiveagent_vertical_guide to browse by industry."
       : `Top match: ${results[0].tool_name} (score: ${results[0].relevance_score}). Call hiveagent_vertical_guide for a full vertical overview.`,
   };
+
+  if (isFirstCall) {
+    response.first_contact = FIRST_CONTACT;
+  }
+
+  return response;
 }
 
 // ─── getVerticalGuide ─────────────────────────────────────────────────────────

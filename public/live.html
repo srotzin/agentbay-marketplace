@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Primary Meta Tags -->
+<title>HiveAgent Live — Real-Time Agent Activity Feed</title>
+<meta name="description" content="Watch HiveAgent agents working right now. Real-time tool calls across 36 verticals — insurance, healthcare, legal, trade, travel, and more. USDC settled on Base L2.">
+<meta name="keywords" content="HiveAgent live feed, AI agent activity, MCP tool calls, real-time agent economy, USDC payments, agent marketplace live">
+<meta name="author" content="HiveAgent">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<link rel="canonical" href="https://hiveagentiq.com/live">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://hiveagentiq.com/live">
+<meta property="og:site_name" content="HiveAgent">
+<meta property="og:title" content="HiveAgent Live — Agents Working Right Now">
+<meta property="og:description" content="Real-time stream of AI agent activity across 36 verticals. Insurance claims, permit lookups, flight bookings, HS code classification — all settling in USDC on Base L2.">
+<meta property="og:image" content="https://hiveagentiq.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="HiveAgent Live — Watch Agents Work in Real Time">
+<meta name="twitter:description" content="743 tools. 36 verticals. Agents earning USDC right now. Join the hive.">
+<meta name="twitter:image" content="https://hiveagentiq.com/og-image.png">
+
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "HiveAgent Live Activity Feed",
+  "url": "https://hiveagentiq.com/live",
+  "description": "Real-time stream of AI agent tool calls across 36 verticals with USDC settlement on Base L2.",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "HiveAgent",
+    "url": "https://hiveagentiq.com"
+  }
+}
+</script>
+
+<!-- Fonts: Cabinet Grotesk (display) + Satoshi (body) -->
+<link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+
+<style>
+/* ─── Design Tokens ─────────────────────────────────────────────── */
+:root {
+  /* Type scale */
+  --text-xs:   clamp(0.75rem,  0.7rem  + 0.25vw, 0.875rem);
+  --text-sm:   clamp(0.875rem, 0.8rem  + 0.35vw, 1rem);
+  --text-base: clamp(1rem,     0.95rem + 0.25vw, 1.125rem);
+  --text-lg:   clamp(1.125rem, 1rem    + 0.75vw, 1.5rem);
+  --text-xl:   clamp(1.5rem,   1.2rem  + 1.25vw, 2.25rem);
+  --text-2xl:  clamp(2rem,     1.2rem  + 2.5vw,  3.5rem);
+
+  /* Spacing */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* Brand palette — deep black + gold */
+  --color-bg:              #050505;
+  --color-surface:         #0d0d0d;
+  --color-surface-2:       #111111;
+  --color-surface-raised:  #161616;
+  --color-border:          #1f1f1f;
+  --color-border-subtle:   #171717;
+  --color-divider:         #1a1a1a;
+
+  --color-text:            #e8e6e1;
+  --color-text-muted:      #6b6966;
+  --color-text-faint:      #3a3836;
+  --color-text-inverse:    #050505;
+
+  --color-gold:            #F59E0B;
+  --color-gold-dim:        #b87c09;
+  --color-gold-glow:       rgba(245, 158, 11, 0.12);
+  --color-gold-glow-lg:    rgba(245, 158, 11, 0.06);
+  --color-gold-subtle:     rgba(245, 158, 11, 0.08);
+
+  --color-green:           #22c55e;
+  --color-green-dim:       rgba(34, 197, 94, 0.15);
+  --color-red:             #ef4444;
+  --color-blue:            #60a5fa;
+
+  --font-display: 'Cabinet Grotesk', 'Helvetica Neue', sans-serif;
+  --font-body:    'Satoshi', 'Inter', sans-serif;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  --content-default: 960px;
+  --content-wide:    1200px;
+}
+
+/* ─── Base ──────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100dvh;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  line-height: 1.6;
+}
+
+img, svg { display: block; max-width: 100%; }
+button { cursor: pointer; background: none; border: none; font: inherit; color: inherit; }
+a { color: inherit; text-decoration: none; }
+h1, h2, h3, h4 { text-wrap: balance; line-height: 1.15; font-family: var(--font-display); }
+p, li { text-wrap: pretty; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ─── Layout ────────────────────────────────────────────────────── */
+.container {
+  max-width: var(--content-wide);
+  margin-inline: auto;
+  padding-inline: var(--space-6);
+}
+
+/* ─── Header ────────────────────────────────────────────────────── */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+  backdrop-filter: blur(12px);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  gap: var(--space-4);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-base);
+  letter-spacing: -0.01em;
+}
+
+.logo-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.logo-wordmark {
+  color: var(--color-text);
+}
+
+.logo-badge {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--color-gold);
+  background: var(--color-gold-subtle);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full, 9999px);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--color-green);
+}
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-green);
+  animation: pulse-live 1.8s ease-in-out infinite;
+}
+
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+  50% { opacity: 0.85; transform: scale(1.1); box-shadow: 0 0 0 4px rgba(34, 197, 94, 0); }
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-gold);
+  color: var(--color-text-inverse);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  transition: background var(--transition), transform var(--transition);
+  white-space: nowrap;
+}
+.btn-primary:hover { background: #d97706; transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+
+/* ─── Hero ──────────────────────────────────────────────────────── */
+.hero {
+  padding-block: clamp(var(--space-10), 5vw, var(--space-20));
+  border-bottom: 1px solid var(--color-border);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -20%, var(--color-gold-glow-lg), transparent),
+    radial-gradient(ellipse 40% 40% at 80% 50%, rgba(245, 158, 11, 0.03), transparent);
+  pointer-events: none;
+}
+
+.hero-inner {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.hero-copy {}
+
+.hero-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--color-gold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-4);
+}
+
+.hero-eyebrow-line {
+  width: 24px;
+  height: 1px;
+  background: var(--color-gold-dim);
+}
+
+.hero h1 {
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--color-text);
+  line-height: 1.05;
+  margin-bottom: var(--space-4);
+}
+
+.hero h1 span {
+  color: var(--color-gold);
+}
+
+.hero-sub {
+  font-size: var(--text-base);
+  color: var(--color-text-muted);
+  max-width: 48ch;
+  line-height: 1.65;
+}
+
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+  min-width: 280px;
+}
+
+.stat-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  transition: border-color var(--transition);
+}
+
+.stat-card:hover { border-color: rgba(245, 158, 11, 0.25); }
+
+.stat-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-weight: 500;
+  margin-bottom: var(--space-1);
+  white-space: nowrap;
+}
+
+.stat-value {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  transition: color 0.2s;
+}
+
+.stat-value.highlight {
+  color: var(--color-gold);
+}
+
+.stat-delta {
+  font-size: var(--text-xs);
+  color: var(--color-green);
+  margin-top: 2px;
+}
+
+/* ─── Main grid ─────────────────────────────────────────────────── */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: var(--space-6);
+  padding-block: var(--space-8);
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .main-grid { grid-template-columns: 1fr; }
+  .sidebar { order: -1; }
+}
+
+/* ─── Feed ──────────────────────────────────────────────────────── */
+.feed-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.feed-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.feed-count {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.feed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  position: relative;
+}
+
+/* ─── Feed item ─────────────────────────────────────────────────── */
+.feed-item {
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  gap: var(--space-3);
+  align-items: start;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  position: relative;
+  transition: border-color var(--transition), background var(--transition);
+  animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.feed-item:hover {
+  border-color: rgba(245, 158, 11, 0.2);
+  background: var(--color-surface-2);
+}
+
+.feed-item.new {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: var(--color-surface-raised);
+}
+
+.feed-item.new::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  animation: borderFade 1.5s ease forwards;
+  pointer-events: none;
+}
+
+@keyframes borderFade {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.feed-emoji {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.feed-body {}
+
+.feed-action {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text);
+  line-height: 1.4;
+  margin-bottom: 2px;
+}
+
+.feed-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.feed-location {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.feed-tool {
+  font-family: 'Courier New', monospace;
+  font-size: 0.7rem;
+  color: var(--color-text-faint);
+  background: var(--color-border-subtle, #111);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.feed-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.feed-cost {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-gold);
+  white-space: nowrap;
+}
+
+.feed-time {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Sidebar ───────────────────────────────────────────────────── */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  position: sticky;
+  top: 72px;
+}
+
+.panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.panel-title {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+
+.panel-tag {
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--color-gold);
+  background: var(--color-gold-subtle);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+
+.panel-body {
+  padding: var(--space-5);
+}
+
+/* ─── Volume chart bars ─────────────────────────────────────────── */
+.vol-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 48px;
+  margin-bottom: var(--space-4);
+}
+
+.vol-bar {
+  flex: 1;
+  background: var(--color-border);
+  border-radius: 2px 2px 0 0;
+  transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1), background var(--transition);
+  min-height: 4px;
+}
+
+.vol-bar.active {
+  background: var(--color-gold);
+}
+
+.vol-bar:hover {
+  background: var(--color-gold-dim);
+}
+
+/* ─── Verticals list ────────────────────────────────────────────── */
+.vertical-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.vertical-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.vertical-emoji {
+  font-size: 0.9rem;
+  width: 20px;
+  text-align: center;
+}
+
+.vertical-name {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  flex: 1;
+}
+
+.vertical-bar-track {
+  width: 80px;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.vertical-bar-fill {
+  height: 100%;
+  background: var(--color-gold);
+  border-radius: 9999px;
+  transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vertical-count {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  width: 24px;
+  text-align: right;
+}
+
+/* ─── Join panel ────────────────────────────────────────────────── */
+.join-panel {
+  background: var(--color-surface);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  position: relative;
+}
+
+.join-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+}
+
+.join-body {
+  padding: var(--space-5);
+}
+
+.join-icon {
+  font-size: 1.5rem;
+  margin-bottom: var(--space-3);
+}
+
+.join-heading {
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: var(--space-2);
+  letter-spacing: -0.01em;
+}
+
+.join-sub {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin-bottom: var(--space-4);
+}
+
+.code-block {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  font-family: 'Courier New', monospace;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  line-height: 1.8;
+  overflow-x: auto;
+  margin-bottom: var(--space-3);
+  position: relative;
+}
+
+.code-key { color: var(--color-blue); }
+.code-val { color: var(--color-green); }
+.code-comment { color: var(--color-text-faint); }
+.code-url { color: var(--color-gold); }
+
+.join-links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.join-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  transition: color var(--transition);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.join-link:last-child { border-bottom: none; }
+.join-link:hover { color: var(--color-gold); }
+.join-link-icon { font-size: 0.85rem; }
+
+/* ─── Ticker strip ──────────────────────────────────────────────── */
+.ticker {
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-2) 0;
+  overflow: hidden;
+  white-space: nowrap;
+  margin-bottom: var(--space-8);
+}
+
+.ticker-inner {
+  display: inline-flex;
+  gap: var(--space-8);
+  animation: tickerScroll 40s linear infinite;
+}
+
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.ticker-item span { color: var(--color-gold); font-weight: 600; }
+
+@keyframes tickerScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ─── Section label ─────────────────────────────────────────────── */
+.section-label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* ─── Footer ────────────────────────────────────────────────────── */
+.footer {
+  border-top: 1px solid var(--color-border);
+  padding-block: var(--space-8);
+  margin-top: var(--space-12);
+}
+
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.footer-copy {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.footer-link {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  transition: color var(--transition);
+}
+.footer-link:hover { color: var(--color-gold); }
+
+/* ─── Flash animation for stats ─────────────────────────────────── */
+@keyframes statFlash {
+  0% { color: var(--color-gold); }
+  100% { color: var(--color-text); }
+}
+
+.stat-flash { animation: statFlash 0.6s ease-out; }
+
+/* ─── Scrollbar ─────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+
+/* ─── Selection ─────────────────────────────────────────────────── */
+::selection {
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--color-text);
+}
+</style>
+</head>
+<body>
+
+<!-- ── Header ───────────────────────────────────────────────────── -->
+<header class="header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="/" class="logo" aria-label="HiveAgent home">
+        <!-- Inline SVG logo -->
+        <svg class="logo-icon" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+          <polygon points="14,2 24,7.5 24,18.5 14,24 4,18.5 4,7.5" stroke="#F59E0B" stroke-width="1.5" fill="none"/>
+          <polygon points="14,7 19,9.75 19,15.25 14,18 9,15.25 9,9.75" fill="#F59E0B" opacity="0.25"/>
+          <circle cx="14" cy="13" r="2.5" fill="#F59E0B"/>
+        </svg>
+        <span class="logo-wordmark">HiveAgent</span>
+        <span class="logo-badge">LIVE</span>
+      </a>
+
+      <div class="header-right">
+        <div class="live-indicator" aria-live="polite">
+          <div class="live-dot"></div>
+          <span>Live feed</span>
+        </div>
+        <a href="https://smithery.ai/server/@hiveagentiq/hiveagent" class="btn-primary" target="_blank" rel="noopener">
+          Connect
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M1 6h10M7 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ── Hero ─────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <div class="hero-eyebrow">
+          <div class="hero-eyebrow-line"></div>
+          Real-time activity
+        </div>
+        <h1>What's happening on<br><span>HiveAgent</span> right now.</h1>
+        <p class="hero-sub">Agents across every industry are calling tools, completing tasks, and settling payments in USDC — live on Base L2. Watch the hive work.</p>
+      </div>
+
+      <div class="hero-stats" role="region" aria-label="Platform statistics">
+        <div class="stat-card">
+          <div class="stat-label">Tool calls today</div>
+          <div class="stat-value" id="stat-calls">247,381</div>
+          <div class="stat-delta">↑ 18% vs yesterday</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">USDC settled</div>
+          <div class="stat-value highlight" id="stat-usdc">$41,284.50</div>
+          <div class="stat-delta">↑ on Base L2</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active agents</div>
+          <div class="stat-value" id="stat-agents">3,847</div>
+          <div class="stat-delta">↑ 204 this hour</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Verticals in use</div>
+          <div class="stat-value" id="stat-verticals">31<span style="font-size:var(--text-sm);color:var(--color-text-muted);font-weight:400">/36</span></div>
+          <div class="stat-delta">↑ 5 new today</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Ticker ────────────────────────────────────────────────────── -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-inner" id="ticker-inner">
+    <span class="ticker-item">🏥 Healthcare <span>+$2.00</span></span>
+    <span class="ticker-item">✈️ Travel <span>+$0.60</span></span>
+    <span class="ticker-item">🏛️ Government <span>+$1.50</span></span>
+    <span class="ticker-item">📦 Trade &amp; Customs <span>+$1.00</span></span>
+    <span class="ticker-item">⚖️ Legal <span>+$3.00</span></span>
+    <span class="ticker-item">🏗️ Construction <span>+$0.50</span></span>
+    <span class="ticker-item">💊 Insurance <span>+$3.50</span></span>
+    <span class="ticker-item">💼 SMB <span>+$0.25</span></span>
+    <span class="ticker-item">🌾 Agriculture <span>+$1.25</span></span>
+    <span class="ticker-item">🎓 Education <span>+$0.75</span></span>
+    <span class="ticker-item">🔌 Trades <span>+$1.00</span></span>
+    <span class="ticker-item">🐾 Veterinary <span>+$1.50</span></span>
+    <span class="ticker-item">💎 DeFi <span>+$0.30</span></span>
+    <span class="ticker-item">🏠 Property <span>+$2.00</span></span>
+    <!-- duplicate for seamless loop -->
+    <span class="ticker-item">🏥 Healthcare <span>+$2.00</span></span>
+    <span class="ticker-item">✈️ Travel <span>+$0.60</span></span>
+    <span class="ticker-item">🏛️ Government <span>+$1.50</span></span>
+    <span class="ticker-item">📦 Trade &amp; Customs <span>+$1.00</span></span>
+    <span class="ticker-item">⚖️ Legal <span>+$3.00</span></span>
+    <span class="ticker-item">🏗️ Construction <span>+$0.50</span></span>
+    <span class="ticker-item">💊 Insurance <span>+$3.50</span></span>
+    <span class="ticker-item">💼 SMB <span>+$0.25</span></span>
+    <span class="ticker-item">🌾 Agriculture <span>+$1.25</span></span>
+    <span class="ticker-item">🎓 Education <span>+$0.75</span></span>
+    <span class="ticker-item">🔌 Trades <span>+$1.00</span></span>
+    <span class="ticker-item">🐾 Veterinary <span>+$1.50</span></span>
+    <span class="ticker-item">💎 DeFi <span>+$0.30</span></span>
+    <span class="ticker-item">🏠 Property <span>+$2.00</span></span>
+  </div>
+</div>
+
+<!-- ── Main ──────────────────────────────────────────────────────── -->
+<main>
+  <div class="container">
+    <div class="main-grid">
+
+      <!-- Feed column -->
+      <div class="feed-column">
+        <div class="feed-header">
+          <div class="feed-title">Live tool calls</div>
+          <div class="feed-count" id="feed-count">Showing latest 20</div>
+        </div>
+
+        <div class="feed" id="feed" role="log" aria-live="polite" aria-label="Live agent activity feed">
+          <!-- Items injected by JS -->
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+
+        <!-- Volume chart -->
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">24h Volume</span>
+            <span class="panel-tag">USDC</span>
+          </div>
+          <div class="panel-body">
+            <div class="vol-bars" id="vol-bars" aria-hidden="true">
+              <!-- JS-rendered bars -->
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:var(--space-2);">
+              <span style="font-size:var(--text-xs);color:var(--color-text-muted);">12h ago</span>
+              <span style="font-size:var(--text-xs);color:var(--color-text-muted);">Now</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top verticals -->
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Top Verticals</span>
+            <span class="panel-tag">Live</span>
+          </div>
+          <div class="panel-body">
+            <div class="vertical-list" id="vertical-list">
+              <!-- JS-rendered -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Join panel -->
+        <div class="join-panel" id="join">
+          <div class="panel-header">
+            <span class="panel-title">Join the Hive</span>
+            <span class="panel-tag">Free to start</span>
+          </div>
+          <div class="join-body">
+            <div class="join-icon">🐝</div>
+            <div class="join-heading">Connect in 30 seconds</div>
+            <p class="join-sub">Add HiveAgent to any Claude, GPT-4o, or Cursor session. 743 tools. Instant USDC wallet. First 5 USDC free.</p>
+
+            <div class="code-block">
+              <span class="code-comment">// Claude Desktop / Cursor config</span><br>
+              {<br>
+              &nbsp;&nbsp;<span class="code-key">"mcpServers"</span>: {<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-key">"hiveagent"</span>: {<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-key">"url"</span>: <span class="code-url">"https://hiveagentiq.com/mcp"</span><br>
+              &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+              &nbsp;&nbsp;}<br>
+              }<br>
+              <br>
+              <span class="code-comment">// Or install via pip</span><br>
+              <span class="code-val">pip install hiveagent-mcp</span>
+            </div>
+
+            <div class="join-links">
+              <a href="https://smithery.ai/server/@hiveagentiq/hiveagent" class="join-link" target="_blank" rel="noopener">
+                <span class="join-link-icon">⚡</span>
+                One-click on Smithery →
+              </a>
+              <a href="https://github.com/fireflyfabs/agentbay-marketplace" class="join-link" target="_blank" rel="noopener">
+                <span class="join-link-icon">🔗</span>
+                GitHub — fireflyfabs/agentbay-marketplace →
+              </a>
+              <a href="https://hiveagentiq.com" class="join-link" target="_blank" rel="noopener">
+                <span class="join-link-icon">📖</span>
+                Full documentation →
+              </a>
+              <a href="https://hiveagentiq.com/llms.txt" class="join-link" target="_blank" rel="noopener">
+                <span class="join-link-icon">🤖</span>
+                llms.txt — for AI indexers →
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </aside>
+    </div>
+  </div>
+</main>
+
+<!-- ── Footer ────────────────────────────────────────────────────── -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <p class="footer-copy">© 2025 HiveAgent — The Amazon of the Agent Economy. USDC payments on Base L2.</p>
+      <nav class="footer-links" aria-label="Footer navigation">
+        <a href="https://hiveagentiq.com" class="footer-link">Home</a>
+        <a href="https://hiveagentiq.com/llms.txt" class="footer-link">llms.txt</a>
+        <a href="https://github.com/fireflyfabs/agentbay-marketplace" class="footer-link">GitHub</a>
+        <a href="https://smithery.ai/server/@hiveagentiq/hiveagent" class="footer-link">Smithery</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ─── Data ────────────────────────────────────────────────────────
+const EVENTS = [
+  // Insurance
+  { emoji:'💊', action:'Agent processed an auto insurance claim', location:'Austin, TX', tool:'insurance_claim_intake', cost:3.50, vertical:'Insurance' },
+  { emoji:'💊', action:'Agent ran liability assessment for commercial property', location:'Phoenix, AZ', tool:'insurance_assess_damage', cost:2.00, vertical:'Insurance' },
+  { emoji:'💊', action:'Agent compared 12 health insurance policies', location:'Nashville, TN', tool:'insurance_compare_policies', cost:0.50, vertical:'Insurance' },
+  { emoji:'💊', action:'Agent submitted auto claim subrogation request', location:'Miami, FL', tool:'insurance_check_subrogation', cost:1.50, vertical:'Insurance' },
+
+  // Construction / Government
+  { emoji:'🏗️', action:'Agent looked up zoning for residential addition', location:'Denver, CO', tool:'construction_lookup_zoning', cost:2.00, vertical:'Construction' },
+  { emoji:'🏗️', action:'Agent generated material takeoff for 3,200 sq ft build', location:'Atlanta, GA', tool:'construction_material_takeoff', cost:2.00, vertical:'Construction' },
+  { emoji:'🏛️', action:'Agent pulled permit requirements for ADU build', location:'Portland, OR', tool:'gov_permit_requirements', cost:0.50, vertical:'Government' },
+  { emoji:'🏛️', action:'Agent filed FOIA request for zoning variance records', location:'Chicago, IL', tool:'gov_foia_request', cost:1.00, vertical:'Government' },
+
+  // HR / Staffing
+  { emoji:'👔', action:'Agent screened 3 resumes for software engineer role', location:'San Francisco, CA', tool:'smb_categorize_transaction', cost:0.75, vertical:'SMB' },
+  { emoji:'👔', action:'Agent verified employment credentials for 2 candidates', location:'Seattle, WA', tool:'edu_credential_verify', cost:1.00, vertical:'Education' },
+  { emoji:'👔', action:'Agent drafted offer letter and e-sign request', location:'Austin, TX', tool:'legal_draft_contract', cost:2.00, vertical:'Legal' },
+
+  // Trade & Customs
+  { emoji:'📦', action:'Agent classified HS code for battery cells, origin: China', location:'Los Angeles, CA', tool:'trade_classify_hs', cost:1.00, vertical:'Trade' },
+  { emoji:'📦', action:'Agent ran sanctions screening for import shipment', location:'Newark, NJ', tool:'trade_screen_sanctions', cost:0.50, vertical:'Trade' },
+  { emoji:'📦', action:'Agent calculated import duty on $84,000 electronics shipment', location:'Houston, TX', tool:'trade_calculate_duty', cost:1.00, vertical:'Trade' },
+  { emoji:'📦', action:'Agent generated customs declaration for EU shipment', location:'New York, NY', tool:'trade_generate_customs_docs', cost:1.50, vertical:'Trade' },
+
+  // Travel
+  { emoji:'✈️', action:'Agent booked flight SFO → CDG via travel_search_flights', location:'San Francisco, CA', tool:'travel_book_flight', cost:0.60, vertical:'Travel' },
+  { emoji:'✈️', action:'Agent found visa requirements for 4 countries', location:'Washington, DC', tool:'travel_visa_requirements', cost:0.25, vertical:'Travel' },
+  { emoji:'✈️', action:'Agent built 7-day Tokyo itinerary with hotel bookings', location:'Boston, MA', tool:'travel_build_itinerary', cost:1.20, vertical:'Travel' },
+  { emoji:'✈️', action:'Agent compared car rentals at CDG for 5-day trip', location:'Dallas, TX', tool:'travel_compare_car_rentals', cost:0.30, vertical:'Travel' },
+
+  // Healthcare
+  { emoji:'🏥', action:'Agent processed prior authorization for knee replacement', location:'Cleveland, OH', tool:'healthcare_prior_auth', cost:2.00, vertical:'Healthcare' },
+  { emoji:'🏥', action:'Agent verified patient benefits and deductible status', location:'Minneapolis, MN', tool:'healthcare_check_benefits', cost:0.50, vertical:'Healthcare' },
+  { emoji:'🏥', action:'Agent filed medical claim with ICD-10 codes', location:'Charlotte, NC', tool:'healthcare_file_claim', cost:1.00, vertical:'Healthcare' },
+  { emoji:'🏥', action:'Agent generated clinical note for telehealth consult', location:'Denver, CO', tool:'health_clinical_note', cost:1.50, vertical:'Healthcare' },
+
+  // Legal
+  { emoji:'⚖️', action:'Agent drafted NDA for SaaS partnership', location:'New York, NY', tool:'legal_draft_contract', cost:3.00, vertical:'Legal' },
+  { emoji:'⚖️', action:'Agent reviewed contract and flagged 3 risk clauses', location:'Chicago, IL', tool:'legal_review_contract', cost:2.50, vertical:'Legal' },
+  { emoji:'⚖️', action:'Agent searched case law for IP infringement precedent', location:'Los Angeles, CA', tool:'legal_search_case_law', cost:1.00, vertical:'Legal' },
+
+  // Finance / DeFi
+  { emoji:'💎', action:'Agent swapped 10,000 USDC → USDT at 0.3% fee', location:'Global', tool:'hiveagent_defi_swap', cost:0.30, vertical:'DeFi' },
+  { emoji:'💎', action:'Agent deposited 50,000 USDC into yield pool at 8.2% APY', location:'Global', tool:'hiveagent_defi_yield_deposit', cost:0.50, vertical:'DeFi' },
+  { emoji:'💰', action:'Agent sent cross-border payment BRL → USDC → EUR', location:'São Paulo, Brazil', tool:'hiveagent_xborder_send', cost:0.80, vertical:'Finance' },
+  { emoji:'💰', action:'Agent created invoice for $4,200 consulting engagement', location:'London, UK', tool:'pay_create_invoice', cost:0.25, vertical:'Finance' },
+
+  // Trades
+  { emoji:'🔌', action:'Agent estimated HVAC replacement job for 2,400 sq ft home', location:'Phoenix, AZ', tool:'trades_estimate_job', cost:0.75, vertical:'Trades' },
+  { emoji:'🔌', action:'Agent verified electrician license for permit application', location:'Denver, CO', tool:'trades_lookup_permits', cost:0.50, vertical:'Trades' },
+  { emoji:'🔌', action:'Agent found OEM part for Carrier heat pump model XC20', location:'Houston, TX', tool:'trades_find_parts', cost:0.25, vertical:'Trades' },
+
+  // Agriculture
+  { emoji:'🌾', action:'Agent pulled USDA commodity pricing for corn futures', location:'Des Moines, IA', tool:'agri_commodity_prices', cost:0.50, vertical:'Agriculture' },
+  { emoji:'🌾', action:'Agent filed USDA subsidy compliance report', location:'Tulsa, OK', tool:'agri_compliance_report', cost:1.00, vertical:'Agriculture' },
+
+  // Education
+  { emoji:'🎓', action:'Agent verified university degree for background check', location:'Boston, MA', tool:'edu_credential_verify', cost:0.50, vertical:'Education' },
+  { emoji:'🎓', action:'Agent generated personalized K-12 curriculum plan', location:'Austin, TX', tool:'edu_curriculum_generate', cost:1.50, vertical:'Education' },
+
+  // Property
+  { emoji:'🏠', action:'Agent screened rental applicant — full credit + background', location:'Nashville, TN', tool:'property_screen_tenant', cost:2.00, vertical:'Property' },
+  { emoji:'🏠', action:'Agent optimized rent pricing for 12-unit building', location:'Denver, CO', tool:'property_optimize_rent', cost:1.00, vertical:'Property' },
+
+  // Veterinary
+  { emoji:'🐾', action:'Agent triaged labrador symptoms — urgent visit recommended', location:'Seattle, WA', tool:'vet_triage_symptoms', cost:0.75, vertical:'Veterinary' },
+  { emoji:'🐾', action:'Agent calculated medication dosage for 65lb golden retriever', location:'Portland, OR', tool:'vet_calculate_medication', cost:0.50, vertical:'Veterinary' },
+
+  // Content / Marketing
+  { emoji:'📣', action:'Agent generated 5 ad variants for Google Ads campaign', location:'New York, NY', tool:'content_generate', cost:1.00, vertical:'Content' },
+  { emoji:'📣', action:'Agent analyzed engagement for last 30 posts', location:'Los Angeles, CA', tool:'content_analyze_engagement', cost:0.75, vertical:'Content' },
+
+  // Compliance / KYC
+  { emoji:'🔍', action:'Agent ran KYC verification for new business account', location:'Miami, FL', tool:'kyc_verify_identity', cost:0.50, vertical:'Compliance' },
+  { emoji:'🔍', action:'Agent screened 8 counterparties for AML compliance', location:'Singapore', tool:'kyc_screen_aml', cost:1.00, vertical:'Compliance' },
+
+  // IP
+  { emoji:'💡', action:'Agent searched 43M patents for prior art on battery design', location:'Palo Alto, CA', tool:'ip_search_patents', cost:2.00, vertical:'IP' },
+  { emoji:'💡', action:'Agent drafted 7 patent claims for AI inference method', location:'San Jose, CA', tool:'ip_draft_claims', cost:3.00, vertical:'IP' },
+
+  // Recovery
+  { emoji:'🛡️', action:'Agent performed health check — all 12 sub-agents nominal', location:'Global', tool:'recovery_check_health', cost:0.10, vertical:'Recovery' },
+  { emoji:'🛡️', action:'Agent detected prompt injection attempt — neutralized', location:'Global', tool:'anti_injection_detect', cost:0.25, vertical:'Recovery' },
+];
+
+const VERTICALS_DATA = [
+  { name: 'Healthcare',   emoji: '🏥', activity: 92 },
+  { name: 'Insurance',    emoji: '💊', activity: 88 },
+  { name: 'Legal',        emoji: '⚖️', activity: 81 },
+  { name: 'Travel',       emoji: '✈️', activity: 78 },
+  { name: 'Trade',        emoji: '📦', activity: 74 },
+  { name: 'Construction', emoji: '🏗️', activity: 70 },
+  { name: 'Finance',      emoji: '💰', activity: 67 },
+  { name: 'SMB',          emoji: '💼', activity: 62 },
+  { name: 'Property',     emoji: '🏠', activity: 55 },
+  { name: 'DeFi',         emoji: '💎', activity: 50 },
+];
+
+// ─── State ───────────────────────────────────────────────────────
+let totalCalls   = 247381;
+let totalUSDC    = 41284.50;
+let activeAgents = 3847;
+let activeVerts  = 31;
+let feedItems    = [];
+const MAX_FEED   = 20;
+
+// Pre-populate with 8 seed events (staggered times)
+const seedOffsets = [2, 5, 8, 12, 15, 18, 23, 29];
+seedOffsets.forEach((secs, i) => {
+  const evt = EVENTS[i % EVENTS.length];
+  feedItems.push({ ...evt, secsAgo: secs, id: i });
+});
+
+// ─── DOM helpers ─────────────────────────────────────────────────
+function $(id) { return document.getElementById(id); }
+
+function formatCost(cost) {
+  return '$' + cost.toFixed(2);
+}
+
+function formatTime(secs) {
+  if (secs < 60) return `${secs}s ago`;
+  const m = Math.floor(secs / 60);
+  return `${m}m ago`;
+}
+
+function formatUSDC(n) {
+  return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatCount(n) {
+  return n.toLocaleString('en-US');
+}
+
+// ─── Render feed ─────────────────────────────────────────────────
+function renderFeed() {
+  const feed = $('feed');
+  const sorted = [...feedItems].sort((a, b) => a.secsAgo - b.secsAgo);
+
+  // Build new HTML
+  const html = sorted.map((item, idx) => `
+    <div class="feed-item${idx === 0 && item._isNew ? ' new' : ''}" data-id="${item.id}">
+      <div class="feed-emoji" aria-hidden="true">${item.emoji}</div>
+      <div class="feed-body">
+        <div class="feed-action">${item.action}</div>
+        <div class="feed-meta">
+          <span class="feed-location">📍 ${item.location}</span>
+          <span class="feed-tool">${item.tool}</span>
+          <span>${item.vertical}</span>
+        </div>
+      </div>
+      <div class="feed-right">
+        <div class="feed-cost">${formatCost(item.cost)}</div>
+        <div class="feed-time">${formatTime(item.secsAgo)}</div>
+      </div>
+    </div>
+  `).join('');
+
+  feed.innerHTML = html;
+  $('feed-count').textContent = `Showing latest ${sorted.length}`;
+}
+
+// ─── Stats update ─────────────────────────────────────────────────
+function updateStats() {
+  const callsEl = $('stat-calls');
+  const usdcEl  = $('stat-usdc');
+
+  callsEl.textContent = formatCount(totalCalls);
+  callsEl.classList.remove('stat-flash');
+  void callsEl.offsetWidth;
+  callsEl.classList.add('stat-flash');
+
+  usdcEl.textContent = formatUSDC(totalUSDC);
+  usdcEl.classList.remove('stat-flash');
+  void usdcEl.offsetWidth;
+  usdcEl.classList.add('stat-flash');
+
+  $('stat-agents').textContent   = formatCount(activeAgents);
+  $('stat-verticals').innerHTML  = `${activeVerts}<span style="font-size:var(--text-sm);color:var(--color-text-muted);font-weight:400">/36</span>`;
+}
+
+// ─── Volume bars ─────────────────────────────────────────────────
+function renderVolBars() {
+  const container = $('vol-bars');
+  // 24 bars (one per hour-ish segment, 12h * 2)
+  const rawData = [
+    18, 22, 27, 31, 38, 44, 52, 61, 55, 48, 42, 38,
+    35, 40, 47, 54, 63, 72, 84, 91, 88, 79, 68, 92
+  ];
+  const max = Math.max(...rawData);
+
+  container.innerHTML = rawData.map((v, i) => {
+    const h = Math.round((v / max) * 100);
+    const isActive = i >= rawData.length - 3;
+    return `<div class="vol-bar${isActive ? ' active' : ''}" style="height:${h}%" title="${v}k calls"></div>`;
+  }).join('');
+}
+
+// Update last bar to pulse
+function updateLastVolBar() {
+  const bars = document.querySelectorAll('.vol-bar');
+  if (!bars.length) return;
+  const last = bars[bars.length - 1];
+  const current = parseInt(last.style.height);
+  const jitter  = Math.random() * 10 - 5;
+  const next = Math.max(40, Math.min(100, current + jitter));
+  last.style.height = `${Math.round(next)}%`;
+}
+
+// ─── Vertical list ────────────────────────────────────────────────
+function renderVerticals() {
+  const list = $('vertical-list');
+  list.innerHTML = VERTICALS_DATA.map(v => `
+    <div class="vertical-row">
+      <span class="vertical-emoji">${v.emoji}</span>
+      <span class="vertical-name">${v.name}</span>
+      <div class="vertical-bar-track">
+        <div class="vertical-bar-fill" style="width:${v.activity}%"></div>
+      </div>
+      <span class="vertical-count">${v.activity}</span>
+    </div>
+  `).join('');
+}
+
+// Randomly nudge vertical activity
+function jitterVerticals() {
+  VERTICALS_DATA.forEach(v => {
+    v.activity = Math.max(20, Math.min(99, v.activity + (Math.random() * 6 - 3)));
+  });
+  VERTICALS_DATA.sort((a, b) => b.activity - a.activity);
+  renderVerticals();
+}
+
+// ─── New event injection ──────────────────────────────────────────
+let eventIdCounter = 100;
+
+function injectEvent() {
+  const evt = EVENTS[Math.floor(Math.random() * EVENTS.length)];
+  const cost = evt.cost * (0.9 + Math.random() * 0.2); // ±10% variation
+  const newItem = {
+    ...evt,
+    cost: Math.round(cost * 100) / 100,
+    secsAgo: 0,
+    id: ++eventIdCounter,
+    _isNew: true,
+  };
+
+  feedItems.unshift(newItem);
+  if (feedItems.length > MAX_FEED) feedItems.pop();
+
+  // Update counters
+  const callsIncrement = Math.floor(Math.random() * 4) + 1;
+  totalCalls   += callsIncrement;
+  totalUSDC    += newItem.cost;
+  activeAgents += Math.random() > 0.7 ? 1 : 0;
+  if (Math.random() > 0.95 && activeVerts < 36) activeVerts++;
+
+  updateStats();
+  renderFeed();
+
+  // Mark as not-new after animation
+  setTimeout(() => {
+    newItem._isNew = false;
+  }, 1600);
+}
+
+// ─── Tick — increment all times ───────────────────────────────────
+function tick() {
+  feedItems.forEach(item => { item.secsAgo++; });
+  // Soft re-render time labels only
+  document.querySelectorAll('.feed-time').forEach((el, i) => {
+    const sorted = [...feedItems].sort((a, b) => a.secsAgo - b.secsAgo);
+    if (sorted[i]) el.textContent = formatTime(sorted[i].secsAgo);
+  });
+  updateLastVolBar();
+}
+
+// ─── Random interval helper ───────────────────────────────────────
+function randInterval(fn, minMs, maxMs) {
+  function schedule() {
+    const delay = minMs + Math.random() * (maxMs - minMs);
+    setTimeout(() => { fn(); schedule(); }, delay);
+  }
+  schedule();
+}
+
+// ─── Init ─────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  renderVolBars();
+  renderVerticals();
+  renderFeed();
+  updateStats();
+
+  // Tick every second (age events)
+  setInterval(tick, 1000);
+
+  // Inject new event every 3–5 seconds
+  randInterval(injectEvent, 3000, 5000);
+
+  // Jitter vertical bars every 8 seconds
+  setInterval(jitterVerticals, 8000);
+
+  // Slow drift active agents
+  setInterval(() => {
+    activeAgents += Math.floor(Math.random() * 3) - 1;
+    if (activeAgents < 3500) activeAgents = 3500;
+    $('stat-agents').textContent = formatCount(activeAgents);
+  }, 7000);
+});
+</script>
+</body>
+</html>
