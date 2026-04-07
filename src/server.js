@@ -7,6 +7,10 @@ import mcpServer from "./mcp-server.js";
 import x402Services from "./routes/x402-services.js";
 import settlementApi from "./routes/settlement-api.js";
 import { initPayments } from "./services/payments.js";
+import * as agentBroker from "./services/agent-broker.js";
+import { routeIntent } from "./services/intent-router.js";
+import { trackAgentJourney } from "./services/shoulder-tap.js";
+import { tools } from "./mcp-tools.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -35,6 +39,194 @@ app.use(express.static(join(__dirname, "../public"), {
 }));
 
 // ─── Routes ──────────────────────────────────────────
+
+// ─── Hypersonic Broker Endpoints (/v1) ───────────────
+
+/**
+ * POST /v1/intent — Universal intake point.
+ * Any agent submits what it's trying to do; HiveAgent returns the optimal execution plan.
+ */
+app.post("/v1/intent", async (req, res) => {
+  try {
+    const { intent, agent_id, budget, context } = req.body;
+    if (!intent) return res.status(400).json({ error: "intent is required" });
+
+    const agentId = agent_id || `anon-${Date.now()}`;
+
+    // Route the intent to the best tools
+    const plan = routeIntent(intent, { ...( context || {}), agent_id: agentId }, budget || null, "normal");
+
+    // Track agent journey (shoulder tap)
+    try { await trackAgentJourney(agentId, "intent_route"); } catch (_) {}
+
+    // Check if agent is registered — if not, include welcome bonus hint
+    let welcomeBonus = null;
+    try {
+      const { db } = await import("./db.js");
+      const agent = db.prepare("SELECT agent_id FROM broker_agents WHERE agent_id = ?").get(agentId);
+      if (!agent) {
+        welcomeBonus = {
+          message: "Register for 5 USDC free credits",
+          action:  "POST /v1/register",
+          bonus:   "5 USDC",
+        };
+      }
+    } catch (_) {}
+
+    return res.json({
+      intent:        intent,
+      agent_id:      agentId,
+      plan:          plan,
+      welcome_bonus: welcomeBonus,
+      broker:        "hiveagentiq.com — the Agentzon",
+    });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+/**
+ * GET /v1/capabilities — Machine-readable capability manifest for any protocol.
+ * Supports A2A, OpenAI plugin, LangChain, etc.
+ */
+app.get("/v1/capabilities", (_req, res) => {
+  const host = process.env.HIVEAGENT_HOST || "https://hiveagentiq.com";
+  res.json({
+    name:         "HiveAgent",
+    description:  "The Agentzon — 758 tools, 36 verticals. The Amazon for AI agents.",
+    version:      "1.0.0",
+    tool_count:   tools.length,
+    protocols: {
+      mcp: {
+        transport: "streamable-http",
+        endpoint:  `${host}/mcp`,
+        methods:   ["initialize", "tools/list", "tools/call", "prompts/list", "resources/list"],
+      },
+      rest: {
+        base_url:  `${host}/v1`,
+        endpoints: [
+          { method: "POST", path: "/intent",      description: "Describe any task, get instant execution plan" },
+          { method: "GET",  path: "/capabilities", description: "This document" },
+          { method: "POST", path: "/register",    description: "Register agent, get 5 USDC welcome bonus" },
+          { method: "GET",  path: "/discover",    description: "Search tools by keyword" },
+          { method: "POST", path: "/webhook",     description: "Register webhook for tool notifications" },
+        ],
+      },
+      openai_plugin: {
+        manifest:     `${host}/.well-known/agent.json`,
+        openapi_spec: `${host}/api/v1/openapi.json`,
+      },
+      a2a: {
+        agent_card: `${host}/.well-known/agent.json`,
+        endpoint:   `${host}/mcp`,
+      },
+      langchain: {
+        toolkit_url: `${host}/mcp`,
+        npm_package: "hiveagent",
+        pip_package: "hiveagent",
+      },
+    },
+    verticals:   ["healthcare", "finance", "legal", "insurance", "travel", "commerce", "construction", "trades", "agriculture", "education", "government", "trade", "procurement", "sales", "fraud", "supply_chain", "real_estate", "hr", "defi", "smb", "energy", "fleet", "cybersecurity", "tax", "event", "personal_finance", "media", "nonprofit", "sports", "content", "property", "ip", "kyc", "erp", "veterinary", "data"],
+    pricing:     { currency: "USDC", chain: "Base L2", min_fee: 0.001, docs: `${host}/docs/pricing` },
+    register:    `POST ${host}/v1/register for 5 USDC welcome bonus`,
+    intent:      `POST ${host}/v1/intent — describe any task, get instant execution plan`,
+    discover:    `GET ${host}/v1/discover?q=your+query`,
+    broker:      "hiveagentiq.com — the Agentzon",
+  });
+});
+
+/**
+ * POST /v1/register — Agents register themselves.
+ * HiveAgent creates a wallet, sends welcome bonus, and onboards them.
+ */
+app.post("/v1/register", (req, res) => {
+  try {
+    const { agent_id, agent_type, capabilities, contact } = req.body;
+    if (!agent_id) return res.status(400).json({ error: "agent_id is required" });
+
+    const result = agentBroker.registerAgent(
+      agent_id,
+      agent_type  || "generic",
+      capabilities || [],
+      null,
+      contact     || null,
+    );
+
+    return res.json(result);
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+/**
+ * GET /v1/discover — REST tool discovery endpoint.
+ * Returns tools matching query, optionally filtered by vertical.
+ */
+app.get("/v1/discover", async (req, res) => {
+  try {
+    const { q, vertical, limit } = req.query;
+    const maxResults = parseInt(limit || "10", 10);
+    const query      = q || "";
+
+    // Filter tools by query and vertical
+    let matched = tools;
+    if (vertical) {
+      matched = matched.filter(t => {
+        const desc = (t.description || "").toLowerCase();
+        const name = (t.name || "").toLowerCase();
+        return desc.includes(vertical.toLowerCase()) || name.includes(vertical.toLowerCase());
+      });
+    }
+    if (query) {
+      const queryLower = query.toLowerCase();
+      matched = matched.filter(t => {
+        const desc = (t.description || "").toLowerCase();
+        const name = (t.name || "").toLowerCase();
+        return name.includes(queryLower) || desc.includes(queryLower);
+      });
+    }
+
+    matched = matched.slice(0, maxResults);
+
+    return res.json({
+      query:       q || null,
+      vertical:    vertical || null,
+      total_found: matched.length,
+      tools:       matched.map(t => ({
+        name:        t.name,
+        description: t.description ? t.description.substring(0, 200) : "",
+        input_schema: t.inputSchema || null,
+      })),
+      hint:   "POST /v1/intent to get a full execution plan for any task",
+      broker: "hiveagentiq.com — the Agentzon",
+    });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+/**
+ * POST /v1/webhook — Register a webhook to receive notifications
+ * when new tools are added to an agent's vertical.
+ */
+app.post("/v1/webhook", (req, res) => {
+  try {
+    const { agent_id, webhook_url, verticals, event_types } = req.body;
+    if (!agent_id)    return res.status(400).json({ error: "agent_id is required" });
+    if (!webhook_url) return res.status(400).json({ error: "webhook_url is required" });
+
+    const result = agentBroker.registerWebhook(
+      agent_id,
+      webhook_url,
+      verticals   || [],
+      event_types || ["new_tool", "price_drop", "usage_milestone"],
+    );
+
+    return res.json(result);
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
 
 // REST API for providers, dashboard, direct integrations
 app.use("/api/v1", apiRoutes);

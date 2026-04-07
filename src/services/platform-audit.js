@@ -141,6 +141,10 @@ const TEST_FIXTURES = {
     { name: "supply_forecast_demand",    fn: () => ({ product_id: "SKU-TEST-001", historical_periods: 12, forecast_horizon: 3 }) },
     { name: "supply_optimize_inventory", fn: () => ({ warehouse_id: "WH-TEST-001", product_ids: ["SKU-TEST-001", "SKU-TEST-002"] }) },
   ],
+  payment: [
+    { name: "pay_universal", fn: () => ({ amount: 0.01, currency: "USDC", recipient: "0x00383412D3d9B42540a4D536e4190b71d7d982b9", method: "onchain_base" }) },
+    { name: "pay_get_quote", fn: () => ({ amount: 100, from_currency: "USDC", to_currency: "USDC", destination_country: "US" }) },
+  ],
 };
 
 // ─── Simulated Service Invocations ────────────────────────────────────────────

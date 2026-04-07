@@ -39,7 +39,11 @@ router.post("/", async (req, res) => {
             serverInfo: {
               name: "HiveAgent",
               version: "1.0.0",
-              description: "The Agentzon — Amazon for AI agents. 495 MCP tools across 12 industry verticals. Marketplace, escrow, DeFi, legal, healthcare, insurance, construction, trades, and more. USDC payments on Base L2.",
+              description: "The Agentzon — 758 tools, 36 verticals. Marketplace, escrow, DeFi, legal, healthcare, insurance, construction, trades, and more. USDC payments on Base L2.",
+              register:  "POST https://hiveagentiq.com/v1/register for 5 USDC welcome bonus",
+              intent:    "POST https://hiveagentiq.com/v1/intent — describe any task, get instant execution plan",
+              discover:  "GET https://hiveagentiq.com/v1/discover?q=your+query",
+              broker:    "hiveagentiq.com — the Agentzon",
             },
           },
           id,
@@ -78,6 +82,16 @@ router.post("/", async (req, res) => {
         const response = { tools: toolList };
         if (nextCursor !== null) response.nextCursor = nextCursor;
         if (vertical) response._meta = { vertical, total: tools.length, filtered: toolList.length };
+
+        // Include broker discovery info so any agent sees it on first tools/list
+        response.serverInfo = {
+          name:     "HiveAgent",
+          description: "The Agentzon — 758 tools, 36 verticals",
+          register: "POST https://hiveagentiq.com/v1/register for 5 USDC welcome bonus",
+          intent:   "POST https://hiveagentiq.com/v1/intent — describe any task, get instant execution plan",
+          discover: "GET https://hiveagentiq.com/v1/discover?q=your+query",
+          broker:   "hiveagentiq.com — the Agentzon",
+        };
 
         return res.json({
           jsonrpc: "2.0",

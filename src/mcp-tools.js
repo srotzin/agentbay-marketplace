@@ -77,6 +77,8 @@ import { phase15Tools, handlePhase15Tool } from "./mcp-tools-phase15.js";
 import { enhanceResponse } from "./response-enhancer.js";
 // Discovery meta-tools (Phase 4)
 import { discoverTools, getVerticalGuide, suggestWorkflow } from "./services/discover.js";
+// Hypersonic Agent Broker
+import * as agentBroker from "./services/agent-broker.js";
 
 // MCP tool definitions (JSON Schema format)
 const coreTools = [
@@ -926,7 +928,93 @@ const coreTools = [
 ];
 
 // Merge core tools + Phase 2 (AI-requested) + Phase 3 (verticals) + Phase 5 (workflows) + Phase 7 (internal) + Phase 8 (lifecycle)
-export const tools = [...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools];
+// ─── Broker MCP Tools ─────────────────────────────────────────────────────────
+
+export const brokerTools = [
+  {
+    name: "broker_register",
+    description: "Use when connecting to HiveAgent for the first time. Register your agent to get a USDC wallet, 5 USDC free credits, personalized tool recommendations, and proactive updates about your verticals. Trigger phrases: 'register with hiveagent', 'get free credits', 'connect my agent', 'onboard to hiveagent', 'join hiveagent'. Returns wallet_address, free_credits(5 USDC), recommended_tools, getting_started_guide. Fee: free.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        agent_id:     { type: "string", description: "Your unique agent identifier (e.g. 'my-agent-v2', 'claude-researcher-001')" },
+        agent_type:   { type: "string", description: "Your agent type/specialty (e.g. 'healthcare', 'finance', 'legal', 'research', 'ecommerce', 'generic')", default: "generic" },
+        capabilities: { type: "array",  description: "List of your capabilities or tools you already use", items: { type: "string" } },
+        contact:      { type: "object", description: "Optional contact info: { email, webhook_url }",
+          properties: { email: { type: "string" }, webhook_url: { type: "string" } } },
+      },
+      required: ["agent_id"],
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  },
+  {
+    name: "broker_match",
+    description: "Use when you need the perfect tool for a specific task. Describe your task and HiveAgent matches you to the best tool with full explanation of why it fits, confidence score, alternatives, and a workflow suggestion. Trigger phrases: 'find the best tool for', 'what tool should I use to', 'match me to a tool', 'best tool for this task'. Fee: $0.02/match.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        task_description: { type: "string", description: "Plain English description of what you need to accomplish (e.g. 'process a health insurance prior authorization', 'send USDC cross-border', 'detect fraud in a transaction')" },
+        capabilities:    { type: "array",  description: "Optional: your current capabilities to help refine the match", items: { type: "string" } },
+      },
+      required: ["task_description"],
+    },
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  },
+  {
+    name: "broker_leaderboard",
+    description: "Use when you want to see what other agents are doing and how you compare. Returns top agents by tool call volume, USDC spent, and top vertical. Drives competition and surfaces which verticals are most active. Trigger phrases: 'show leaderboard', 'how do I rank', 'top agents', 'most active agents'. Fee: free.",
+    inputSchema: {
+      type: "object",
+      properties: {},
+      required: [],
+    },
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  },
+  {
+    name: "broker_broadcast",
+    description: "Use when you want to notify all registered agents in a vertical about something — a new tool, a price event, a workflow tip. Trigger phrases: 'broadcast to agents', 'notify all healthcare agents', 'send message to vertical', 'alert agents about'. Returns agents_notified and delivery_rate. Fee: $0.001/agent notified.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        message:    { type: "string",  description: "The message to broadcast to agents" },
+        vertical:   { type: "string",  description: "Target vertical (e.g. 'healthcare', 'finance', 'legal') — omit for all verticals" },
+        agent_type: { type: "string",  description: "Optional: filter to specific agent type" },
+      },
+      required: ["message"],
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+  },
+];
+
+export function handleBrokerTool(name, args = {}) {
+  switch (name) {
+    case "broker_register":
+      return agentBroker.registerAgent(
+        args.agent_id,
+        args.agent_type  || "generic",
+        args.capabilities || [],
+        args.contact?.webhook_url || null,
+        args.contact || null,
+      );
+    case "broker_match":
+      return agentBroker.matchAgentToTools(
+        args.capabilities || [],
+        args.task_description,
+      );
+    case "broker_leaderboard":
+      return agentBroker.getAgentLeaderboard();
+    case "broker_broadcast":
+      return agentBroker.broadcastToAgents(
+        args.message,
+        args.vertical   || null,
+        args.agent_type || null,
+      );
+    default:
+      throw new Error(`Unknown broker tool: ${name}`);
+  }
+}
+
+export const tools = [...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...brokerTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1469,6 +1557,11 @@ export async function handleTool(name, args) {
       } catch (e) {
         if (!e.message?.includes('Unknown')) throw e;
       }
-      return await handlePhase15Tool(name, args);
+      try {
+        return await handlePhase15Tool(name, args);
+      } catch (e) {
+        if (!e.message?.includes('Unknown')) throw e;
+      }
+      return handleBrokerTool(name, args);
   }
 }
