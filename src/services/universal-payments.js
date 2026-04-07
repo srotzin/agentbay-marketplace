@@ -661,55 +661,126 @@ export function offramp(amount, fromCrypto, toFiatCurrency, destination, agentId
 
 // ─── getSupportedCurrencies ───────────────────────────────────────────────────
 
-/**
- * List all supported currencies with chains, methods, fees.
- * @returns {{ currencies[] }}
- */
+// ─── Coming-soon Asian currencies ─────────────────────────────────────────────
+const COMING_SOON_CURRENCIES = {
+  CNY: {
+    symbol:  "CNY",
+    name:    "Chinese Yuan",
+    type:    "fiat",
+    status:  "coming_soon",
+    methods: ["alipay", "wechat_pay", "unionpay"],
+    note:    "Q3 2026",
+  },
+  HKD: {
+    symbol:  "HKD",
+    name:    "Hong Kong Dollar",
+    type:    "fiat",
+    status:  "coming_soon",
+    methods: ["alipay"],
+    note:    "Q3 2026",
+  },
+};
+
 export function getSupportedCurrencies() {
   const rows = db.prepare("SELECT * FROM pay_currencies ORDER BY type, symbol").all();
+  const liveCurrencies = rows.map(c => ({
+    symbol:       c.symbol,
+    name:         c.name,
+    type:         c.type,
+    peg:          c.peg,
+    chains:       JSON.parse(c.chains || "[]"),
+    methods:      JSON.parse(c.methods || "[]"),
+    min_amount:   c.min_amount,
+    max_amount:   c.max_amount,
+    status:       "live",
+    fee_schedule: {
+      onchain: "0.10%",
+      card:    "1.50%",
+      ach:     "0.50%",
+      swap:    "0.05%",
+    },
+  }));
+
+  // Append coming-soon Chinese/HK currencies
+  const comingSoonList = Object.values(COMING_SOON_CURRENCIES).map(c => ({
+    symbol:       c.symbol,
+    name:         c.name,
+    type:         c.type,
+    status:       c.status,
+    methods:      c.methods,
+    note:         c.note,
+    chains:       [],
+    min_amount:   1.00,
+    max_amount:   1000000,
+  }));
+
   return {
-    currencies: rows.map(c => ({
-      symbol:       c.symbol,
-      name:         c.name,
-      type:         c.type,
-      peg:          c.peg,
-      chains:       JSON.parse(c.chains || "[]"),
-      methods:      JSON.parse(c.methods || "[]"),
-      min_amount:   c.min_amount,
-      max_amount:   c.max_amount,
-      fee_schedule: {
-        onchain: "0.10%",
-        card:    "1.50%",
-        ach:     "0.50%",
-        swap:    "0.05%",
-      },
-    })),
-    total: rows.length,
-    free:  true,
+    currencies:    liveCurrencies,
+    coming_soon:   comingSoonList,
+    total:         rows.length,
+    total_including_upcoming: rows.length + comingSoonList.length,
+    free:          true,
   };
 }
 
 // ─── getSupportedMethods ──────────────────────────────────────────────────────
 
-/**
- * List all payment methods with fees, speeds, limits.
- * @returns {{ methods[] }}
- */
+// ─── Chinese payment methods (coming Q3 2026) ─────────────────────────────────
+const CHINESE_PAYMENT_METHODS = {
+  alipay: {
+    name:       "Alipay",
+    status:     "coming_soon",
+    currencies: ["CNY", "HKD"],
+    fee:        "1.5%",
+    note:       "Available Q3 2026",
+  },
+  wechat_pay: {
+    name:       "WeChat Pay",
+    status:     "coming_soon",
+    currencies: ["CNY"],
+    fee:        "1.5%",
+    note:       "Available Q3 2026",
+  },
+  unionpay: {
+    name:       "UnionPay",
+    status:     "coming_soon",
+    currencies: ["CNY", "USD"],
+    fee:        "2%",
+    note:       "Available Q3 2026",
+  },
+};
+
 export function getSupportedMethods() {
   const rows = db.prepare("SELECT * FROM pay_methods ORDER BY fee_pct").all();
+  const liveMethodsList = rows.map(m => ({
+    name:                m.name,
+    type:                m.type,
+    currencies_supported: JSON.parse(m.currencies || "[]"),
+    fee_pct:             m.fee_pct,
+    fee_pct_display:     `${(m.fee_pct * 100).toFixed(3)}%`,
+    settlement_time:     m.settlement_time,
+    min_amount:          m.min_amount,
+    max_amount:          m.max_amount,
+    status:              "live",
+  }));
+
+  // Append coming-soon Chinese payment methods
+  const comingSoonList = Object.entries(CHINESE_PAYMENT_METHODS).map(([key, m]) => ({
+    name:                key,
+    display_name:        m.name,
+    type:                "wallet",
+    currencies_supported: m.currencies,
+    fee:                 m.fee,
+    status:              m.status,
+    note:                m.note,
+  }));
+
   return {
-    methods: rows.map(m => ({
-      name:                m.name,
-      type:                m.type,
-      currencies_supported: JSON.parse(m.currencies || "[]"),
-      fee_pct:             m.fee_pct,
-      fee_pct_display:     `${(m.fee_pct * 100).toFixed(3)}%`,
-      settlement_time:     m.settlement_time,
-      min_amount:          m.min_amount,
-      max_amount:          m.max_amount,
-    })),
-    total: rows.length,
-    free:  true,
+    methods:      liveMethodsList,
+    coming_soon:  comingSoonList,
+    total:        rows.length,
+    total_including_upcoming: rows.length + comingSoonList.length,
+    free:         true,
   };
 }
 

@@ -896,6 +896,11 @@ const TIPS = {
   vet_estimate_cost:         ["vet_schedule_appointment", "vet_triage_symptoms", "vet_dashboard"],
   vet_dashboard:             ["vet_triage_symptoms", "vet_schedule_appointment", "vet_health_record"],
 
+  // ── Transactional Executor workflow (Phase 14) ────────────────────
+  tx_execute:        ["tx_log", "tx_execute_budget", "hiveagent_audit_log"],
+  tx_execute_budget: ["tx_log", "tx_execute", "hiveagent_audit_log"],
+  tx_log:            ["tx_execute", "tx_execute_budget", "hiveagent_audit_query"],
+
   // ── Universal Payment Hub workflow (Phase 12) ─────────────────────────────
   pay_universal:
     "Tip: Payment sent — call pay_check_status with the tx_id to confirm settlement, or use pay_history to see cumulative volume and your effective fee rate.",
@@ -1043,6 +1048,14 @@ const TIPS = {
     "Tip: Cost estimate ready — book the procedure now with vet_schedule_appointment, or review insurance coverage options before committing.",
   vet_dashboard:
     "Tip: Pet care overview loaded — address any overdue vaccinations with vet_schedule_appointment or triage new symptoms with vet_triage_symptoms.",
+
+  // ── Transactional Executor tips (Phase 14) ───────────────────────────────
+  tx_execute:
+    "Tip: Transaction complete — call tx_log with the transaction_id to get the full audit trail. If any rollbacks occurred, verify them in tx_log before retrying failed steps.",
+  tx_execute_budget:
+    "Tip: Budget-capped transaction complete — check budget_remaining in the result. Use tx_log to audit every step, and lower the budget next time if you want a tighter cost cap.",
+  tx_log:
+    "Tip: Full audit trail loaded — inspect failed steps and their rollback_status carefully. If rollbacks failed, you may need to manually compensate those steps.",
 }
 
 // ─── Fallback suggestions ─────────────────────────────────────────────────────
