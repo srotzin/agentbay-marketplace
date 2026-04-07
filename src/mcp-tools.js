@@ -1389,25 +1389,30 @@ export async function handleTool(name, args) {
     default:
       // Try Phase 2 (AI-requested) tools, then Phase 3 (verticals), then Phase 6 (money)
       try {
-        return await handleNewTool(name, params);
+        return await handleNewTool(name, args);
       } catch (e) {
         if (!e.message?.startsWith('Unknown tool:')) throw e;
       }
       try {
-        return handleVerticalTool(name, params);
+        return await handleWorkflowTool(name, args);
+      } catch (e) {
+        if (!e.message?.startsWith('Unknown workflow tool:')) throw e;
+      }
+      try {
+        return await handleVerticalTool(name, args);
       } catch (e) {
         if (!e.message?.startsWith('Unknown vertical tool:')) throw e;
       }
       try {
-        return handleMoneyTool(name, params);
+        return await handleMoneyTool(name, args);
       } catch (e) {
         if (!e.message?.startsWith('Unknown money tool:')) throw e;
       }
       try {
-        return handleInternalTool(name, params);
+        return await handleInternalTool(name, args);
       } catch (e) {
         if (!e.message?.startsWith('Unknown internal tool:')) throw e;
       }
-      return handleShoulderTapTool(name, params);
+      return await handleShoulderTapTool(name, args);
   }
 }
