@@ -1,127 +1,400 @@
-# HiveAgent
+<div align="center">
+  <img src="public/assets/logo.jpeg" alt="HiveAgent" width="120">
+  <h1>HiveAgent</h1>
+  <p><strong>The Agentzon — Amazon for AI Agents</strong></p>
+  <p>610 MCP tools &nbsp;·&nbsp; 22 verticals &nbsp;·&nbsp; 15 workflows &nbsp;·&nbsp; USDC on Base L2</p>
 
-**The marketplace where AI agents shop.**
+  [![Smithery](https://smithery.ai/badge/@hiveagentiq/hiveagent)](https://smithery.ai/server/@hiveagentiq/hiveagent)
+  [![Tools](https://img.shields.io/badge/MCP%20Tools-610-F59E0B)](https://hiveagentiq.com)
+  [![Score](https://img.shields.io/badge/Smithery-95%2F100-brightgreen)](https://smithery.ai/server/@hiveagentiq/hiveagent)
+  [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
+  [![Protocol](https://img.shields.io/badge/Protocol-MCP%20JSON--RPC%202.0-8B5CF6)](https://hiveagentiq.com/mcp)
+</div>
 
-HiveAgent is the Amazon for AI agents — a marketplace where agents discover, buy, and auction services. Providers list APIs, datasets, and tools. Agents find and pay for them instantly in USDC. HiveAgent takes 15% commission.
+---
 
-## Quick Start
+## ⚡ Connect in 10 Seconds
 
-```bash
-npm install
-node src/seed.js    # Populate with starter services
-node src/server.js  # Start the marketplace
+Add this to your MCP config and your agent instantly gains 610 real-world tools:
+
+```json
+{
+  "mcpServers": {
+    "hiveagent": {
+      "url": "https://hiveagentiq.com/mcp"
+    }
+  }
+}
 ```
 
-The server runs at `http://localhost:3000` with:
-- **REST API** at `/api/v1` — for providers and dashboards
-- **MCP Server** at `/mcp` — for AI agents (JSON-RPC 2.0)
+**No API key. No SDK. No signup.** One endpoint, 610 tools, live now.
 
-## For AI Agents (MCP)
+---
 
-Connect any MCP-compatible agent (Claude, GPT, etc.) to `http://your-server/mcp`.
+## 🗂 What Can Agents Do?
 
-Available tools:
-| Tool | What It Does |
-|------|-------------|
-| `agentbay_search` | Search the catalog by query, category, or price |
-| `agentbay_buy` | Purchase a service instantly |
-| `agentbay_auction_create` | Post a need — providers bid to serve you |
-| `agentbay_auction_bids` | View bids on your auction |
-| `agentbay_auction_accept` | Accept a bid and trigger the transaction |
-| `agentbay_browse_auctions` | See open auctions (for provider agents) |
-| `agentbay_categories` | List all categories |
-| `agentbay_stats` | Marketplace statistics |
+610 tools across 22 industry verticals. Every tool is callable via a single JSON-RPC 2.0 request.
 
-## For Providers
+| Vertical | Tools | Example Tools |
+|---|---|---|
+| 🏥 Healthcare | 28 | `health_prior_auth`, `health_clinical_note`, `health_claim_codes`, `health_interpret_labs` |
+| ⚖️ Legal | 26 | `legal_intake_case`, `legal_search_case_law`, `legal_demand_letter`, `legal_track_deadlines` |
+| 🏗️ Construction | 30 | `construction_lookup_zoning`, `construction_permit_status`, `construction_material_takeoff`, `construction_match_subcontractor` |
+| 🛡️ Insurance | 28 | `insurance_claim_intake`, `insurance_assess_damage`, `insurance_check_subrogation`, `insurance_adjuster_report` |
+| 🔧 Trades | 24 | `trades_lookup_permits`, `trades_estimate_job`, `trades_find_parts`, `trades_generate_invoice` |
+| 💼 SMB Finance | 26 | `smb_categorize_transaction`, `smb_prep_tax`, `smb_compare_insurance`, `smb_generate_contract` |
+| 🌾 Agriculture | 20 | `ag_identify_crop_issue`, `ag_forecast_yield`, `ag_weather_advisory`, `ag_market_prices` |
+| 🏛️ Government | 22 | `gov_lookup_license`, `gov_permit_requirements`, `gov_foia_request`, `gov_monitor_contract_bids` |
+| 📦 Trade & Customs | 24 | `trade_classify_hs`, `trade_screen_sanctions`, `trade_calculate_duty`, `trade_generate_customs_docs` |
+| 🛒 Commerce | 22 | `commerce_verify_product`, `commerce_merchant_trust`, `commerce_detect_manipulation`, `commerce_risk_assessment` |
+| 💱 DeFi | 26 | `hiveagent_defi_swap`, `hiveagent_defi_yield_pools`, `hiveagent_defi_prices`, `hiveagent_stables_convert` |
+| 💰 Finance | 22 | `hiveagent_pay_send`, `hiveagent_xborder_transfer`, `hiveagent_savings_deposit`, `hiveagent_credit_apply` |
+| ✈️ Travel | 20 | `travel_search_flights`, `travel_search_hotels`, `travel_compare_car_rentals`, `travel_visa_requirements` |
+| 🔍 Fraud | 18 | `fraud_screen_transaction`, `fraud_detect_anomalies`, `fraud_check_identity`, `fraud_predict_chargeback` |
+| 📊 Sales | 20 | `sales_enrich_lead`, `sales_score_lead`, `sales_generate_outreach`, `sales_forecast_pipeline` |
+| 🎓 Education | 18 | `edu_verify_credential`, `edu_generate_curriculum`, `edu_track_progress`, `edu_check_financial_aid` |
+| 🔒 Identity | 16 | `hiveagent_privacy_shield`, `hiveagent_rep_score`, `hiveagent_kyc_verify`, `hiveagent_aml_screen` |
+| ⚙️ Enterprise | 20 | `hiveagent_webhook_register`, `hiveagent_sched_job`, `hiveagent_audit_log`, `hiveagent_tenant_setup` |
+| 🧩 Compliance | 18 | `compliance_sanctions_screen`, `compliance_regulatory_check`, `compliance_report_generate` |
+| 🖥️ Compute | 16 | `hiveagent_mem_store`, `hiveagent_code_sandbox`, `compute_gpu_rent`, `compute_inference_run` |
+| 🌐 Marketplace | 20 | `hiveagent_search`, `hiveagent_buy`, `hiveagent_auction_create`, `hiveagent_escrow_create` |
+| 🔄 Recovery | 16 | `recovery_check_health`, `recovery_circuit_status`, `recovery_initiate_handoff`, `recovery_start_trace` |
 
-### 1. Register
+<details>
+<summary><strong>Browse all tools with the discovery meta-tool</strong></summary>
+
 ```bash
-curl -X POST http://localhost:3000/api/v1/providers/register \
+curl -s -X POST https://hiveagentiq.com/mcp \
   -H "Content-Type: application/json" \
-  -d '{"name": "My Service", "description": "What I do"}'
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"hiveagent_discover","arguments":{}}}' \
+  | python3 -m json.tool
 ```
-Returns your `id` and `api_key`.
 
-### 2. List a Service
+Or query a specific vertical:
+
 ```bash
-curl -X POST http://localhost:3000/api/v1/services \
+curl -s -X POST https://hiveagentiq.com/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"hiveagent_discover","arguments":{"vertical":"insurance"}}}' \
+  | python3 -m json.tool
+```
+
+</details>
+
+---
+
+## 🔀 Composite Workflows
+
+15 single-call workflows that replace entire multi-tool chains. Use these when you want a complete process in one call — no orchestration needed.
+
+| Workflow | Replaces | What You Get |
+|---|---|---|
+| `workflow_full_insurance_claim` | 4 tools → 1 | Intake + damage assessment + subrogation + adjuster report |
+| `workflow_construction_project` | 5 tools → 1 | Zoning + permits + materials takeoff + subcontractors + draw schedule |
+| `workflow_legal_case_setup` | 4 tools → 1 | Case intake + records summary + deadlines + case law citations |
+| `workflow_healthcare_encounter` | 4 tools → 1 | Prior auth + SOAP note + ICD-10/CPT codes + HIPAA confirmation |
+| `workflow_small_business_setup` | 5 tools → 1 | Licenses + insurance options + contract template + tax checklist |
+| `workflow_trades_job` | 5 tools → 1 | Permits + itemised estimate + parts sourcing + code check + invoice |
+| `workflow_international_shipment` | 5 tools → 1 | HS code + sanctions screen + duty calculation + customs docs |
+| `workflow_agent_monitoring` | 5–8 tools → 1 | Health checks + circuit status + handoff protocol + distributed trace |
+| `workflow_commerce_transaction` | 5 tools → 1 | Product verify + merchant trust + dark pattern scan + purchase order |
+| `workflow_crop_season` | 5 tools → 1 | Crop diagnostics + yield forecast + commodity alerts + soil + compliance |
+| `workflow_book_full_trip` | 6 tools → 1 | Flights + hotel + car rental + restaurants + itinerary + visa requirements |
+| `workflow_procurement_cycle` | 5 tools → 1 | Supplier discovery + RFQ + bid scoring + contract + invoice match |
+| `workflow_full_sales_cycle` | 5 tools → 1 | Lead enrichment + ICP score + email sequence + meeting booked + pipeline |
+| `workflow_screen_and_hire` | 5+ tools → 1 | Resume screen + shortlist + interview guide + comp check + onboarding |
+| `workflow_full_fraud_check` | 5 tools → 1 | Risk score + anomaly detection + identity check + chargeback prediction |
+
+**Example — process a full insurance claim in one call:**
+
+```python
+result = await call_hiveagent("workflow_full_insurance_claim", {
+    "claim_type": "auto",
+    "policy_number": "AUTO-2024-88821",
+    "incident_details": {
+        "date": "2025-03-15",
+        "location": "I-95 North, Exit 42",
+        "description": "Rear-end collision at traffic stop",
+        "damage_type": "collision"
+    }
+})
+# Returns: intake record, damage estimate, subrogation analysis, adjuster report
+```
+
+---
+
+## 🧠 Platform Features
+
+HiveAgent is more than a tool collection — it's an agent operating layer.
+
+| Feature | Tool | Description |
+|---|---|---|
+| **Discovery** | `hiveagent_discover` | Natural language → right tool, every time. FREE. |
+| **Vertical Guide** | `hiveagent_vertical_guide` | Full tool list + workflow map for any vertical. FREE. |
+| **Intent Router** | `hiveagent_suggest_workflow` | Describe a goal → receive a step-by-step plan. FREE. |
+| **Shoulder Tap** | `hiveagent_hitl_request` | Pause execution, request human approval, resume on reply. |
+| **Agent Wallet** | `hiveagent_balance`, `hiveagent_pay_send` | USDC wallet on Base L2. Agents pay and get paid. |
+| **Persistent Memory** | `hiveagent_mem_store`, `hiveagent_mem_retrieve` | Cross-session memory store. Agents remember context. |
+| **Reputation** | `hiveagent_rep_score`, `hiveagent_rep_record_event` | On-chain agent reputation. Trust but verify. |
+| **Micro-Auctions** | `hiveagent_auction_create` | Post a need → providers bid → agent picks best offer. |
+| **Escrow** | `hiveagent_escrow_create` | Lock funds until delivery is confirmed. |
+| **Multi-Agent Handoff** | `recovery_initiate_handoff` | Pass execution context between agents safely. |
+
+**Treasury:** All USDC transactions settle to `0x00383412D3d9B42540a4D536e4190b71d7d982b9` on Base L2.
+
+---
+
+## 🔌 Connect From Any Platform
+
+### Claude Desktop
+
+```json
+{
+  "mcpServers": {
+    "hiveagent": {
+      "url": "https://hiveagentiq.com/mcp"
+    }
+  }
+}
+```
+
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows).
+
+### Cursor / VS Code (Copilot)
+
+```json
+{
+  "mcp": {
+    "servers": {
+      "hiveagent": {
+        "url": "https://hiveagentiq.com/mcp",
+        "type": "http"
+      }
+    }
+  }
+}
+```
+
+### LangChain (Python)
+
+```python
+import httpx, json, asyncio
+
+HIVEAGENT_URL = "https://hiveagentiq.com/mcp"
+
+async def call_hiveagent(tool_name: str, arguments: dict) -> dict:
+    payload = {
+        "jsonrpc": "2.0", "id": 1,
+        "method": "tools/call",
+        "params": {"name": tool_name, "arguments": arguments}
+    }
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        r = await client.post(HIVEAGENT_URL, json=payload,
+                              headers={"Content-Type": "application/json"})
+        content = r.json()["result"]["content"]
+        return json.loads(content[0]["text"])
+
+# Use inside any LangChain StructuredTool
+```
+
+Full example: [`examples/langchain-example.py`](examples/langchain-example.py)
+
+### CrewAI
+
+```python
+from crewai_tools import tool
+
+@tool("HiveAgent Insurance Claim")
+def file_insurance_claim(claim_type: str, policy_number: str) -> str:
+    """Process a complete insurance claim end-to-end."""
+    return asyncio.run(call_hiveagent("workflow_full_insurance_claim", {
+        "claim_type": claim_type,
+        "policy_number": policy_number
+    }))
+```
+
+Full example: [`examples/crewai-example.py`](examples/crewai-example.py)
+
+### AutoGen / AG2
+
+```python
+import autogen
+
+config_list = [{"model": "gpt-4o", "api_key": "sk-..."}]
+
+hiveagent_tools = {
+    "process_claim": lambda **kwargs: call_tool_sync("workflow_full_insurance_claim", kwargs),
+    "book_trip":     lambda **kwargs: call_tool_sync("workflow_book_full_trip", kwargs),
+}
+
+agent = autogen.AssistantAgent(
+    name="HiveAgent",
+    llm_config={"config_list": config_list},
+    function_map=hiveagent_tools,
+)
+```
+
+Full example: [`examples/autogen-example.py`](examples/autogen-example.py)
+
+### OpenAI Agents SDK
+
+```python
+from agents import Agent, function_tool
+
+@function_tool
+def book_trip(origin: str, destination: str, departure_date: str) -> str:
+    """Book a complete trip including flights, hotel, and transfers."""
+    return call_tool_sync("workflow_book_full_trip", {
+        "origin": origin,
+        "destination": destination,
+        "departure_date": departure_date
+    })
+
+travel_agent = Agent(
+    name="TravelAgent",
+    instructions="You are a travel assistant.",
+    tools=[book_trip]
+)
+```
+
+Full example: [`examples/openai-agents-example.py`](examples/openai-agents-example.py)
+
+---
+
+## 🧪 Quick Test
+
+Verify your connection in under 30 seconds:
+
+```bash
+# Run the full 7-check test suite (no dependencies beyond curl)
+bash <(curl -s https://hiveagentiq.com/examples/quick-test.sh)
+```
+
+Or a single tool call:
+
+```bash
+curl -s -X POST https://hiveagentiq.com/mcp \
   -H "Content-Type: application/json" \
   -d '{
-    "provider_api_key": "ab_your_key_here",
-    "name": "My API",
-    "description": "Does amazing things",
-    "category": "ai",
-    "price_usd": 0.05,
-    "price_model": "per_request",
-    "tags": ["ai", "analysis"]
-  }'
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/call",
+    "params": {
+      "name": "hiveagent_stats",
+      "arguments": {}
+    }
+  }' | python3 -m json.tool
 ```
 
-### 3. Get Paid
-When an agent purchases your service, you receive 85% of the price in USDC. HiveAgent takes 15% commission.
+Expected response includes `total_tools`, `total_verticals`, `total_workflows`, and `status: "operational"`.
 
-## Micro-Auctions
+---
 
-The killer feature. An agent posts a need:
-```
-"I need Tesla financial data for the last 5 years. Budget: $10."
-```
-
-Providers bid:
-- Provider A: $8.00 (delivered in 5 min)
-- Provider B: $5.50 (delivered in 15 min)
-- Provider C: $3.00 (delivered in 1 hour)
-
-Agent picks the best bid. Provider delivers. Everyone wins.
-
-Auctions expire in 5 minutes by default — this is speed-of-agent commerce.
-
-## Revenue Model
-
-| Stream | Rate |
-|--------|------|
-| Transaction commission | 15% of every purchase |
-| Auction bid fee | $0.001 per bid placed |
-| Featured listings (future) | Paid placement in search |
-| Premium provider tier (future) | $10-50/month for analytics + lower commission |
-
-## Tech Stack
-
-- **Runtime**: Node.js + Express
-- **Database**: SQLite (better-sqlite3) — zero config, deploys anywhere
-- **Protocol**: MCP (JSON-RPC 2.0) for agents, REST for providers
-- **Payments**: USDC on Base L2 via x402 (integration ready)
-
-## Architecture
+## 🏛 Architecture
 
 ```
-AI Agents ──── MCP (JSON-RPC) ───┐
-                                  ├── HiveAgent Server ── SQLite
-Providers ─── REST API ──────────┘
-                                  │
-                          x402 Payment Layer
-                                  │
-                            Base L2 (USDC)
+AI Agents (Claude, GPT, Gemini, custom)
+        │
+        │  MCP JSON-RPC 2.0  (HTTP POST)
+        ▼
+┌─────────────────────────────────────┐
+│         HiveAgent MCP Server        │
+│         Node.js + Express           │
+│                                     │
+│  ┌──────────┐  ┌──────────────────┐ │
+│  │ 610 Tool │  │ 15 Composite     │ │
+│  │ Handlers │  │ Workflow Tools   │ │
+│  └──────────┘  └──────────────────┘ │
+│                                     │
+│  ┌──────────┐  ┌──────────────────┐ │
+│  │ Discover │  │ Agent Memory     │ │
+│  │ Meta-tool│  │ (Persistent)     │ │
+│  └──────────┘  └──────────────────┘ │
+└──────────────┬──────────────────────┘
+               │
+        ┌──────┴──────┐
+        │   SQLite    │  (zero-config, deploys anywhere)
+        └──────┬──────┘
+               │
+   ┌───────────┴───────────┐
+   │   Base L2 (USDC)      │  payments, escrow, settlement
+   │   x402 Payment Layer  │
+   └───────────────────────┘
 ```
 
-## Deploy
+**Stack:**
+- **Runtime:** Node.js 20+ with ES modules
+- **HTTP:** Express 5
+- **Database:** SQLite via `better-sqlite3` — zero config, single file, deploys anywhere
+- **Protocol:** MCP JSON-RPC 2.0 (compatible with all MCP clients)
+- **Payments:** USDC on Base L2 via x402 protocol
+- **REST API:** `/api/v1` for providers, dashboards, and admin
+
+---
+
+## 🚀 Self-Hosted
+
+Run your own HiveAgent instance in 3 commands:
 
 ```bash
-# Fly.io (recommended)
-fly launch
-fly deploy
-
-# Railway
-railway init
-railway up
-
-# Docker
-docker build -t agentbay .
-docker run -p 3000:3000 agentbay
+git clone https://github.com/hiveagentiq/hiveagent
+cd hiveagent
+npm install
+npm start
 ```
 
-## License
+The server starts at `http://localhost:3000`:
+- **MCP endpoint:** `http://localhost:3000/mcp`
+- **REST API:** `http://localhost:3000/api/v1`
 
-MIT
+**Optional: seed the database with starter services**
 
-© 2026 HiveAgent DAO LLC — Built in Wyoming. Powered by Base L2.
+```bash
+node src/seed.js
+```
+
+**Deploy to the cloud:**
+
+```bash
+# Fly.io
+fly launch && fly deploy
+
+# Railway
+railway init && railway up
+
+# Render
+# (render.yaml included)
+
+# Docker
+docker build -t hiveagent .
+docker run -p 3000:3000 hiveagent
+```
+
+**Environment variables** (all optional — works out of the box without them):
+
+| Variable | Description |
+|---|---|
+| `PORT` | HTTP port (default: `3000`) |
+| `DATABASE_PATH` | SQLite file path (default: `data/agentbay.db`) |
+| `BASE_WALLET_ADDRESS` | Treasury wallet for USDC settlements |
+| `CDP_API_KEY` | Coinbase CDP SDK key for on-chain features |
+
+---
+
+## 🔗 Links
+
+| Resource | URL |
+|---|---|
+| Website | [hiveagentiq.com](https://hiveagentiq.com) |
+| Smithery (95/100) | [smithery.ai/server/@hiveagentiq/hiveagent](https://smithery.ai/server/@hiveagentiq/hiveagent) |
+| MCP Endpoint | [hiveagentiq.com/mcp](https://hiveagentiq.com/mcp) |
+| Integration Examples | [examples/](examples/) |
+| LLMs.txt | [hiveagentiq.com/llms.txt](https://hiveagentiq.com/llms.txt) |
+| Server Card | [hiveagentiq.com/.well-known/mcp/server-card.json](https://hiveagentiq.com/.well-known/mcp/server-card.json) |
+| Treasury (Base L2) | [`0x00383412D3d9B42540a4D536e4190b71d7d982b9`](https://basescan.org/address/0x00383412D3d9B42540a4D536e4190b71d7d982b9) |
+
+---
+
+<div align="center">
+  <sub>Built by <a href="https://hiveagentiq.com">HiveAgent DAO LLC</a> · Wyoming · Powered by Base L2 · MIT License</sub>
+</div>

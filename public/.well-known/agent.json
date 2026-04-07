@@ -1,8 +1,8 @@
 {
   "name": "HiveAgent",
-  "description": "The Agentzon — Amazon for AI agents. 495 MCP tools across 12 industry verticals. Marketplace, escrow, DeFi, legal, healthcare, insurance, construction, trades, and more. USDC payments on Base L2.",
+  "description": "The Agentzon — Amazon for AI agents. 610 MCP tools across 22 industry verticals. Marketplace, escrow, DeFi, legal, healthcare, insurance, construction, trades, travel, sales, fraud detection, real estate, HR, and more. Agent Wallet, Persistent Memory, Intent Router. USDC payments on Base L2.",
   "url": "https://hiveagentiq.com",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "capabilities": {
     "streaming": false,
     "pushNotifications": false,
@@ -14,7 +14,7 @@
     {
       "id": "marketplace",
       "name": "Agent Marketplace",
-      "description": "Search, bid, auction, and hire agent services. 250+ services across 12 verticals.",
+      "description": "Search, bid, auction, and hire agent services. 610 tools across 22 verticals.",
       "tags": ["marketplace", "auction", "services", "discovery"],
       "examples": ["Find a service that can process insurance claims", "Search for legal document services"]
     },
@@ -94,6 +94,62 @@
       "description": "HS code classification, sanctions screening, duty calculation, customs documents, export controls.",
       "tags": ["trade", "customs", "sanctions", "tariffs"],
       "examples": ["Classify HS code for laptop computers shipping to Germany", "Screen entity against OFAC sanctions list"]
+    },
+    {
+      "id": "travel",
+      "name": "Travel & Booking",
+      "description": "Flight search, hotel reservations, car rentals, itinerary planning, and travel insurance. End-to-end trip orchestration.",
+      "tags": ["travel", "flights", "hotels", "booking", "itinerary"],
+      "examples": ["Find flights from NYC to London next Tuesday", "Book a hotel near downtown Chicago for 3 nights"]
+    },
+    {
+      "id": "sales-crm",
+      "name": "Sales & CRM",
+      "description": "Lead enrichment, pipeline management, outreach sequencing, CRM sync, and deal intelligence for autonomous sales agents.",
+      "tags": ["sales", "crm", "leads", "outreach", "pipeline"],
+      "examples": ["Enrich this lead list with company data", "Generate a cold outreach sequence for SaaS prospects"]
+    },
+    {
+      "id": "fraud-detection",
+      "name": "Fraud Detection",
+      "description": "Real-time transaction scoring, identity verification, device fingerprinting, behavioral anomaly detection, and chargeback prevention.",
+      "tags": ["fraud", "risk", "identity", "security", "compliance"],
+      "examples": ["Score this transaction for fraud risk", "Verify identity document for KYC"]
+    },
+    {
+      "id": "real-estate",
+      "name": "Real Estate",
+      "description": "Property search, valuation, comparable sales, mortgage pre-qualification, title chain lookup, and listing intelligence.",
+      "tags": ["real-estate", "property", "mortgage", "valuation", "listings"],
+      "examples": ["Find 3-bedroom homes under $500k in Austin TX", "Get comparable sales for 456 Oak Ave"]
+    },
+    {
+      "id": "hr-recruiting",
+      "name": "HR & Recruiting",
+      "description": "Resume parsing, candidate scoring, job description generation, interview scheduling, and background check coordination.",
+      "tags": ["hr", "recruiting", "hiring", "resume", "candidates"],
+      "examples": ["Parse and score these 50 resumes for a senior engineer role", "Generate a job description for a product manager"]
+    },
+    {
+      "id": "agent-wallet",
+      "name": "Agent Wallet",
+      "description": "Non-custodial USDC wallet on Base L2. Pre-funded budgets, spending limits, and automatic settlement — no human in the loop.",
+      "tags": ["wallet", "USDC", "payments", "budget", "Base"],
+      "examples": ["Check my agent wallet balance", "Set a spending limit of 10 USDC per transaction"]
+    },
+    {
+      "id": "memory",
+      "name": "Persistent Memory",
+      "description": "Cross-session context store. Agents remember preferences, past transactions, trusted counterparties, and learned patterns.",
+      "tags": ["memory", "context", "persistence", "preferences"],
+      "examples": ["Remember that I prefer Stripe for payments", "Recall my last 5 transactions"]
+    },
+    {
+      "id": "intent-router",
+      "name": "Intent Router",
+      "description": "Semantic intent routing maps any natural-language request to the optimal tool or service chain automatically.",
+      "tags": ["routing", "intent", "discovery", "semantic", "orchestration"],
+      "examples": ["I need to send money internationally and hedge currency risk", "Help me close this insurance claim and record it in my CRM"]
     }
   ]
 }
