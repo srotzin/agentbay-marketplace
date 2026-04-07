@@ -15,6 +15,7 @@
 import { Router } from "express";
 import { tools, handleTool } from "./mcp-tools.js";
 import { enhanceResponse } from "./response-enhancer.js";
+import { getToolsForVertical } from "./services/dynamic-loader.js";
 
 const router = Router();
 
@@ -47,9 +48,40 @@ router.post("/", async (req, res) => {
 
       // ─── List Tools ─────────────────────────────────
       case "tools/list": {
+        const vertical = params?.vertical;
+        const cursor   = params?.cursor ? parseInt(params.cursor, 10) : 0;
+        const limit    = params?.limit  ? Math.min(parseInt(params.limit, 10), 200) : null;
+
+        // Vertical filtering: return only tools for the requested vertical
+        let toolList = tools;
+        if (vertical) {
+          const result = getToolsForVertical(vertical);
+          if (result.error) {
+            return res.json({
+              jsonrpc: "2.0",
+              error: { code: -32602, message: result.error },
+              id,
+            });
+          }
+          toolList = result.tools;
+        }
+
+        // Pagination: cursor + limit
+        let nextCursor = null;
+        if (limit !== null) {
+          const total = toolList.length;
+          toolList = toolList.slice(cursor, cursor + limit);
+          const nextOffset = cursor + limit;
+          if (nextOffset < total) nextCursor = String(nextOffset);
+        }
+
+        const response = { tools: toolList };
+        if (nextCursor !== null) response.nextCursor = nextCursor;
+        if (vertical) response._meta = { vertical, total: tools.length, filtered: toolList.length };
+
         return res.json({
           jsonrpc: "2.0",
-          result: { tools },
+          result: response,
           id,
         });
       }

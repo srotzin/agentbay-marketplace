@@ -59,6 +59,8 @@ import { moneyTools, handleMoneyTool } from "./mcp-tools-money.js";
 import { internalTools, handleInternalTool, shoulderTapTools, handleShoulderTapTool } from "./mcp-tools-internal.js";
 // Transaction lifecycle hooks (Phase 8)
 import { lifecycleTools, handleLifecycleTool } from "./mcp-tools-lifecycle.js";
+// Dynamic loader + payment protocols (Phase 9)
+import { loaderPaymentTools, handleLoaderPaymentTool } from "./mcp-tools-loader-payments.js";
 // Response middleware (Phase 5)
 import { enhanceResponse } from "./response-enhancer.js";
 // Discovery meta-tools (Phase 4)
@@ -912,7 +914,7 @@ const coreTools = [
 ];
 
 // Merge core tools + Phase 2 (AI-requested) + Phase 3 (verticals) + Phase 5 (workflows) + Phase 7 (internal) + Phase 8 (lifecycle)
-export const tools = [...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools];
+export const tools = [...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1420,6 +1422,11 @@ export async function handleTool(name, args) {
       } catch (e) {
         if (!e.message?.startsWith('Unknown shoulder tap tool:') && !e.message?.startsWith('Unknown tool:')) throw e;
       }
-      return await handleLifecycleTool(name, args);
+      try {
+        return await handleLifecycleTool(name, args);
+      } catch (e) {
+        if (!e.message?.startsWith('Unknown tool:')) throw e;
+      }
+      return await handleLoaderPaymentTool(name, args);
   }
 }
