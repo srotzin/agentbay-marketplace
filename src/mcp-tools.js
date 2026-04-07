@@ -1403,7 +1403,7 @@ export async function handleTool(name, args) {
       try {
         return await handleNewTool(name, args);
       } catch (e) {
-        if (!e.message?.startsWith('Unknown tool:')) throw e;
+        if (!e.message?.includes('Unknown')) throw e;
       }
       try {
         return await handleWorkflowTool(name, args);
@@ -1413,47 +1413,47 @@ export async function handleTool(name, args) {
       try {
         return await handleVerticalTool(name, args);
       } catch (e) {
-        if (!e.message?.startsWith('Unknown vertical tool:')) throw e;
+        if (!e.message?.includes('Unknown')) throw e;
       }
       try {
         return await handleMoneyTool(name, args);
       } catch (e) {
-        if (!e.message?.startsWith('Unknown money tool:')) throw e;
+        if (!e.message?.includes('Unknown')) throw e;
       }
       try {
         return await handleInternalTool(name, args);
       } catch (e) {
-        if (!e.message?.startsWith('Unknown internal tool:')) throw e;
+        if (!e.message?.includes('Unknown')) throw e;
       }
       try {
         return await handleShoulderTapTool(name, args);
       } catch (e) {
-        if (!e.message?.startsWith('Unknown shoulder tap tool:') && !e.message?.startsWith('Unknown tool:')) throw e;
+        if (!e.message?.includes('Unknown')) throw e;
       }
       try {
         return await handleLifecycleTool(name, args);
       } catch (e) {
-        if (!e.message?.startsWith('Unknown lifecycle tool:') && !e.message?.startsWith('Unknown tool:')) throw e;
+        if (!e.message?.includes('Unknown')) throw e;
       }
       try {
         return await handleLoaderPaymentTool(name, args);
       } catch (e) {
-        if (!e.message?.startsWith('Unknown loader/payment tool:')) throw e;
+        if (!e.message?.includes('Unknown')) throw e;
       }
       try {
         return await handlePhase10Tool(name, args);
       } catch (e) {
-        if (!e.message?.startsWith('Unknown Phase 10 tool:') && !e.message?.startsWith('Unknown tool:')) throw e;
+        if (!e.message?.includes('Unknown')) throw e;
       }
       try {
         return await handlePhase11Tool(name, args);
       } catch (e) {
-        if (!e.message?.startsWith('Unknown Phase 11 tool:') && !e.message?.startsWith('Unknown tool:')) throw e;
+        if (!e.message?.includes('Unknown')) throw e;
       }
       try {
         return await handlePhase12Tool(name, args);
       } catch (e) {
-        if (!e.message?.startsWith('Unknown Phase 12 tool:') && !e.message?.startsWith('Unknown tool:')) throw e;
+        if (!e.message?.includes('Unknown')) throw e;
       }
       return await handlePhase13Tool(name, args);
   }
