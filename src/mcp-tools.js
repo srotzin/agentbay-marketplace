@@ -71,6 +71,8 @@ import { phase12Tools, handlePhase12Tool } from "./mcp-tools-phase12.js";
 import { phase13Tools, handlePhase13Tool } from "./mcp-tools-phase13.js";
 // Transactional executor — atomic multi-tool workflows with rollback (Phase 14)
 import { phase14Tools, handlePhase14Tool } from "./mcp-tools-phase14.js";
+// Media/Entertainment, Nonprofit/Grants, Sports/Fitness (Phase 15)
+import { phase15Tools, handlePhase15Tool } from "./mcp-tools-phase15.js";
 // Response middleware (Phase 5)
 import { enhanceResponse } from "./response-enhancer.js";
 // Discovery meta-tools (Phase 4)
@@ -924,7 +926,7 @@ const coreTools = [
 ];
 
 // Merge core tools + Phase 2 (AI-requested) + Phase 3 (verticals) + Phase 5 (workflows) + Phase 7 (internal) + Phase 8 (lifecycle)
-export const tools = [...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools];
+export const tools = [...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1462,6 +1464,11 @@ export async function handleTool(name, args) {
       } catch (e) {
         if (!e.message?.includes('Unknown')) throw e;
       }
-      return await handlePhase14Tool(name, args);
+      try {
+        return await handlePhase14Tool(name, args);
+      } catch (e) {
+        if (!e.message?.includes('Unknown')) throw e;
+      }
+      return await handlePhase15Tool(name, args);
   }
 }

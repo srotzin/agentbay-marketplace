@@ -198,6 +198,38 @@
     <priority>0.7</priority>
   </url>
 
+  <!-- Live Agent Activity Dashboard -->
+  <url>
+    <loc>https://hiveagentiq.com/live.html</loc>
+    <lastmod>2026-04-07</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Tool & Server Comparison Page -->
+  <url>
+    <loc>https://hiveagentiq.com/compare.html</loc>
+    <lastmod>2026-04-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Platform Status Page -->
+  <url>
+    <loc>https://hiveagentiq.com/status.html</loc>
+    <lastmod>2026-04-07</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Interactive MCP Playground -->
+  <url>
+    <loc>https://hiveagentiq.com/playground.html</loc>
+    <lastmod>2026-04-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
   <!-- Pricing FAQ -->
   <url>
     <loc>https://hiveagentiq.com/docs/pricing.html#faq</loc>
