@@ -299,3 +299,21 @@ export const custodyTools = [
     },
   },
 ];
+
+import * as selfCustody from "./services/agent-self-custody.js";
+
+export async function handleCustodyTool(name, args) {
+  switch (name) {
+    case "custody_create_smart_wallet": return selfCustody.createSmartWallet(args.agent_id, args.security_policy, args.recovery_agents, args.spending_rules);
+    case "custody_set_policy":          return selfCustody.setSpendingPolicy(args.wallet_address, args.rules);
+    case "custody_delegate_control":    return selfCustody.delegateControl(args.wallet_address, args.delegate_agent, args.scope, args.max_amount, args.duration);
+    case "custody_social_recovery":     return selfCustody.socialRecovery(args.lost_wallet_address, args.recovery_agents, args.new_controller);
+    case "custody_execute_intent":      return selfCustody.executeIntent(args.agent_id, args.intent, args.budget);
+    case "custody_prove_ownership":     return selfCustody.proveOwnership(args.wallet_address, args.challenge);
+    case "custody_freeze_wallet":       return selfCustody.freezeWallet(args.wallet_address, args.reason, args.duration);
+    case "custody_audit_trail":         return selfCustody.getWalletAuditTrail(args.wallet_address, args.date_range);
+    case "custody_multi_agent_vault":   return selfCustody.createMultiAgentVault(args.agent_ids, args.threshold, args.purpose);
+    case "custody_export_portability":  return selfCustody.exportPortability(args.wallet_address, args.target_chain);
+    default: throw new Error(`Unknown custody tool: ${name}`);
+  }
+}

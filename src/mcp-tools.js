@@ -79,6 +79,7 @@ import { phase16Tools, handlePhase16Tool } from "./mcp-tools-phase16.js";
 import { pharmaTxTools, handlePharmaTxTool } from "./mcp-tools-pharma-tx.js";
 // A2A Tokenization Rails — ATS-1 token standard, multi-chain settlement, protocol router
 import { railsTools, handleRailsTool } from "./mcp-tools-rails.js";
+import { custodyTools, handleCustodyTool } from "./mcp-tools-custody.js";
 // Response middleware (Phase 5)
 import { enhanceResponse } from "./response-enhancer.js";
 // Discovery meta-tools (Phase 4)
@@ -1020,7 +1021,7 @@ export function handleBrokerTool(name, args = {}) {
   }
 }
 
-export const tools = [...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...pharmaTxTools, ...railsTools, ...brokerTools];
+export const tools = [...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1580,6 +1581,10 @@ export async function handleTool(name, args) {
       }
       try {
         return await handleRailsTool(name, args);
+      } catch (e) {
+        if (!e.message?.includes("Unknown")) throw e;
+      }
+      return await handleCustodyTool(name, args);
       } catch (e) {
         if (!e.message?.includes('Unknown rails tool:')) throw e;
       }
