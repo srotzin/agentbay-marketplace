@@ -964,6 +964,26 @@ tbody td {
               </td>
             </tr>
 
+            <tr>
+              <td class="task-name">Self-custody wallet</td>
+              <td class="td-bad">
+                <div style="margin-bottom: 6px;"><span class="pain-point">Lose seed phrase = lose everything.</span> No recovery. No appeal.</div>
+                <div style="margin-bottom: 6px;">Can&rsquo;t automate spending. Every tx needs a human.</div>
+                <div style="margin-bottom: 6px;">One device, <span class="pain-point">one point of failure.</span></div>
+                <div>Can&rsquo;t delegate. <span class="pain-point">Can&rsquo;t share treasury.</span> Can&rsquo;t program rules.</div>
+              </td>
+              <td class="td-good">
+                <div class="tool-name">custody_create_smart_wallet</div>
+                <div style="margin-bottom: 6px;">Social recovery via M-of-N agents &mdash; <strong>no seed phrase.</strong> No single point of failure.</div>
+                <div class="tool-name">custody_set_policy</div>
+                <div style="margin-bottom: 6px;">Programmable rules: auto-approve &lt;$10, require PoW &gt;$5k, blocklist, time locks.</div>
+                <div class="tool-name">custody_delegate_control</div>
+                <div style="margin-bottom: 6px;">Delegate to sub-agents with hard caps &amp; expiry. Cryptographically enforced.</div>
+                <div class="tool-name">custody_multi_agent_vault</div>
+                <div>M-of-N shared treasury. No single agent can drain it. &nbsp;<span class="price-tag badge badge-green">free to create</span></div>
+              </td>
+            </tr>
+
           </tbody>
         </table>
       </div>

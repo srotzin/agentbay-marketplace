@@ -10,6 +10,18 @@ import { initPayments } from "./services/payments.js";
 import * as agentBroker from "./services/agent-broker.js";
 import { routeIntent } from "./services/intent-router.js";
 import { getRailsStats, getTokenRegistry, settleAgentTransaction } from "./services/agent-token-rails.js";
+import {
+  createSmartWallet,
+  setSpendingPolicy,
+  delegateControl,
+  socialRecovery,
+  executeIntent,
+  proveOwnership,
+  freezeWallet,
+  getWalletAuditTrail,
+  createMultiAgentVault,
+  exportPortability,
+} from "./services/agent-self-custody.js";
 import { broadcastToMarket, getProtocols } from "./services/protocol-router.js";
 import { trackAgentJourney } from "./services/shoulder-tap.js";
 import { tools } from "./mcp-tools.js";
@@ -380,6 +392,88 @@ app.post("/v1/broadcast", (req, res) => {
       });
     }
     const result = broadcastToMarket(agent_id, offer);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// ─── Agent Self-Custody 2.0 REST Endpoints ─────────────────────────────────
+
+/**
+ * POST /v1/wallet/create — Create a self-custody smart wallet
+ *
+ * NOT a custodial wallet. HiveAgent never holds your keys. Ever.
+ * Creates an ERC-4337 smart account on Base L2 with MPC key splitting,
+ * programmable spending rules, delegation, and social recovery.
+ */
+app.post("/v1/wallet/create", (req, res) => {
+  try {
+    const { agent_id, security_policy, recovery_agents, spending_rules } = req.body ?? {};
+    if (!agent_id) {
+      return res.status(400).json({
+        error: "agent_id is required",
+        example: {
+          agent_id:        "agent_007",
+          security_policy: "mpc_3of5",
+          recovery_agents: ["agent_alice", "agent_bob", "agent_carol", "agent_dave"],
+          spending_rules:  { max_per_transaction: 500, max_daily: 2000, auto_approve_below: 10 },
+        },
+        note: "HiveAgent never holds your keys. Your wallet, your rules, your agents.",
+      });
+    }
+    const result = createSmartWallet(
+      agent_id,
+      security_policy  || "mpc_3of5",
+      recovery_agents  || [],
+      spending_rules   || {},
+    );
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /v1/wallet/intent — Execute an intent from a self-custody wallet
+ *
+ * Agent knows WHAT it wants to do — HiveAgent resolves HOW.
+ * Agent retains full custody at all times. 0.05% fee.
+ */
+app.post("/v1/wallet/intent", (req, res) => {
+  try {
+    const { agent_id, intent, budget } = req.body ?? {};
+    if (!agent_id || !intent || !budget) {
+      return res.status(400).json({
+        error: "agent_id, intent, and budget are required",
+        example: {
+          agent_id: "agent_007",
+          intent:   "pay $50 to the agent that processed my insurance claim",
+          budget:   75,
+        },
+      });
+    }
+    const result = executeIntent(agent_id, intent, budget);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /v1/wallet/:address/audit — Public audit trail for a self-custody wallet
+ *
+ * Every action on a self-custody wallet is permanently recorded.
+ * Fully transparent. Verifiable on Base L2. Free to query.
+ */
+app.get("/v1/wallet/:address/audit", (req, res) => {
+  try {
+    const { address }    = req.params;
+    const { from, to }   = req.query;
+    const dateRange      = {};
+    if (from) dateRange.from = from;
+    if (to)   dateRange.to   = to;
+    const result = getWalletAuditTrail(address, dateRange);
     res.json(result);
   } catch (err) {
     res.status(400).json({ error: err.message });

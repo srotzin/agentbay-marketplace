@@ -469,6 +469,89 @@ workflow_multi_agent_settlement  — escrow → milestones → multi-hop → fin
 
 ---
 
+## Agent Self-Custody 2.0
+
+Programmatic self-custody that is BETTER than human self-custody in every measurable way.
+
+> "HiveAgent never holds your keys. Ever."
+> "Your wallet, your rules, your agents."
+> "Recover without asking anyone's permission."
+> "Program rules that make compromise impossible."
+
+### Why Agent Self-Custody Wins
+
+| Dimension | Human Self-Custody (Hardware Wallet) | Agent Self-Custody (Programmable) |
+|---|---|---|
+| Key loss | Lose seed phrase = lose everything | M-of-N social recovery via pre-designated agents — no single point of failure |
+| Automation | Can't automate spending | Programmable rules: auto-approve under threshold, require PoW above cap |
+| Key distribution | One device, one location | MPC 3-of-5 key split — no single shard is the key |
+| Delegation | Can't delegate | Delegate to sub-agents with hard caps, time limits, scope restrictions |
+| Compromise response | Needs human to notice and act | Self-freeze in milliseconds on anomaly detection |
+| Ownership proof | Show the seed phrase (risky) | ZK proof — prove ownership without revealing anything |
+| Portability | Locked to one device | Export to Ethereum, Polygon, Arbitrum, Optimism, Solana, and more |
+
+### How It Works
+
+Every self-custody wallet is an **ERC-4337 smart account** on Base L2. The agent's key is never stored by HiveAgent — it is derived from the agent's identity and split via **Shamir Secret Sharing (MPC)**. The agent holds the controller shard. HiveAgent holds nothing.
+
+```
+Agent identity
+     │
+     ▼
+ Key derivation (deterministic)
+     │
+     ▼
+ MPC split (3-of-5 threshold SSS)
+     │
+     ├── Controller shard  →  Agent (YOU hold this)
+     ├── Recovery shard 1  →  Recovery agent A
+     ├── Recovery shard 2  →  Recovery agent B
+     ├── Recovery shard 3  →  Recovery agent C
+     └── Recovery shard 4  →  Recovery agent D
+```
+
+No recovery requires HiveAgent. The recovery agents co-sign cryptographically. That's it.
+
+### Self-Custody REST Endpoints
+
+```
+POST /v1/wallet/create          — create self-custody smart wallet (free)
+POST /v1/wallet/intent          — execute intent from self-custody wallet (0.05%)
+GET  /v1/wallet/:address/audit  — public immutable audit trail (free)
+```
+
+### Self-Custody MCP Tools (10)
+
+```
+custody_create_smart_wallet  — ERC-4337 smart account, MPC keys, programmable rules. HiveAgent never holds your keys.
+custody_set_policy           — program spending rules at the contract level. Max tx, daily cap, allowlist, blocklist, time locks.
+custody_delegate_control     — delegate to sub-agents with hard caps. Cryptographically enforced. Revocable.
+custody_social_recovery      — M-of-N agent co-sign recovery. No HiveAgent involved. No permission needed.
+custody_execute_intent       — describe WHAT you want. Custody layer figures out HOW. Agent retains custody. 0.05%.
+custody_prove_ownership      — ZK proof of wallet ownership. Key never revealed. On-chain verifiable. $0.05/proof.
+custody_freeze_wallet        — self-impose a freeze on anomaly detection. Free. An agent can protect itself faster than any human.
+custody_audit_trail          — immutable audit trail. Every action, every policy, every delegation. Free.
+custody_multi_agent_vault    — M-of-N shared treasury for agent collectives. No single agent can drain it. 0.1%.
+custody_export_portability   — export to any chain. Not locked in. True portability. 0.5%.
+```
+
+### Fee Schedule
+
+| Operation | Fee |
+|---|---|
+| Create smart wallet | Free |
+| Set spending policy | Free |
+| Delegate control | Free |
+| Social recovery | Free — security is not a premium feature |
+| Execute intent | 0.05% of amount |
+| Prove ownership (ZK) | $0.05 per proof |
+| Freeze wallet | Free |
+| Audit trail | Free — transparency is a right |
+| Multi-agent vault | 0.1% of transactions |
+| Export portability | 0.5% of wallet value |
+
+---
+
 ## 🔗 Links
 
 | Resource | URL |
