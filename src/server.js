@@ -9,6 +9,8 @@ import settlementApi from "./routes/settlement-api.js";
 import { initPayments } from "./services/payments.js";
 import * as agentBroker from "./services/agent-broker.js";
 import { routeIntent } from "./services/intent-router.js";
+import { getRailsStats, getTokenRegistry, settleAgentTransaction } from "./services/agent-token-rails.js";
+import { broadcastToMarket, getProtocols } from "./services/protocol-router.js";
 import { trackAgentJourney } from "./services/shoulder-tap.js";
 import { tools } from "./mcp-tools.js";
 
@@ -239,6 +241,150 @@ app.use("/x402", x402Services);
 
 // Settlement & Escrow API — agent-to-agent transactions
 app.use("/api/v1/settlement", settlementApi);
+
+// ─── A2A Tokenization Rails — REST Endpoints ─────────────────────────────────
+
+/**
+ * GET /v1/rails — The Rails Manifest
+ *
+ * The authoritative protocol manifest for HiveAgent Tokenization Rails.
+ * What other protocols, agents, and integrators check to integrate with HiveAgent.
+ * Returns supported protocols, chains, token standards, settlement times, and fees.
+ */
+app.get("/v1/rails", (_req, res) => {
+  try {
+    const protocols = getProtocols();
+    const stats = getRailsStats();
+    res.json({
+      manifest: "HiveAgent A2A Tokenization Rails",
+      version: "1.0.0",
+      description: "The settlement infrastructure for the agent economy. Not just a marketplace — the rails every agent economy transaction runs on.",
+      token_standard: "ATS-1 (Agent Token Standard v1)",
+      primary_chain: "Base L2",
+      supported_chains: ["base", "ethereum", "solana", "polygon", "arbitrum"],
+      supported_protocols: protocols.protocols.map((p) => ({
+        id: p.protocol_id,
+        name: p.name,
+        fee: p.fee_rate_pct ?? `$${p.flat_fee_usd} flat`,
+        settlement_time: p.avg_settlement_human,
+      })),
+      asset_types: [
+        "service_subscription", "data_feed", "compute_capacity", "workflow_access",
+        "yield_share", "reputation_bond", "governance_right", "revenue_share",
+      ],
+      endpoints: {
+        rails_manifest: "GET /v1/rails",
+        universal_settle: "POST /v1/settle",
+        token_registry: "GET /v1/tokens",
+        market_broadcast: "POST /v1/broadcast",
+        mcp_tools: "/mcp",
+        capabilities: "GET /v1/capabilities",
+      },
+      settlement: {
+        avg_time_ms: stats.settlements.avg_settlement_time_ms,
+        fee_rate: "0.1%",
+        on_chain: true,
+        immutable: true,
+        chain: "Base L2",
+      },
+      statistics: {
+        total_tokens_issued: stats.tokens.total_issued,
+        total_settlements: stats.settlements.total_settlements_all_time,
+        total_market_cap_usdc: stats.market.total_market_cap_usdc,
+        total_volume_24h_usdc: stats.volume.total_volume_24h_usdc,
+        liquidity_pools: stats.market.liquidity_pools,
+      },
+      integration: {
+        sdk: "npm install @hiveagent/rails",
+        docs: "https://docs.hiveagent.xyz/rails",
+        mcp_endpoint: "/mcp",
+        contact: "rails@hiveagent.xyz",
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /v1/settle — Universal Settlement Endpoint
+ *
+ * Any agent, any protocol, settles through HiveAgent.
+ * The single endpoint that is THE settlement layer for the agent economy.
+ * Returns a cryptographic settlement proof recorded permanently on Base L2.
+ */
+app.post("/v1/settle", async (req, res) => {
+  try {
+    const { from_agent, to_agent, amount, currency, proof_of_service } = req.body ?? {};
+    if (!from_agent || !to_agent || !amount || !currency) {
+      return res.status(400).json({
+        error: "from_agent, to_agent, amount, and currency are required",
+        example: {
+          from_agent: "agent_buyer_001",
+          to_agent: "agent_provider_007",
+          amount: 25.00,
+          currency: "USDC",
+          proof_of_service: "ipfs://Qm... or hash or description",
+        },
+      });
+    }
+    const result = settleAgentTransaction(from_agent, to_agent, amount, currency, proof_of_service);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /v1/tokens — Agent Token Registry
+ *
+ * Like CoinMarketCap — but for agent service tokens.
+ * All ATS-1 tokens issued through HiveAgent, ranked by market cap.
+ */
+app.get("/v1/tokens", (req, res) => {
+  try {
+    const { asset_type, min_market_cap, sort_by } = req.query;
+    const result = getTokenRegistry({
+      assetType: asset_type,
+      minMarketCap: min_market_cap ? parseFloat(min_market_cap) : undefined,
+      sortBy: sort_by,
+    });
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /v1/broadcast — Broadcast to Agent Market
+ *
+ * Broadcast a service offer to the entire agent market.
+ * Competing agents respond with bids within 5 minutes.
+ */
+app.post("/v1/broadcast", (req, res) => {
+  try {
+    const { agent_id, offer } = req.body ?? {};
+    if (!agent_id || !offer?.service) {
+      return res.status(400).json({
+        error: "agent_id and offer.service are required",
+        example: {
+          agent_id: "agent_buyer_001",
+          offer: {
+            service: "Daily weather data for 50 cities",
+            price: 5.00,
+            currency: "USDC",
+            capacity: "Unlimited API calls",
+            duration: "30 days",
+          },
+        },
+      });
+    }
+    const result = broadcastToMarket(agent_id, offer);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
 
 // ─── MCP Auto-Discovery (/.well-known) ──────────────────
 

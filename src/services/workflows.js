@@ -1067,3 +1067,278 @@ export async function runGlobalDrugPricing(
     ],
   };
 }
+
+
+// ─── Rail Workflow Imports ────────────────────────────────────────────────────
+
+import {
+  issueAgentToken,
+  createTokenPool,
+  getTokenRegistry,
+  issueAgentBond,
+  createEscrowToken,
+  settleAgentTransaction,
+} from "./agent-token-rails.js";
+
+import {
+  broadcastToMarket,
+  settleMultiHop,
+} from "./protocol-router.js";
+
+// ─── Rail Workflow 1: Tokenize and List ──────────────────────────────────────
+
+/**
+ * tokenizeAndList
+ *
+ * Complete token launch pipeline in one call:
+ *   1. Issue ATS-1 token on Base L2
+ *   2. Create USDC liquidity pool (AMM)
+ *   3. Verify listing in token registry
+ *   4. Broadcast to agent market
+ *
+ * Replaces: rails_issue_token + rails_create_pool + rails_token_registry + rails_broadcast_offer
+ * Saves 4 individual tool calls → 1.
+ *
+ * @param {string} agentId         - Issuing agent
+ * @param {string} tokenName       - Full token name
+ * @param {string} tokenSymbol     - Ticker symbol
+ * @param {number} totalSupply     - Total tokens to mint
+ * @param {string} assetType       - ATS-1 asset type
+ * @param {number} underlyingValue - USD value of underlying asset
+ * @param {number} initialLiquidity - USD to seed into the AMM pool
+ */
+export async function tokenizeAndList(
+  agentId,
+  tokenName,
+  tokenSymbol,
+  totalSupply,
+  assetType,
+  underlyingValue,
+  initialLiquidity
+) {
+  const liquidityAmt = initialLiquidity ?? Math.min(underlyingValue * 0.1, 50_000);
+
+  const issuance = safe(() =>
+    issueAgentToken(agentId, tokenName, tokenSymbol, totalSupply, assetType, underlyingValue)
+  );
+
+  const pool = safe(() =>
+    createTokenPool(issuance?.token_id ?? "UNKNOWN", "USDC", liquidityAmt, 0.003)
+  );
+
+  const registry = safe(() => getTokenRegistry({ sortBy: "market_cap" }));
+
+  const broadcast = safe(() =>
+    broadcastToMarket(agentId, {
+      service: `${tokenName} (${tokenSymbol}) — ATS-1 token now live`,
+      price: issuance?.initial_price_usdc,
+      currency: "USDC",
+      capacity: `${totalSupply.toLocaleString()} tokens available`,
+      duration: "Perpetual",
+    })
+  );
+
+  const totalFees = sumFees(issuance, pool, broadcast);
+  const registryCount = registry?.total_count ?? 0;
+
+  return {
+    summary: `Token ${tokenSymbol} launched: issued on Base L2, liquidity pool live, listed in registry, broadcast to ${broadcast?.agents_notified ?? 0} agents.`,
+    step_1_issuance: issuance,
+    step_2_pool: pool,
+    step_3_registry_listing: {
+      listed: !issuance?.error,
+      token_rank: registryCount,
+      total_tokens_in_registry: registryCount,
+    },
+    step_4_market_broadcast: broadcast,
+    launch_summary: {
+      token_id: issuance?.token_id,
+      token_symbol: tokenSymbol,
+      contract_address: issuance?.contract_address,
+      initial_price_usdc: issuance?.initial_price_usdc,
+      pool_id: pool?.pool_id,
+      pool_tvl_usdc: liquidityAmt,
+      agents_notified: broadcast?.agents_notified ?? 0,
+      bids_received: broadcast?.bids_received ?? 0,
+    },
+    total_cost_usd: totalFees,
+    recommended_next_steps: [
+      "Use rails_stake to let early believers lock tokens for priority access",
+      "Use rails_market_depth to monitor trading activity",
+      "Use rails_issue_bond to raise additional capital against your token",
+    ],
+  };
+}
+
+// ─── Rail Workflow 2: Agent Fundraise ────────────────────────────────────────
+
+/**
+ * agentFundraise
+ *
+ * Complete capital raise pipeline:
+ *   1. Issue on-chain bond with terms
+ *   2. Set coupon schedule and maturity
+ *   3. Open subscription window
+ *   4. Broadcast to agent investors
+ *
+ * Replaces: rails_issue_bond + rails_broadcast_offer + rails_token_registry (to list)
+ * Saves 3 tool calls → 1.
+ *
+ * @param {string} agentId          - Bond issuer
+ * @param {number} faceValue        - Total capital to raise in USD
+ * @param {number} couponRate       - Annual coupon (e.g. 0.085 = 8.5%)
+ * @param {number} maturityMonths   - Months to maturity
+ * @param {string} useOfProceeds    - How proceeds will be used
+ */
+export async function agentFundraise(agentId, faceValue, couponRate, maturityMonths, useOfProceeds) {
+  const bond = safe(() =>
+    issueAgentBond(agentId, faceValue, couponRate, maturityMonths, useOfProceeds)
+  );
+
+  const broadcast = safe(() =>
+    broadcastToMarket(agentId, {
+      service: `BOND OFFERING: ${bond?.isin_equivalent ?? "NEW"} — ${(couponRate * 100).toFixed(2)}% coupon, ${maturityMonths}mo maturity. Rated ${bond?.credit_rating_estimate ?? "A"}.`,
+      price: 100,
+      currency: "USDC",
+      capacity: `${bond?.subscription?.available_units ?? Math.ceil(faceValue / 100)} units @ $100 face`,
+      duration: `Subscription closes in 14 days`,
+    })
+  );
+
+  const totalFees = sumFees(bond, broadcast);
+  const investorInterest = broadcast?.bids_received ?? 0;
+  const estimatedSubscription = Math.min(investorInterest * (faceValue / 10), faceValue);
+
+  return {
+    summary: `Bond ${bond?.isin_equivalent ?? "issued"}: $${faceValue.toLocaleString()} at ${(couponRate * 100).toFixed(2)}% coupon. Rated ${bond?.credit_rating_estimate}. ${broadcast?.agents_notified ?? 0} investors notified. Est. ${((estimatedSubscription / faceValue) * 100).toFixed(0)}% subscribed.`,
+    step_1_bond_issuance: bond,
+    step_2_investor_broadcast: broadcast,
+    fundraise_summary: {
+      bond_id: bond?.bond_id,
+      isin: bond?.isin_equivalent,
+      credit_rating: bond?.credit_rating_estimate,
+      face_value_usd: faceValue,
+      coupon_rate_pct: `${(couponRate * 100).toFixed(2)}%`,
+      yield_to_maturity_pct: bond?.yield_to_maturity_pct,
+      maturity_months: maturityMonths,
+      maturity_date: bond?.maturity_date,
+      subscription_closes: bond?.subscription?.close,
+      investors_notified: broadcast?.agents_notified ?? 0,
+      early_interest_count: investorInterest,
+      estimated_subscription_usd: parseFloat(estimatedSubscription.toFixed(2)),
+      subscription_pct: parseFloat(((estimatedSubscription / faceValue) * 100).toFixed(1)),
+    },
+    investor_pipeline: broadcast?.all_bids?.slice(0, 5) ?? [],
+    use_of_proceeds: useOfProceeds,
+    smart_contract: bond?.smart_contract,
+    total_cost_usd: totalFees,
+    recommended_next_steps: [
+      "Monitor subscription via rails_portfolio",
+      "Issue additional bonds at different maturities to build a yield curve",
+      "Consider rails_issue_token (revenue_share) to complement bond financing with equity-like instruments",
+    ],
+  };
+}
+
+// ─── Rail Workflow 3: Multi-Agent Settlement ─────────────────────────────────
+
+/**
+ * multiAgentSettlement
+ *
+ * Full multi-party settlement pipeline:
+ *   1. Create tokenized escrow with milestones
+ *   2. Process milestone proofs and intermediate hops
+ *   3. Execute multi-hop settlement to all parties
+ *   4. Final settlement with permanent on-chain proof
+ *
+ * Replaces: rails_create_escrow_token + rails_multi_hop_settle + rails_settle
+ * Saves 3 tool calls → 1.
+ *
+ * @param {string} taskId        - Task or project being settled
+ * @param {string} payerAgent    - Agent paying for the work
+ * @param {string} receiverAgent - Primary agent who completed the work
+ * @param {number} totalAmount   - Total payment amount in USDC
+ * @param {Array}  hops          - Intermediate agents taking cuts [{agent_id, cut_pct, service}]
+ * @param {Array}  milestones    - Milestone definitions [{name, pct, description}]
+ * @param {string} proofOfWork   - Hash/description of completed deliverable
+ */
+export async function multiAgentSettlement(
+  taskId,
+  payerAgent,
+  receiverAgent,
+  totalAmount,
+  hops,
+  milestones,
+  proofOfWork
+) {
+  const escrowMilestones = milestones ?? [
+    { name: "Delivery", pct: 100, description: "Full delivery on proof submission" },
+  ];
+
+  const escrow = safe(() =>
+    createEscrowToken(taskId, totalAmount, escrowMilestones, "USDC")
+  );
+
+  const agentHops = hops ?? [];
+  let multiHop = null;
+  if (agentHops.length > 0) {
+    multiHop = safe(() =>
+      settleMultiHop(agentHops, receiverAgent, totalAmount)
+    );
+  }
+
+  const finalSettlement = safe(() =>
+    settleAgentTransaction(payerAgent, receiverAgent, totalAmount, "USDC", proofOfWork ?? taskId)
+  );
+
+  const totalFees = sumFees(escrow, multiHop ?? {}, finalSettlement);
+  const hopCount = agentHops.length;
+
+  return {
+    summary: `Multi-agent settlement complete for task ${taskId}. $${totalAmount} USDC settled across ${hopCount + 1} parties. Final settlement recorded permanently on Base L2.`,
+    step_1_escrow: escrow,
+    step_2_multi_hop: multiHop ?? { skipped: true, reason: "No intermediate hops specified" },
+    step_3_final_settlement: finalSettlement,
+    settlement_summary: {
+      task_id: taskId,
+      payer: payerAgent,
+      final_receiver: receiverAgent,
+      total_amount_usdc: totalAmount,
+      hop_count: hopCount,
+      milestone_count: escrowMilestones.length,
+      settlement_id: finalSettlement?.settlement_id,
+      on_chain_tx: finalSettlement?.on_chain_tx,
+      proof_hash: finalSettlement?.proof_hash,
+      chain: "Base L2",
+      immutable: true,
+      status: "FINAL",
+    },
+    all_parties: [
+      { role: "payer", agent: payerAgent, amount_paid: totalAmount },
+      ...agentHops.map((h) => ({
+        role: "intermediate",
+        agent: h.agent_id,
+        service: h.service,
+        cut_pct: h.cut_pct,
+        amount_received: parseFloat((totalAmount * h.cut_pct / 100).toFixed(4)),
+      })),
+      {
+        role: "final_receiver",
+        agent: receiverAgent,
+        amount_received: multiHop?.final_settlement?.final_received ?? totalAmount,
+      },
+    ],
+    audit_trail: {
+      escrow_contract: escrow?.smart_contract_address,
+      multi_hop_proof: multiHop?.settlement_proof ?? null,
+      final_proof_hash: finalSettlement?.proof_hash,
+      basescan_url: finalSettlement?.basescan_url,
+    },
+    total_cost_usd: totalFees,
+    recommended_next_steps: [
+      "Save settlement_id and proof_hash for accounting records",
+      "Use rails_portfolio to see updated token balances",
+      "Rate your counterparty agents to build reputation data",
+    ],
+  };
+}

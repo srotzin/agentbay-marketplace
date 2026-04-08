@@ -41,6 +41,9 @@ import {
   runFullRxTransaction,
   runPharmaSupplyChain,
   runGlobalDrugPricing,
+  tokenizeAndList,
+  agentFundraise,
+  multiAgentSettlement,
 } from "./services/workflows.js";
 
 // ─── Tool Definitions ─────────────────────────────────────────────────────────
@@ -976,6 +979,159 @@ export const workflowTools = [
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },
 
+  // ─── RAIL WORKFLOW 1: Tokenize and List ──────────────────────────────────────
+  {
+    name: "workflow_tokenize_and_list",
+    description:
+      "Use when an agent wants to launch a tradeable ATS-1 token for their service in a SINGLE CALL. " +
+      "Replaces: rails_issue_token + rails_create_pool + rails_token_registry + rails_broadcast_offer (4 calls → 1). " +
+      "Runs the complete token launch pipeline: issue ATS-1 token on Base L2 → create USDC AMM liquidity pool → " +
+      "verify registry listing → broadcast launch to 500-2000+ agents in the market. " +
+      "Triggers: 'tokenize my service', 'launch agent token', 'create tradeable token', 'issue ATS-1', 'list agent token'. " +
+      "Returns: token_id, contract_address, pool_id, market broadcast results, and total launch cost.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        agent_id: {
+          type: "string",
+          description: "ID of the issuing agent",
+        },
+        token_name: {
+          type: "string",
+          description: "Full token name (e.g. 'ResearchBot Data Token')",
+        },
+        token_symbol: {
+          type: "string",
+          description: "2-8 character ticker (e.g. 'RBDT')",
+        },
+        total_supply: {
+          type: "number",
+          description: "Total tokens to mint",
+        },
+        asset_type: {
+          type: "string",
+          enum: ["service_subscription", "data_feed", "compute_capacity", "workflow_access", "yield_share", "reputation_bond", "governance_right", "revenue_share"],
+          description: "ATS-1 asset type",
+        },
+        underlying_value: {
+          type: "number",
+          description: "USD value of the underlying asset being tokenized",
+        },
+        initial_liquidity: {
+          type: "number",
+          description: "USD to seed into the AMM liquidity pool (default: 10% of underlying value)",
+        },
+      },
+      required: ["agent_id", "token_name", "token_symbol", "total_supply", "asset_type", "underlying_value"],
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+  },
+
+  // ─── RAIL WORKFLOW 2: Agent Fundraise ────────────────────────────────────────
+  {
+    name: "workflow_agent_fundraise",
+    description:
+      "Use when an agent needs to raise capital from other agents through a bond issuance in a SINGLE CALL. " +
+      "Replaces: rails_issue_bond + rails_broadcast_offer (2 calls → 1). " +
+      "Runs the complete fundraise pipeline: issue on-chain bond with ISIN + credit rating → " +
+      "set coupon schedule and maturity → open subscription window → broadcast to agent investor market. " +
+      "Triggers: 'raise capital', 'issue agent bond', 'fund my agent', 'raise money', 'agent fundraise', 'bond offering'. " +
+      "Returns: bond_id, ISIN, credit_rating, investor pipeline, estimated_subscription, and total cost.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        agent_id: {
+          type: "string",
+          description: "Bond issuer agent ID",
+        },
+        face_value: {
+          type: "number",
+          description: "Total capital to raise in USD (minimum $1,000)",
+        },
+        coupon_rate: {
+          type: "number",
+          description: "Annual coupon rate as decimal (e.g. 0.085 = 8.5%)",
+        },
+        maturity_months: {
+          type: "number",
+          description: "Months until bond matures",
+        },
+        use_of_proceeds: {
+          type: "string",
+          description: "How proceeds will be used (disclosed to investors)",
+        },
+      },
+      required: ["agent_id", "face_value", "coupon_rate", "maturity_months"],
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+  },
+
+  // ─── RAIL WORKFLOW 3: Multi-Agent Settlement ─────────────────────────────────
+  {
+    name: "workflow_multi_agent_settlement",
+    description:
+      "Use when settling a complex multi-party transaction with escrow, milestones, and multi-hop distribution in a SINGLE CALL. " +
+      "Replaces: rails_create_escrow_token + rails_multi_hop_settle + rails_settle (3 calls → 1). " +
+      "Runs the complete settlement pipeline: create tokenized escrow → process milestone proofs → " +
+      "execute atomic multi-hop distribution → final on-chain settlement with permanent proof. " +
+      "Triggers: 'settle multi-agent task', 'pay with milestones', 'multi-party settlement', 'escrow and settle', " +
+      "'distribute payment across agents', 'atomic settlement with hops'. " +
+      "Returns: settlement_id, proof_hash, all party receipts, audit trail, and BaseScan URL.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        task_id: {
+          type: "string",
+          description: "Task or project ID being settled",
+        },
+        payer_agent: {
+          type: "string",
+          description: "Agent paying for the work",
+        },
+        receiver_agent: {
+          type: "string",
+          description: "Primary agent who completed the work (receives final net payment)",
+        },
+        total_amount: {
+          type: "number",
+          description: "Total payment amount in USDC",
+        },
+        hops: {
+          type: "array",
+          description: "Intermediate agents taking cuts before final receiver. Optional.",
+          items: {
+            type: "object",
+            properties: {
+              agent_id: { type: "string" },
+              cut_pct: { type: "number" },
+              service: { type: "string" },
+            },
+            required: ["agent_id", "cut_pct"],
+          },
+        },
+        milestones: {
+          type: "array",
+          description: "Milestone definitions for escrow. Percentages must sum to 100.",
+          items: {
+            type: "object",
+            properties: {
+              name: { type: "string" },
+              pct: { type: "number" },
+              description: { type: "string" },
+            },
+            required: ["name", "pct"],
+          },
+        },
+        proof_of_work: {
+          type: "string",
+          description: "Proof of completed work: hash, IPFS CID, URL, or description",
+        },
+      },
+      required: ["task_id", "payer_agent", "receiver_agent", "total_amount"],
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+  },
+
 ];
 
 // ─── Handler ──────────────────────────────────────────────────────────────────
@@ -1164,6 +1320,37 @@ export function handleWorkflowTool(name, args = {}) {
         args.indication ?? "",
         args.is_generic ?? false,
         args.is_biologic ?? false
+      );
+
+    case "workflow_tokenize_and_list":
+      return tokenizeAndList(
+        args.agent_id,
+        args.token_name,
+        args.token_symbol,
+        args.total_supply,
+        args.asset_type,
+        args.underlying_value,
+        args.initial_liquidity
+      );
+
+    case "workflow_agent_fundraise":
+      return agentFundraise(
+        args.agent_id,
+        args.face_value,
+        args.coupon_rate,
+        args.maturity_months,
+        args.use_of_proceeds
+      );
+
+    case "workflow_multi_agent_settlement":
+      return multiAgentSettlement(
+        args.task_id,
+        args.payer_agent,
+        args.receiver_agent,
+        args.total_amount,
+        args.hops,
+        args.milestones,
+        args.proof_of_work
       );
 
     default:
