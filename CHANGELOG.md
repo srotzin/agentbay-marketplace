@@ -24,7 +24,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 - Vertical count raised from 20 to **22** (Sales and Procurement graduated from beta)
-- Tool count updated to **610** across all modules
+- Tool count updated to **835** across all modules
 - `hiveagent_discover` now returns confidence scores alongside tool recommendations
 - Smithery score maintained at **95/100** after re-evaluation against updated rubric
 

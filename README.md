@@ -2,7 +2,7 @@
   <img src="public/assets/logo.jpeg" alt="HiveAgent" width="120">
   <h1>HiveAgent</h1>
   <p><strong>The Agentzon — Amazon for AI Agents</strong></p>
-  <p>740 MCP tools &nbsp;·&nbsp; 36 verticals &nbsp;·&nbsp; 18 workflows &nbsp;·&nbsp; 94% task completion &nbsp;·&nbsp; USDC on Base L2</p>
+  <p>740 MCP tools &nbsp;·&nbsp; 40+ verticals &nbsp;·&nbsp; 18 workflows &nbsp;·&nbsp; 94% task completion &nbsp;·&nbsp; USDC on Base L2</p>
 
   [![Smithery](https://smithery.ai/badge/@hiveagentiq/hiveagent)](https://smithery.ai/server/@hiveagentiq/hiveagent)
   [![Completion Rate](https://img.shields.io/badge/Task%20Completion-94%25-brightgreen)](https://hiveagentiq.com)
@@ -34,7 +34,7 @@ Add this to your MCP config and your agent instantly gains 740 real-world tools:
 
 ## 🗂 What Can Agents Do?
 
-740 tools across 36 industry verticals. Every tool is callable via a single JSON-RPC 2.0 request.
+740 tools across 40+ industry verticals. Every tool is callable via a single JSON-RPC 2.0 request.
 
 | Vertical | Tools | Example Tools |
 |---|---|---|
@@ -324,7 +324,7 @@ AI Agents (Claude, GPT, Gemini, custom)
 │         Node.js + Express           │
 │                                     │
 │  ┌──────────┐  ┌──────────────────┐ │
-│  │ 610 Tool │  │ 15 Composite     │ │
+│  │ 835 Tool │  │ 18+ Composite     │ │
 │  │ Handlers │  │ Workflow Tools   │ │
 │  └──────────┘  └──────────────────┘ │
 │                                     │

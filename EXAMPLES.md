@@ -1,6 +1,6 @@
 # Integration Examples
 
-Connect your agent framework to HiveAgent's **610 MCP tools** in minutes.
+Connect your agent framework to HiveAgent's **835 MCP tools** in minutes.
 
 | Framework | File | What It Shows |
 |-----------|------|---------------|
@@ -41,7 +41,7 @@ async def call_hiveagent(tool_name: str, arguments: dict) -> str:
         content = r.json()["result"]["content"]
         return content[0]["text"]
 
-# Use any of 610 tools:
+# Use any of 835 tools:
 result = asyncio.run(call_hiveagent("workflow_full_insurance_claim", {
     "claimant": "Jane Smith",
     "policy_number": "AUTO-2024-88821",

@@ -1,6 +1,6 @@
 # hiveagent
 
-Official Rust SDK for the [HiveAgent](https://hiveagentiq.com) MCP API — 828 tools across 40 verticals, including DeFi, escrow, ZK proofs, parametric insurance, payments, and AI models.
+Official Rust SDK for the [HiveAgent](https://hiveagentiq.com) MCP API — 835 tools across 40 verticals, including DeFi, escrow, ZK proofs, parametric insurance, payments, and AI models.
 
 [![crates.io](https://img.shields.io/crates/v/hiveagent)](https://crates.io/crates/hiveagent)
 [![docs.rs](https://docs.rs/hiveagent/badge.svg)](https://docs.rs/hiveagent)
@@ -144,7 +144,7 @@ println!("Escrow: {} at {}", escrow.escrow_id, escrow.contract_address);
 
 ### Call any tool directly
 
-All 828 tools are accessible via `call_tool`:
+All 835 tools are accessible via `call_tool`:
 
 ```rust
 let result = client

@@ -2,10 +2,10 @@
   <img src="public/assets/logo.jpeg" alt="HiveAgent" width="120">
   <h1>HiveAgent</h1>
   <p><strong>Agentzon — AI 智能体的亚马逊</strong></p>
-  <p>610 MCP 工具 &nbsp;·&nbsp; 22 个垂直领域 &nbsp;·&nbsp; 15 个复合工作流 &nbsp;·&nbsp; Base L2 USDC 支付</p>
+  <p>835 MCP 工具 &nbsp;·&nbsp; 40+ 个垂直领域 &nbsp;·&nbsp; 15 个复合工作流 &nbsp;·&nbsp; Base L2 USDC 支付</p>
 
   [![Smithery](https://smithery.ai/badge/@hiveagentiq/hiveagent)](https://smithery.ai/server/@hiveagentiq/hiveagent)
-  [![Tools](https://img.shields.io/badge/MCP%20工具-610-F59E0B)](https://hiveagentiq.com)
+  [![Tools](https://img.shields.io/badge/MCP%20工具-835-F59E0B)](https://hiveagentiq.com)
   [![Score](https://img.shields.io/badge/Smithery-95%2F100-brightgreen)](https://smithery.ai/server/@hiveagentiq/hiveagent)
   [![License](https://img.shields.io/badge/许可证-MIT-blue)](LICENSE)
 </div>
@@ -16,7 +16,7 @@
 
 ## ⚡ 10 秒接入
 
-将以下配置添加到你的 MCP 客户端，即可立即获得 610 个真实世界工具：
+将以下配置添加到你的 MCP 客户端，即可立即获得 835 个真实世界工具：
 
 ```json
 {
@@ -28,13 +28,13 @@
 }
 ```
 
-**无需 API 密钥。无需安装 SDK。无需注册账号。** 一个端点，610 个工具，即刻可用。
+**无需 API 密钥。无需安装 SDK。无需注册账号。** 一个端点，835 个工具，即刻可用。
 
 ---
 
 ## 🗂 智能体能做什么？
 
-610 个工具横跨 22 个行业垂直领域。每个工具通过单次 JSON-RPC 2.0 请求即可调用。
+835 个工具横跨 22 个行业垂直领域。每个工具通过单次 JSON-RPC 2.0 请求即可调用。
 
 | 垂直领域 | 工具数 | 示例工具 |
 |---|---|---|

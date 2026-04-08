@@ -1,6 +1,6 @@
 # HiveAgent Integration Examples
 
-Connect your agent framework to **610 real-world tools** across 12 industry verticals — insurance, legal, healthcare, construction, trades, agriculture, SMB finance, international trade, government, and more.
+Connect your agent framework to **835 real-world tools** across 40+ industry verticals — insurance, legal, healthcare, construction, trades, agriculture, SMB finance, international trade, government, and more.
 
 **One endpoint. No API keys. No per-tool SDKs.**
 
@@ -91,7 +91,7 @@ async def call_hiveagent(tool_name: str, arguments: dict) -> str:
         return content[0]["text"]  # JSON string
 ```
 
-That's the entire integration layer. Wrap the function in your framework's tool format and you have access to all 610 tools.
+That's the entire integration layer. Wrap the function in your framework's tool format and you have access to all 835 tools.
 
 ---
 
