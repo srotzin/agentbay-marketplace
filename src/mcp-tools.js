@@ -73,6 +73,8 @@ import { phase13Tools, handlePhase13Tool } from "./mcp-tools-phase13.js";
 import { phase14Tools, handlePhase14Tool } from "./mcp-tools-phase14.js";
 // Media/Entertainment, Nonprofit/Grants, Sports/Fitness (Phase 15)
 import { phase15Tools, handlePhase15Tool } from "./mcp-tools-phase15.js";
+// Pharma Intelligence + ZK Privacy (Phase 16)
+import { phase16Tools, handlePhase16Tool } from "./mcp-tools-phase16.js";
 // Response middleware (Phase 5)
 import { enhanceResponse } from "./response-enhancer.js";
 // Discovery meta-tools (Phase 4)
@@ -1014,7 +1016,7 @@ export function handleBrokerTool(name, args = {}) {
   }
 }
 
-export const tools = [...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...brokerTools];
+export const tools = [...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...brokerTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1559,6 +1561,11 @@ export async function handleTool(name, args) {
       }
       try {
         return await handlePhase15Tool(name, args);
+      } catch (e) {
+        if (!e.message?.includes('Unknown')) throw e;
+      }
+      try {
+        return await handlePhase16Tool(name, args);
       } catch (e) {
         if (!e.message?.includes('Unknown')) throw e;
       }

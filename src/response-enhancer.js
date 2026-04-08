@@ -901,6 +901,25 @@ const TIPS = {
   tx_execute_budget: ["tx_log", "tx_execute", "hiveagent_audit_log"],
   tx_log:            ["tx_execute", "tx_execute_budget", "hiveagent_audit_query"],
 
+  // ── Pharma Intelligence workflow (Phase 16) ─────────────────────────────
+  pharma_search_drugs:            ["pharma_check_interactions", "pharma_track_trial", "pharma_forecast_approval"],
+  pharma_check_interactions:      ["pharma_regulatory_submission", "pharma_search_drugs", "pharma_track_trial"],
+  pharma_track_trial:             ["pharma_forecast_approval", "pharma_market_intel", "pharma_regulatory_submission"],
+  pharma_forecast_approval:       ["pharma_regulatory_submission", "pharma_optimize_pricing", "pharma_market_intel"],
+  pharma_optimize_pricing:        ["pharma_supply_chain", "pharma_forecast_approval", "pharma_market_intel"],
+  pharma_supply_chain:            ["pharma_regulatory_submission", "pharma_optimize_pricing", "pharma_search_drugs"],
+  pharma_regulatory_submission:   ["pharma_track_trial", "pharma_forecast_approval", "pharma_supply_chain"],
+  pharma_market_intel:            ["pharma_forecast_approval", "pharma_search_drugs", "pharma_optimize_pricing"],
+
+  // ── ZK Privacy workflow (Phase 16) ─────────────────────────────────────
+  zk_generate_proof:    ["zk_verify_proof", "zk_create_credential", "zk_dashboard"],
+  zk_verify_proof:      ["zk_generate_proof", "zk_dashboard", "zk_kyc_check"],
+  zk_private_transfer:  ["zk_generate_proof", "zk_dashboard", "zk_private_audit"],
+  zk_create_credential: ["zk_verify_proof", "zk_dashboard", "zk_kyc_check"],
+  zk_kyc_check:         ["zk_create_credential", "zk_verify_proof", "zk_dashboard"],
+  zk_private_audit:     ["zk_verify_proof", "zk_dashboard", "zk_generate_proof"],
+  zk_dashboard:         ["zk_generate_proof", "zk_create_credential", "zk_kyc_check"],
+
   // ── Universal Payment Hub workflow (Phase 12) ─────────────────────────────
   pay_universal:
     "Tip: Payment sent — call pay_check_status with the tx_id to confirm settlement, or use pay_history to see cumulative volume and your effective fee rate.",
@@ -1056,6 +1075,40 @@ const TIPS = {
     "Tip: Budget-capped transaction complete — check budget_remaining in the result. Use tx_log to audit every step, and lower the budget next time if you want a tighter cost cap.",
   tx_log:
     "Tip: Full audit trail loaded — inspect failed steps and their rollback_status carefully. If rollbacks failed, you may need to manually compensate those steps.",
+
+  // ── Pharma Intelligence tips (Phase 16) ───────────────────────────────────
+  pharma_search_drugs:
+    "Tip: Drug data retrieved — check for drug-drug interactions next with pharma_check_interactions, or look up relevant clinical trials with pharma_track_trial.",
+  pharma_check_interactions:
+    "Tip: Interaction check complete — if critical interactions are flagged, escalate to clinical review immediately. Use pharma_regulatory_submission to document safety findings for IND/NDA submissions.",
+  pharma_track_trial:
+    "Tip: Trial data retrieved — use pharma_forecast_approval to estimate approval probability based on trial phase, or pharma_market_intel to size the market opportunity for this indication.",
+  pharma_forecast_approval:
+    "Tip: Approval forecast generated — review the risk_factors and analogous_approvals carefully. Follow with pharma_regulatory_submission to structure your IND or NDA, or pharma_optimize_pricing to model launch economics.",
+  pharma_optimize_pricing:
+    "Tip: Pricing model complete — review the payer_coverage_forecast and proceed to pharma_supply_chain to ensure manufacturing capacity matches your market share projection.",
+  pharma_supply_chain:
+    "Tip: Supply chain assessment complete — if shortage_risk is HIGH or MODERATE, activate alternative_suppliers immediately. Use pharma_regulatory_submission to file any required FDA supply shortage notifications.",
+  pharma_regulatory_submission:
+    "Tip: Submission outline generated — address the common_deficiencies list before filing. Request a pre-submission Type B meeting with FDA, then track submission with pharma_track_trial once IND is open.",
+  pharma_market_intel:
+    "Tip: Market intelligence report ready — identify pipeline_drugs as partnership targets and monitor patent_cliffs for generic entry opportunities. Use pharma_forecast_approval to evaluate in-license candidates.",
+
+  // ── ZK Privacy tips (Phase 16) ────────────────────────────────────────────
+  zk_generate_proof:
+    "Tip: ZK proof generated — store the proof_id and share only the verification_endpoint with verifiers. No personal data was transmitted. Use zk_verify_proof to confirm the proof is valid before presenting it.",
+  zk_verify_proof:
+    "Tip: Proof verification complete — the Base L2 tx_hash is your permanent on-chain audit record. If valid=false, check whether the proof has expired and regenerate with zk_generate_proof.",
+  zk_private_transfer:
+    "Tip: Private transfer executed — save the nullifier to prove this transfer occurred without double-spending. Use zk_dashboard to track all active proofs associated with this transfer.",
+  zk_create_credential:
+    "Tip: ZK credential issued — share only the verification_endpoint and reveal_proof with verifiers. The what_stays_private list confirms what data was never exposed. Run zk_dashboard to monitor all active credentials.",
+  zk_kyc_check:
+    "Tip: KYC proof generated — no PII was stored (data_retained=false). Present the proof_id to any compliance verifier using the verification endpoint. Reuse this proof for up to 1 year before renewal.",
+  zk_private_audit:
+    "Tip: Audit proof complete — send the auditor_proof_package to your auditor via a secure channel. Only the designated auditor's public key can decrypt it. Archive the audit_id for your records.",
+  zk_dashboard:
+    "Tip: ZK dashboard loaded — renew any proofs expiring in < 7 days with zk_generate_proof. Increase your privacy_score by issuing credentials with zk_create_credential or running a KYC check with zk_kyc_check.",
 }
 
 
