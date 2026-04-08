@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>How to automate insurance claims with AI agents (end-to-end tutorial)</title>
+  <meta name="description" content="A practical, end-to-end guide to automating insurance claims intake, triage, document collection, and settlement updates using AI agents + MCP-style tools." />
+  <link rel="stylesheet" href="/assets/style.css" />
+  <style>
+    main { max-width: 980px; margin: 0 auto; padding: 40px 20px; }
+    h1 { letter-spacing: -0.02em; line-height: 1.1; }
+    .lede { font-size: 1.1rem; color: #c7d2fe; max-width: 78ch; }
+    .card { border: 1px solid rgba(255,255,255,.12); border-radius: 14px; padding: 16px 18px; background: rgba(255,255,255,.03); }
+    pre { overflow: auto; padding: 14px; border-radius: 12px; background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.12); }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 900px){ .grid { grid-template-columns: 1fr 1fr; } }
+    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: .9em; padding: 2px 6px; border: 1px solid rgba(255,255,255,.16); border-radius: 8px; background: rgba(255,255,255,.04); }
+    .callout { border-left: 3px solid #6366f1; padding: 10px 14px; background: rgba(99,102,241,.08); border-radius: 10px; }
+    .muted { opacity: .86; }
+    .toc a { color: inherit; text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/">AgentBay</a>
+    <nav class="nav">
+      <a href="/docs/">Docs</a>
+      <a href="/compare.html">Compare</a>
+      <a href="/live.html">Live</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>How to automate insurance claims with AI agents</h1>
+    <p class="lede">A practical, end-to-end tutorial for building a claims assistant that can intake FNOL, classify severity, request missing documents, update stakeholders, and hand off to adjusters when needed.</p>
+
+    <section class="card toc" aria-label="Table of contents">
+      <strong>Contents</strong>
+      <ol>
+        <li><a href="#architecture">Architecture: agent + tools + audit trail</a></li>
+        <li><a href="#workflow">Claim workflow (FNOL → settlement) as a state machine</a></li>
+        <li><a href="#tools">Tool interface design (MCP style)</a></li>
+        <li><a href="#prompts">Agent prompts: policies, safety, and compliance</a></li>
+        <li><a href="#evaluation">Evaluation: accuracy, leakage, latency</a></li>
+        <li><a href="#deployment">Deployment checklist</a></li>
+      </ol>
+    </section>
+
+    <h2 id="architecture">1) Architecture: agent + tools + audit trail</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>What you build</h3>
+        <ul>
+          <li><strong>Claims Intake Agent</strong>: chats with the claimant, gathers structured facts, and creates a claim record.</li>
+          <li><strong>Claims Ops Tools</strong>: deterministic actions (create claim, request documents, schedule inspection, update status).</li>
+          <li><strong>Audit Log</strong>: a durable record of tool calls, evidence, and rationale for compliance + dispute resolution.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Why this works</h3>
+        <ul>
+          <li>Agents are best at messy language, ambiguity, and prioritization.</li>
+          <li>Tools are best at consistent execution and integrations.</li>
+          <li>Separation makes outcomes explainable: every action is a tool call tied to evidence.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:12px">
+      <strong>Key constraint:</strong> the agent should never “decide” coverage. It can summarize facts, detect missing information, and propose next steps — but coverage decisions and settlement amounts must be done by policy rules + adjuster review.
+    </div>
+
+    <h2 id="workflow">2) Claim workflow as a state machine</h2>
+    <p class="muted">Model the claim as explicit states. This prevents the agent from skipping steps, and makes back-office handoffs clean.</p>
+
+    <pre><code>NEW (FNOL) → TRIAGE → DOCS_PENDING → INVESTIGATION → REVIEW → APPROVED|DENIED → SETTLEMENT → CLOSED</code></pre>
+
+    <div class="card">
+      <h3>Suggested state transitions</h3>
+      <ul>
+        <li><span class="kbd">NEW</span> → create claim, confirm contact info, incident basics, and coverage type.</li>
+        <li><span class="kbd">TRIAGE</span> → classify severity (low/med/high) and fraud risk (low/med/high) with conservative thresholds.</li>
+        <li><span class="kbd">DOCS_PENDING</span> → request missing documents and set reminders.</li>
+        <li><span class="kbd">INVESTIGATION</span> → schedule inspection / repair estimate / police report follow-up.</li>
+        <li><span class="kbd">REVIEW</span> → package a summary for an adjuster with evidence links.</li>
+        <li><span class="kbd">SETTLEMENT</span> → status updates, payment method confirmation, final notice.</li>
+      </ul>
+    </div>
+
+    <h2 id="tools">3) Tool interface design (MCP style)</h2>
+    <p>Keep tools small, typed, and safe. Your agent calls tools; tools enforce permissions, validation, and logging.</p>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Minimal tool set</h3>
+        <ul>
+          <li><code>claims.create</code> (structured FNOL)</li>
+          <li><code>claims.update</code> (status, notes)</li>
+          <li><code>claims.request_documents</code> (checklist + channels)</li>
+          <li><code>claims.schedule_inspection</code> (time windows)</li>
+          <li><code>claims.generate_adjuster_packet</code> (facts + evidence)</li>
+          <li><code>messaging.send</code> (templated updates)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Example tool schema</h3>
+        <pre><code>{
+  name: "claims.create",
+  description: "Create a new claim from FNOL data",
+  inputSchema: {
+    type: "object",
+    properties: {
+      policyNumber: { type: "string" },
+      claimant: {
+        type: "object",
+        properties: {
+          fullName: { type: "string" },
+          phone: { type: "string" },
+          email: { type: "string" }
+        },
+        required: ["fullName"]
+      },
+      incident: {
+        type: "object",
+        properties: {
+          lossType: { type: "string", enum: ["auto", "property", "liability", "health"] },
+          occurredAt: { type: "string", description: "ISO timestamp" },
+          location: { type: "string" },
+          narrative: { type: "string" }
+        },
+        required: ["lossType", "narrative"]
+      }
+    },
+    required: ["claimant", "incident"]
+  }
+}</code></pre>
+      </div>
+    </div>
+
+    <h3>Guardrails you want in every tool</h3>
+    <ul>
+      <li><strong>Idempotency keys</strong> for create operations.</li>
+      <li><strong>Explicit permission checks</strong> (claimant vs. adjuster vs. supervisor).</li>
+      <li><strong>Templated messaging</strong> rather than freeform, to reduce compliance risk.</li>
+      <li><strong>Redaction</strong> of sensitive fields from logs by default.</li>
+    </ul>
+
+    <h2 id="prompts">4) Agent prompts: policies, safety, and compliance</h2>
+    <div class="card">
+      <h3>System rules (examples)</h3>
+      <ul>
+        <li>Never promise coverage, payout, or timelines.</li>
+        <li>When uncertain: ask for clarification, or escalate to adjuster.</li>
+        <li>Prefer tool calls for any record change; never fabricate claim IDs.</li>
+        <li>Use least-privilege tools; do not access claims unrelated to the current claimant.</li>
+      </ul>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <h3>Conversation skeleton</h3>
+      <pre><code>1) Confirm identity + policy
+2) Collect incident facts (when/where/what)
+3) Collect impact (damage, injuries, vehicles, parties)
+4) Request evidence (photos, reports, receipts)
+5) Summarize + confirm accuracy
+6) Create claim (tool call)
+7) Next steps + expected updates</code></pre>
+    </div>
+
+    <h2 id="evaluation">5) Evaluation: accuracy, leakage, latency</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Offline evaluation set</h3>
+        <ul>
+          <li>50–200 synthetic FNOL conversations (varied loss types).</li>
+          <li>Golden structured output: fields + required document checklist.</li>
+          <li>Adversarial cases: contradictory narratives, missing dates, prompt injection attempts.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Metrics that matter</h3>
+        <ul>
+          <li><strong>Field accuracy</strong>: did you extract the right facts?</li>
+          <li><strong>Escalation rate</strong>: are humans pulled in appropriately?</li>
+          <li><strong>Cycle time</strong>: time to reach “adjuster packet ready”.</li>
+          <li><strong>Customer satisfaction</strong>: post-interaction CSAT.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2 id="deployment">6) Deployment checklist</h2>
+    <div class="card">
+      <ul>
+        <li>Log every tool call with timestamp, actor, and claim ID.</li>
+        <li>Store evidence links (photos, PDFs) and track whether they were verified.</li>
+        <li>Implement rate limits + abuse handling on inbound channels.</li>
+        <li>Provide an adjuster UI for quick review + override.</li>
+        <li>Run a staged rollout: internal → friendly customers → broad release.</li>
+      </ul>
+    </div>
+
+    <hr style="margin: 22px 0; border-color: rgba(255,255,255,.12)" />
+    <p class="muted">Want this as a first-class vertical? Add a dedicated <code>insurance-claims</code> service module with tools mirroring the schema above, then expose them in an MCP tools phase file.</p>
+  </main>
+
+  <footer class="footer">
+    <div class="muted">© AgentBay</div>
+  </footer>
+</body>
+</html>
