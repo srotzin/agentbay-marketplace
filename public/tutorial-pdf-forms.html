@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PDF Forms Tutorial (MCP) — Extract, Fill, and Flatten</title>
+  <meta name="description" content="Hands-on guide to extracting PDF form fields, filling values, and flattening forms via MCP tools." />
+  <link rel="icon" href="/assets/favicon.ico" />
+  <link rel="stylesheet" href="/assets/style.css" />
+  <style>
+    .wrap { max-width: 980px; margin: 0 auto; padding: 40px 20px; }
+    pre { overflow: auto; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .callout { border: 1px solid rgba(0,0,0,.12); border-radius: 12px; padding: 16px 18px; background: rgba(0,0,0,.02); }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    @media (min-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header style="margin-bottom: 22px">
+      <a href="/" style="text-decoration:none">← Home</a>
+      <h1 style="margin: 12px 0 6px">PDF Forms Tutorial (MCP)</h1>
+      <p style="margin: 0; opacity:.85">Extract fields, fill values, and flatten forms to produce a signed-ready PDF.</p>
+    </header>
+
+    <section class="callout" style="margin-bottom: 22px">
+      <strong>When this tutorial helps</strong>
+      <ul style="margin: 10px 0 0">
+        <li>Onboarding flows: users upload a PDF form and you auto-fill with profile data.</li>
+        <li>Back office: extract field names for mapping to CRM / ERP objects.</li>
+        <li>Compliance: generate a flattened PDF so recipients can’t edit fields after submission.</li>
+      </ul>
+    </section>
+
+    <section style="margin-bottom: 26px">
+      <h2>1) Upload your PDF</h2>
+      <p>Most pipelines begin with a file URL, a user upload, or a document pulled from storage.</p>
+      <pre><code>{
+  "file": "w2_template.pdf"
+}</code></pre>
+    </section>
+
+    <section style="margin-bottom: 26px">
+      <h2>2) Extract form fields</h2>
+      <p>Use the PDF forms tool to list fields (names, types, and current values). This step is critical because PDF field names are often non-obvious (e.g., <code>topmostSubform[0].Page1[0].f1_01[0]</code>).</p>
+      <pre><code>// MCP tool call (conceptual)
+{
+  "tool": "pdf_forms_extract_fields",
+  "args": {
+    "pdfPath": "w2_template.pdf"
+  }
+}</code></pre>
+      <div class="grid">
+        <div class="callout">
+          <strong>Tip</strong>
+          <p style="margin: 10px 0 0">Cache extracted field metadata (names + types) per template so subsequent fills are instantaneous.</p>
+        </div>
+        <div class="callout">
+          <strong>Common failure mode</strong>
+          <p style="margin: 10px 0 0">Some PDFs are scanned images (no AcroForm). In that case, combine OCR + an annotation strategy instead of form filling.</p>
+        </div>
+      </div>
+    </section>
+
+    <section style="margin-bottom: 26px">
+      <h2>3) Fill values</h2>
+      <p>Provide a map of field name → desired value. Prefer exact field names from step (2).</p>
+      <pre><code>{
+  "tool": "pdf_forms_fill",
+  "args": {
+    "pdfPath": "w2_template.pdf",
+    "outputPath": "w2_filled.pdf",
+    "values": {
+      "EmployeeName": "Taylor Johnson",
+      "SSN": "***-**-1234",
+      "Wages": "82500"
+    }
+  }
+}</code></pre>
+      <p>When a field has a constrained set of options (checkboxes / radio groups), validate the input to avoid silent mis-fills.</p>
+    </section>
+
+    <section style="margin-bottom: 26px">
+      <h2>4) Flatten the PDF</h2>
+      <p>Flattening converts filled form fields into static page content so recipients can view but not edit.</p>
+      <pre><code>{
+  "tool": "pdf_forms_flatten",
+  "args": {
+    "pdfPath": "w2_filled.pdf",
+    "outputPath": "w2_filled_flattened.pdf"
+  }
+}</code></pre>
+    </section>
+
+    <section style="margin-bottom: 26px">
+      <h2>5) Validate output</h2>
+      <p>For production workflows, add validation checks:</p>
+      <ul>
+        <li>Re-extract fields after fill and confirm expected values were applied.</li>
+        <li>Confirm the output opens in a strict PDF reader (some engines produce files that work only in permissive viewers).</li>
+        <li>Generate a thumbnail preview to show the user what they’re about to send.</li>
+      </ul>
+    </section>
+
+    <section class="callout" style="margin-bottom: 26px">
+      <strong>Source note</strong>
+      <p style="margin: 10px 0 0">This tutorial is based on HiveAgent’s MCP tool catalog and module patterns: https://hiveagentiq.com/mcp</p>
+    </section>
+
+    <footer style="padding-top: 18px; border-top: 1px solid rgba(0,0,0,.1); opacity:.8">
+      <p style="margin:0">Want more guides? See <a href="/docs">Docs</a> or the <a href="/compare.html">comparisons</a>.</p>
+    </footer>
+  </div>
+</body>
+</html>
