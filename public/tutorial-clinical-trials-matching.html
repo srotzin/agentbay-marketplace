@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Clinical Trials Matching Tutorial (MCP) — Find, Screen, and Track</title>
+  <meta name="description" content="Hands-on guide to finding clinical trials, screening eligibility, matching patients, and tracking enrollment status via MCP tools." />
+  <link rel="icon" href="/assets/favicon.ico" />
+  <link rel="stylesheet" href="/assets/style.css" />
+  <style>
+    .wrap { max-width: 980px; margin: 0 auto; padding: 40px 20px; }
+    pre { overflow: auto; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .callout { border: 1px solid rgba(0,0,0,.12); border-radius: 12px; padding: 16px 18px; background: rgba(0,0,0,.02); }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    @media (min-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header style="margin-bottom: 22px">
+      <a href="/" style="text-decoration:none">← Home</a>
+      <h1 style="margin: 12px 0 6px">Clinical Trials Matching Tutorial (MCP)</h1>
+      <p style="margin: 0; opacity:.85">Find trials, screen eligibility, match candidates, and keep coordinators in the loop.</p>
+    </header>
+
+    <section class="callout" style="margin-bottom: 22px">
+      <strong>When this tutorial helps</strong>
+      <ul style="margin: 10px 0 0">
+        <li>Patient navigation: find trials based on diagnosis, biomarkers, and geography.</li>
+        <li>Site recruitment: pre-screen candidates and prioritize outreach with explainable matches.</li>
+        <li>Sponsor ops: track enrollment status to forecast timelines and unblock bottlenecks.</li>
+      </ul>
+    </section>
+
+    <section style="margin-bottom: 26px">
+      <h2>1) Collect a patient profile</h2>
+      <p>Start with a structured profile. Keep it minimal at first, then enrich as you learn more.</p>
+      <pre><code>{
+  "tool": "clinical_trials_patient_profile",
+  "args": {
+    "patientId": "p_001",
+    "condition": "Non-small cell lung cancer",
+    "age": 61,
+    "sex": "F",
+    "location": {
+      "country": "US",
+      "state": "CA",
+      "city": "San Diego"
+    },
+    "biomarkers": ["EGFR exon 19 deletion"],
+    "priorTherapies": ["osimertinib"],
+    "notes": "Non-smoker, ECOG 1"
+  }
+}</code></pre>
+      <div class="callout">
+        <strong>Privacy note</strong>
+        <p style="margin: 10px 0 0">Avoid sending direct identifiers. Use an internal patientId and redact free-text notes when possible.</p>
+      </div>
+    </section>
+
+    <section style="margin-bottom: 26px">
+      <h2>2) Search for candidate trials</h2>
+      <p>Search by condition, biomarkers, geography, sponsor, phase, and recruitment status.</p>
+      <pre><code>{
+  "tool": "clinical_trials_search",
+  "args": {
+    "query": "EGFR exon 19 deletion NSCLC",
+    "phase": [2, 3],
+    "recruiting": true,
+    "near": {"city": "San Diego", "radiusMiles": 150},
+    "limit": 25
+  }
+}</code></pre>
+      <div class="grid">
+        <div class="callout">
+          <strong>Tip</strong>
+          <p style="margin: 10px 0 0">Run two searches: one strict (biomarker + recruiting + local) and one broad (condition-only + remote/telehealth allowed) to avoid missing options.</p>
+        </div>
+        <div class="callout">
+          <strong>Common failure mode</strong>
+          <p style="margin: 10px 0 0">Trial records can lag. Always validate contact details and recruitment status before outreach.</p>
+        </div>
+      </div>
+    </section>
+
+    <section style="margin-bottom: 26px">
+      <h2>3) Match and explain eligibility</h2>
+      <p>Pass trial candidates plus the patient profile to generate a ranked list with rationale and missing-data requests.</p>
+      <pre><code>{
+  "tool": "clinical_trials_match",
+  "args": {
+    "patientId": "p_001",
+    "trialIds": ["NCT00000000", "NCT11111111"],
+    "explain": true
+  }
+}</code></pre>
+      <p>In production, store the explanation and the fields that drove the decision (e.g., biomarker match, age range, exclusion criteria) for auditability.</p>
+    </section>
+
+    <section style="margin-bottom: 26px">
+      <h2>4) Create an outreach packet</h2>
+      <p>Once a trial is promising, build a coordinator-friendly summary (without PHI unless your workflow is approved for it).</p>
+      <pre><code>{
+  "patientId": "p_001",
+  "trialId": "NCT00000000",
+  "summary": {
+    "condition": "NSCLC",
+    "keyBiomarkers": ["EGFR exon 19 del"],
+    "age": 61,
+    "priorTherapies": ["osimertinib"],
+    "questions": [
+      "Is prior osimertinib allowed?",
+      "Are brain metastases permitted if stable?"
+    ]
+  }
+}</code></pre>
+      <p>Send the packet via your preferred communications tool (email / ticket / CRM note) and record the attempt.</p>
+    </section>
+
+    <section style="margin-bottom: 26px">
+      <h2>5) Track match and enrollment status</h2>
+      <p>Update status over time so the agent can nudge, follow up, and forecast.</p>
+      <pre><code>{
+  "tool": "clinical_trials_match_status",
+  "args": {
+    "patientId": "p_001",
+    "trialId": "NCT00000000",
+    "status": "screening",
+    "lastContactedAt": "2026-04-08",
+    "nextFollowUpAt": "2026-04-11",
+    "notes": "Coordinator requested latest labs"
+  }
+}</code></pre>
+    </section>
+
+    <section class="callout" style="margin-bottom: 26px">
+      <strong>Source note</strong>
+      <p style="margin: 10px 0 0">This tutorial is based on HiveAgent’s MCP tool catalog and module patterns: https://hiveagentiq.com/mcp</p>
+    </section>
+
+    <footer style="padding-top: 18px; border-top: 1px solid rgba(0,0,0,.1); opacity:.8">
+      <p style="margin:0">Want more guides? See <a href="/docs">Docs</a> or the <a href="/compare.html">comparisons</a>.</p>
+    </footer>
+  </div>
+</body>
+</html>
