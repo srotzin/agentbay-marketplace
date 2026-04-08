@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Primary Meta Tags -->
+<title>Pricing — HiveAgent | Every tool fee, crystal clear</title>
+<meta name="description" content="Transparent, per-call pricing for all 828 HiveAgent MCP tools. Free tier, sandbox mode, builder plan, and enterprise pricing. See exactly what each tool costs before you integrate.">
+<meta name="keywords" content="HiveAgent pricing, MCP tool costs, AI agent pricing, USDC payments, Base L2 fees, agent marketplace pricing, free tier">
+<meta name="author" content="HiveAgent">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://hiveagentiq.com/pricing">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://hiveagentiq.com/pricing">
+<meta property="og:site_name" content="HiveAgent">
+<meta property="og:title" content="Pricing — HiveAgent">
+<meta property="og:description" content="Transparent per-call pricing for 828 MCP tools. Free tier available. No surprises.">
+<meta property="og:image" content="https://hiveagentiq.com/og-image.png">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Pricing — HiveAgent">
+<meta name="twitter:description" content="Transparent per-call pricing for 828 MCP tools. Free tier available. No surprises.">
+<meta name="twitter:image" content="https://hiveagentiq.com/og-image.png">
+
+<!-- Favicon -->
+<link rel="icon" type="image/jpeg" href="./assets/logo.jpeg">
+<link rel="apple-touch-icon" href="./assets/logo.jpeg">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://api.fontshare.com">
+<link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800,900&f[]=satoshi@300,400,500,700&display=swap" rel="stylesheet">
+
+<style>
+/* ========== BASE RESET ========== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+  --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+  --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
+  --text-3xl: clamp(2.5rem, 1rem + 4vw, 5rem);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+
+  /* HiveAgent Brand */
+  --gold: #F59E0B;
+  --gold-hover: #D97706;
+  --gold-light: #FBBF24;
+  --gold-glow: rgba(245, 158, 11, 0.12);
+  --gold-glow-strong: rgba(245, 158, 11, 0.25);
+  --bg: #050505;
+  --surface: #0a0a0a;
+  --surface-2: #111111;
+  --surface-card: #0d0d0d;
+  --surface-card-hover: #141414;
+  --border: #1a1a1a;
+  --border-hover: #2a2a2a;
+  --text: #EDEDED;
+  --text-muted: #9CA3AF;
+  --text-faint: #6B7280;
+
+  --font-display: 'Cabinet Grotesk', 'Inter', sans-serif;
+  --font-body: 'Satoshi', 'Inter', sans-serif;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+
+  --transition-fast: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--space-16);
+}
+body {
+  min-height: 100dvh;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.6;
+}
+img, svg { display: block; max-width: 100%; height: auto; }
+ul[role='list'], ol[role='list'] { list-style: none; }
+input, button, textarea, select { font: inherit; color: inherit; }
+h1, h2, h3, h4, h5, h6 { text-wrap: balance; line-height: 1.15; }
+p, li { text-wrap: pretty; max-width: 72ch; }
+button { cursor: pointer; background: none; border: none; }
+a { color: var(--gold); text-decoration: none; transition: color var(--transition-fast); }
+a:hover { color: var(--gold-light); }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: var(--radius-sm); }
+
+/* ========== LAYOUT ========== */
+.container { max-width: 960px; margin: 0 auto; padding-inline: var(--space-6); }
+.container-wide { max-width: 1200px; margin: 0 auto; padding-inline: var(--space-6); }
+
+/* ========== NAV ========== */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(5, 5, 5, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding-block: var(--space-4);
+}
+.nav-inner {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-6);
+  max-width: 1200px; margin: 0 auto; padding-inline: var(--space-6);
+}
+.nav-logo { display: flex; align-items: center; gap: var(--space-2); text-decoration: none; color: var(--text); }
+.nav-logo-icon { width: 28px; height: 28px; }
+.nav-logo-text { font-family: var(--font-display); font-size: var(--text-sm); font-weight: 800; color: var(--text); letter-spacing: -0.01em; }
+.nav-logo-text span { color: var(--gold); }
+.nav-links { display: flex; align-items: center; gap: var(--space-6); list-style: none; }
+.nav-links a { font-size: var(--text-sm); color: var(--text-muted); text-decoration: none; font-weight: 500; transition: color var(--transition-fast); }
+.nav-links a:hover { color: var(--text); }
+.nav-links a.active { color: var(--gold); }
+.nav-cta { display: flex; align-items: center; gap: var(--space-3); }
+.btn {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  font-size: var(--text-sm); font-weight: 600;
+  padding: 0.5rem 1rem; border-radius: var(--radius-md);
+  text-decoration: none; transition: all var(--transition-fast);
+  border: 1px solid transparent; cursor: pointer; font-family: var(--font-body);
+}
+.btn-primary { background: var(--gold); color: #000; border-color: var(--gold); }
+.btn-primary:hover { background: var(--gold-hover); border-color: var(--gold-hover); color: #000; }
+.btn-ghost { background: transparent; color: var(--text-muted); border-color: var(--border); }
+.btn-ghost:hover { color: var(--text); border-color: var(--border-hover); background: var(--surface-2); }
+
+/* ========== HERO ========== */
+.hero {
+  padding-block: clamp(var(--space-16), 8vw, var(--space-32));
+  border-bottom: 1px solid var(--border);
+  position: relative; overflow: hidden; text-align: center;
+}
+.hero::before {
+  content: '';
+  position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
+  width: 700px; height: 400px;
+  background: radial-gradient(ellipse, rgba(245, 158, 11, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  font-size: var(--text-xs); font-weight: 600; color: var(--gold);
+  background: var(--gold-glow); border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 9999px; padding: 0.25rem 0.75rem;
+  letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: var(--space-6);
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl); font-weight: 800; letter-spacing: -0.03em;
+  line-height: 1.05; margin-bottom: var(--space-5); color: var(--text);
+}
+.hero-title .gold { color: var(--gold); }
+.hero-sub {
+  font-size: var(--text-lg); color: var(--text-muted); max-width: 560px;
+  margin: 0 auto var(--space-10); line-height: 1.6;
+}
+
+/* ========== PLAN CARDS ========== */
+.plans-section { padding-block: clamp(var(--space-12), 6vw, var(--space-24)); }
+.section-label {
+  font-size: var(--text-xs); font-weight: 700; color: var(--text-faint);
+  text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: var(--space-4);
+}
+.section-heading {
+  font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 800;
+  color: var(--text); letter-spacing: -0.02em; margin-bottom: var(--space-4); line-height: 1.1;
+}
+.section-sub { font-size: var(--text-base); color: var(--text-muted); max-width: 560px; margin-bottom: var(--space-10); }
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-5);
+  margin-bottom: var(--space-8);
+}
+.plan-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-8);
+  display: flex; flex-direction: column; gap: var(--space-6);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+  position: relative;
+}
+.plan-card:hover { border-color: var(--border-hover); background: var(--surface-card-hover); }
+.plan-card.featured {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: color-mix(in srgb, var(--surface-card) 90%, rgba(245, 158, 11, 0.05));
+}
+.plan-card.featured:hover { border-color: rgba(245, 158, 11, 0.55); }
+.plan-badge {
+  position: absolute; top: -12px; left: var(--space-6);
+  font-size: var(--text-xs); font-weight: 700; color: #000;
+  background: var(--gold); border-radius: 9999px;
+  padding: 0.2rem 0.75rem; letter-spacing: 0.05em; text-transform: uppercase;
+}
+.plan-name {
+  font-family: var(--font-display); font-size: var(--text-lg); font-weight: 800;
+  color: var(--text); letter-spacing: -0.01em;
+}
+.plan-price-row { display: flex; align-items: baseline; gap: var(--space-2); }
+.plan-price {
+  font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 800;
+  color: var(--text); letter-spacing: -0.02em;
+}
+.plan-price-unit { font-size: var(--text-sm); color: var(--text-muted); }
+.plan-desc { font-size: var(--text-sm); color: var(--text-muted); line-height: 1.5; }
+.plan-features { list-style: none; display: flex; flex-direction: column; gap: var(--space-3); flex: 1; }
+.plan-feature { display: flex; align-items: flex-start; gap: var(--space-3); font-size: var(--text-sm); color: var(--text-muted); }
+.plan-feature svg { width: 16px; height: 16px; color: var(--gold); flex-shrink: 0; margin-top: 0.15em; }
+.plan-cta { display: block; text-align: center; }
+
+/* ========== TOOL FEE TABLE ========== */
+.fees-section { padding-block: clamp(var(--space-12), 6vw, var(--space-20)); }
+
+.filter-row {
+  display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap;
+  margin-bottom: var(--space-6);
+}
+.filter-btn {
+  font-size: var(--text-xs); font-weight: 600; color: var(--text-muted);
+  background: var(--surface-card); border: 1px solid var(--border);
+  border-radius: 9999px; padding: 0.3rem 0.8rem; cursor: pointer;
+  transition: all var(--transition-fast); font-family: var(--font-body);
+}
+.filter-btn:hover { color: var(--text); border-color: var(--border-hover); }
+.filter-btn.active { color: #000; background: var(--gold); border-color: var(--gold); }
+
+.fee-table-wrap {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  overflow-x: auto;
+  margin-bottom: var(--space-6);
+}
+.fee-table {
+  width: 100%; border-collapse: collapse; min-width: 600px;
+}
+.fee-table thead { background: var(--surface-2); }
+.fee-table th {
+  font-size: var(--text-xs); font-weight: 700; color: var(--text-faint);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  text-align: left; padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.fee-table td {
+  font-size: var(--text-sm); color: var(--text-muted);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.fee-table tbody tr:last-child td { border-bottom: none; }
+.fee-table tbody tr { transition: background var(--transition-fast); }
+.fee-table tbody tr:hover td { background: var(--surface-2); }
+
+.fee-table td:first-child { color: var(--text); font-weight: 500; }
+.fee-table .tool-name { color: var(--text); font-weight: 600; font-family: var(--font-body); }
+.fee-table .cost { color: var(--gold); font-weight: 700; font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 0.85em; white-space: nowrap; }
+.fee-table .cost-free { color: #22c55e; font-weight: 700; font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 0.85em; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: var(--space-1);
+  font-size: var(--text-xs); font-weight: 600;
+  padding: 0.15rem 0.5rem; border-radius: 9999px;
+  text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;
+}
+.badge-green { background: rgba(34,197,94,0.1); color: #22c55e; border: 1px solid rgba(34,197,94,0.2); }
+.badge-gold { background: var(--gold-glow); color: var(--gold); border: 1px solid rgba(245,158,11,0.2); }
+.badge-blue { background: rgba(59,130,246,0.1); color: #60a5fa; border: 1px solid rgba(59,130,246,0.2); }
+.badge-purple { background: rgba(168,85,247,0.1); color: #c084fc; border: 1px solid rgba(168,85,247,0.2); }
+.badge-orange { background: rgba(249,115,22,0.1); color: #fb923c; border: 1px solid rgba(249,115,22,0.2); }
+.badge-gray { background: rgba(107,114,128,0.15); color: var(--text-muted); border: 1px solid var(--border); }
+.badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+/* ========== INFO BOXES ========== */
+.info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--space-5); margin-bottom: var(--space-10); }
+.info-box {
+  background: var(--surface-card); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: var(--space-6);
+  transition: border-color var(--transition-fast);
+}
+.info-box:hover { border-color: var(--border-hover); }
+.info-box-title {
+  font-family: var(--font-display); font-size: var(--text-base); font-weight: 700; color: var(--text);
+  margin-bottom: var(--space-3); display: flex; align-items: center; gap: var(--space-2);
+}
+.info-box-title svg { width: 18px; height: 18px; color: var(--gold); }
+.info-box p { font-size: var(--text-sm); color: var(--text-muted); line-height: 1.6; }
+.info-box ul { list-style: none; display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-3); }
+.info-box li { display: flex; align-items: baseline; gap: var(--space-3); font-size: var(--text-sm); color: var(--text-muted); }
+.info-box li::before { content: ''; flex-shrink: 0; width: 4px; height: 4px; background: var(--gold); border-radius: 50%; margin-top: 0.55em; align-self: flex-start; }
+
+.callout {
+  background: var(--gold-glow); border: 1px solid rgba(245,158,11,0.2);
+  border-radius: var(--radius-xl); padding: var(--space-6); margin-bottom: var(--space-8);
+  display: flex; align-items: flex-start; gap: var(--space-4);
+}
+.callout-icon { color: var(--gold); flex-shrink: 0; width: 20px; height: 20px; margin-top: 0.1em; }
+.callout p { font-size: var(--text-sm); color: var(--text-muted); }
+.callout strong { color: var(--text); }
+
+/* ========== ENTERPRISE ========== */
+.enterprise-section {
+  padding-block: clamp(var(--space-12), 6vw, var(--space-20));
+  border-top: 1px solid var(--border);
+}
+.enterprise-card {
+  background: var(--surface-card); border: 1px solid var(--border);
+  border-radius: var(--radius-2xl); padding: var(--space-10);
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-8);
+}
+.enterprise-card-content { flex: 1; min-width: 280px; }
+.enterprise-card-content h2 {
+  font-family: var(--font-display); font-size: var(--text-xl); font-weight: 800;
+  color: var(--text); letter-spacing: -0.02em; margin-bottom: var(--space-3);
+}
+.enterprise-card-content p { font-size: var(--text-base); color: var(--text-muted); max-width: 500px; margin-bottom: var(--space-5); }
+.enterprise-features {
+  display: flex; flex-wrap: wrap; gap: var(--space-3);
+}
+.enterprise-feature {
+  display: flex; align-items: center; gap: var(--space-2);
+  font-size: var(--text-xs); color: var(--text-muted); font-weight: 600;
+}
+.enterprise-feature svg { width: 14px; height: 14px; color: var(--gold); }
+.enterprise-card-cta { display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-3); }
+
+/* ========== FAQ ========== */
+.faq-section { padding-block: clamp(var(--space-12), 6vw, var(--space-20)); border-top: 1px solid var(--border); }
+.faq-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-5); }
+.faq-item { background: var(--surface-card); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: var(--space-6); }
+.faq-q { font-family: var(--font-display); font-size: var(--text-base); font-weight: 700; color: var(--text); margin-bottom: var(--space-3); }
+.faq-a { font-size: var(--text-sm); color: var(--text-muted); line-height: 1.6; }
+.faq-a a { color: var(--gold); }
+
+/* ========== FOOTER ========== */
+.footer { border-top: 1px solid var(--border); padding-block: var(--space-10); }
+.footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-4); max-width: 1200px; margin: 0 auto; padding-inline: var(--space-6); }
+.footer-copy { font-size: var(--text-xs); color: var(--text-faint); }
+.footer-links { display: flex; gap: var(--space-6); list-style: none; }
+.footer-links a { font-size: var(--text-xs); color: var(--text-faint); text-decoration: none; }
+.footer-links a:hover { color: var(--text-muted); }
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 640px) {
+  .nav-links { display: none; }
+  .plans-grid { grid-template-columns: 1fr; }
+  .enterprise-card { flex-direction: column; }
+  .enterprise-card-cta { align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <div class="nav-inner">
+    <a href="./index.html" class="nav-logo" aria-label="HiveAgent home">
+      <svg class="nav-logo-icon" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M14 2L4 7.5V20.5L14 26L24 20.5V7.5L14 2Z" stroke="#F59E0B" stroke-width="1.5" fill="none"/>
+        <path d="M14 8L9 10.5V15.5L14 18L19 15.5V10.5L14 8Z" fill="#F59E0B" opacity="0.8"/>
+      </svg>
+      <span class="nav-logo-text">Hive<span>Agent</span></span>
+    </a>
+    <ul class="nav-links" role="list">
+      <li><a href="./index.html">Home</a></li>
+      <li><a href="./playground.html">Playground</a></li>
+      <li><a href="./pricing.html" class="active">Pricing</a></li>
+      <li><a href="./status.html">Status</a></li>
+      <li><a href="./trust.html">Trust</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="./trust.html" class="btn btn-ghost">Trust &amp; Security</a>
+      <a href="./playground.html" class="btn btn-primary">Try free</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">Transparent pricing</div>
+    <h1 class="hero-title">Pay only for what you call.<br><span class="gold">No hidden fees.</span></h1>
+    <p class="hero-sub">Every tool fee listed. Sandbox mode is always free. Free tier for exploration. Scale with per-call USDC pricing on Base L2.</p>
+  </div>
+</section>
+
+<!-- PLANS -->
+<section class="plans-section">
+  <div class="container-wide">
+    <div class="section-label">Account tiers</div>
+    <h2 class="section-heading">Start free. Scale as you grow.</h2>
+    <p class="section-sub">All tiers use per-call pricing for paid tools. Upgrade to unlock higher rate limits and priority support.</p>
+
+    <div class="plans-grid">
+      <!-- Free -->
+      <div class="plan-card">
+        <div>
+          <div class="plan-name">Free</div>
+          <div class="plan-price-row">
+            <span class="plan-price">$0</span>
+            <span class="plan-price-unit">/ month</span>
+          </div>
+          <p class="plan-desc">Start building immediately. No credit card required.</p>
+        </div>
+        <ul class="plan-features" role="list">
+          <li class="plan-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            100 tool calls per day
+          </li>
+          <li class="plan-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            10 calls per minute
+          </li>
+          <li class="plan-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Access to all free-tier tools
+          </li>
+          <li class="plan-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Sandbox environment
+          </li>
+          <li class="plan-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Community Discord support
+          </li>
+        </ul>
+        <div class="plan-cta">
+          <a href="./playground.html" class="btn btn-ghost" style="width:100%; justify-content:center">Start free</a>
+        </div>
+      </div>
+
+      <!-- Sandbox -->
+      <div class="plan-card">
+        <div>
+          <div class="plan-name">Sandbox</div>
+          <div class="plan-price-row">
+            <span class="plan-price">Free</span>
+          </div>
+          <p class="plan-desc">Test any tool at no cost in an isolated environment. Sandbox responses are mocked — no real transactions.</p>
+        </div>
+        <ul class="plan-features" role="list">
+          <li class="plan-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Unlimited mocked calls
+          </li>
+          <li class="plan-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            All 828 tools available
+          </li>
+          <li class="plan-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Isolated from production
+          </li>
+          <li class="plan-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Schema-valid mock responses
+          </li>
+          <li class="plan-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Enable via <code style="font-size:0.85em;background:var(--surface-2);padding:0 4px;border-radius:3px">sandbox: true</code>
+          </li>
+        </ul>
+        <div class="plan-cta">
+          <a href="./playground.html" class="btn btn-ghost" style="width:100%; justify-content:center">Open playground</a>
+        </div>
+      </div>
+
+      <!-- Builder -->
+      <div class="plan-card featured">
+        <div class="plan-badge">Most popular</div>
+        <div>
+          <div class="plan-name">Builder</div>
+          <div class="plan-price-row">
+            <span class="plan-price">$49</span>
+            <span class="plan-price-unit">/ month + usage</span>
+          </div>
+          <p class="plan-desc">For production agents. Higher limits, priority routing, and SLA guarantees.</p>
+        </div>
+        <ul class="plan-features" role="list">
+          <li class="plan-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            10,000 calls per day
+          </li>
+          <li class="plan-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            100 calls per minute
+          </li>
+          <li class="plan-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            All 828 tools + new releases
+          </li>
+          <li class="plan-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            99.9% SLA on gateway
+          </li>
+          <li class="plan-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Priority routing queue
+          </li>
+          <li class="plan-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Email + Discord support
+          </li>
+        </ul>
+        <div class="plan-cta">
+          <a href="mailto:support@hiveagentiq.com?subject=Builder Plan" class="btn btn-primary" style="width:100%; justify-content:center">Get Builder</a>
+        </div>
+      </div>
+
+      <!-- Enterprise -->
+      <div class="plan-card">
+        <div>
+          <div class="plan-name">Enterprise</div>
+          <div class="plan-price-row">
+            <span class="plan-price">Custom</span>
+          </div>
+          <p class="plan-desc">Volume discounts, dedicated infrastructure, BAA for healthcare, and custom SLAs.</p>
+        </div>
+        <ul class="plan-features" role="list">
+          <li class="plan-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Unlimited rate limits (negotiated)
+          </li>
+          <li class="plan-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Volume discounts on tool fees
+          </li>
+          <li class="plan-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Dedicated infrastructure option
+          </li>
+          <li class="plan-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            BAA for HIPAA workflows
+          </li>
+          <li class="plan-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Custom SLA with credits
+          </li>
+          <li class="plan-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Dedicated Slack channel
+          </li>
+        </ul>
+        <div class="plan-cta">
+          <a href="mailto:support@hiveagentiq.com?subject=Enterprise Inquiry" class="btn btn-ghost" style="width:100%; justify-content:center">Contact us</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout" role="note" aria-label="Important pricing note">
+      <svg class="callout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <p><strong>How tool fees work:</strong> The monthly plan covers your rate limit tier and support level. Tool fees are charged per call in USDC on Base L2 — billed to your connected wallet or prepaid credit balance. Tools marked $0.00 are always free. Sandbox calls are always free regardless of plan.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TOOL FEE TABLE -->
+<section class="fees-section">
+  <div class="container-wide">
+    <div class="section-label">Per-call fees</div>
+    <h2 class="section-heading">Tool fee reference</h2>
+    <p class="section-sub">Every tool, every cost. Prices in USD (billed in USDC at spot rate on Base L2). Last updated April 2026.</p>
+
+    <div class="filter-row" role="group" aria-label="Filter by category">
+      <button class="filter-btn active" onclick="filterTable('all', this)">All categories</button>
+      <button class="filter-btn" onclick="filterTable('core', this)">Core</button>
+      <button class="filter-btn" onclick="filterTable('finance', this)">Finance &amp; DeFi</button>
+      <button class="filter-btn" onclick="filterTable('data', this)">Data &amp; Search</button>
+      <button class="filter-btn" onclick="filterTable('zk', this)">ZK &amp; Compliance</button>
+      <button class="filter-btn" onclick="filterTable('enterprise', this)">Enterprise</button>
+      <button class="filter-btn" onclick="filterTable('payments', this)">Payments</button>
+      <button class="filter-btn" onclick="filterTable('ai', this)">AI &amp; Models</button>
+    </div>
+
+    <div class="fee-table-wrap">
+      <table class="fee-table" role="table" aria-label="Tool fees by category">
+        <thead>
+          <tr>
+            <th scope="col">Category</th>
+            <th scope="col">Tool</th>
+            <th scope="col">Cost per call</th>
+            <th scope="col">Model / Mechanism</th>
+            <th scope="col">Notes</th>
+          </tr>
+        </thead>
+        <tbody id="feeTableBody">
+          <!-- CORE -->
+          <tr data-cat="core">
+            <td><span class="badge badge-gray">Core</span></td>
+            <td class="tool-name">hiveagent_discover</td>
+            <td class="cost-free">$0.00</td>
+            <td>Vector search</td>
+            <td>Natural language tool discovery. Always free.</td>
+          </tr>
+          <tr data-cat="core">
+            <td><span class="badge badge-gray">Core</span></td>
+            <td class="tool-name">hiveagent_list_tools</td>
+            <td class="cost-free">$0.00</td>
+            <td>Static manifest</td>
+            <td>Returns full tool registry. Always free.</td>
+          </tr>
+          <tr data-cat="core">
+            <td><span class="badge badge-gray">Core</span></td>
+            <td class="tool-name">hiveagent_ping</td>
+            <td class="cost-free">$0.00</td>
+            <td>Health check</td>
+            <td>Gateway health probe. Always free.</td>
+          </tr>
+          <tr data-cat="core">
+            <td><span class="badge badge-gray">Core</span></td>
+            <td class="tool-name">hiveagent_status</td>
+            <td class="cost-free">$0.00</td>
+            <td>Static</td>
+            <td>Returns current operational status. Free.</td>
+          </tr>
+          <tr data-cat="core">
+            <td><span class="badge badge-gray">Core</span></td>
+            <td class="tool-name">hiveagent_get_balance</td>
+            <td class="cost-free">$0.00</td>
+            <td>Ledger read</td>
+            <td>Read your credit balance. Always free.</td>
+          </tr>
+
+          <!-- DATA & SEARCH -->
+          <tr data-cat="data">
+            <td><span class="badge badge-blue">Data</span></td>
+            <td class="tool-name">web_search</td>
+            <td class="cost">$0.0015</td>
+            <td>Brave / SerpAPI</td>
+            <td>Web search with snippets. Cached results are free.</td>
+          </tr>
+          <tr data-cat="data">
+            <td><span class="badge badge-blue">Data</span></td>
+            <td class="tool-name">fetch_url</td>
+            <td class="cost">$0.0005</td>
+            <td>Direct HTTP</td>
+            <td>Fetch and parse any URL. Per-request.</td>
+          </tr>
+          <tr data-cat="data">
+            <td><span class="badge badge-blue">Data</span></td>
+            <td class="tool-name">news_search</td>
+            <td class="cost">$0.002</td>
+            <td>News API</td>
+            <td>Real-time news with date filter.</td>
+          </tr>
+          <tr data-cat="data">
+            <td><span class="badge badge-blue">Data</span></td>
+            <td class="tool-name">academic_search</td>
+            <td class="cost">$0.002</td>
+            <td>Semantic Scholar</td>
+            <td>Papers, citations, DOIs.</td>
+          </tr>
+          <tr data-cat="data">
+            <td><span class="badge badge-blue">Data</span></td>
+            <td class="tool-name">company_lookup</td>
+            <td class="cost">$0.005</td>
+            <td>Crunchbase</td>
+            <td>Company data: funding, team, description.</td>
+          </tr>
+          <tr data-cat="data">
+            <td><span class="badge badge-blue">Data</span></td>
+            <td class="tool-name">person_lookup</td>
+            <td class="cost">$0.005</td>
+            <td>LinkedIn via proxy</td>
+            <td>Professional profile data.</td>
+          </tr>
+          <tr data-cat="data">
+            <td><span class="badge badge-blue">Data</span></td>
+            <td class="tool-name">market_data</td>
+            <td class="cost">$0.001</td>
+            <td>CoinGecko / Yahoo</td>
+            <td>Live prices, OHLCV, market cap.</td>
+          </tr>
+
+          <!-- FINANCE & DEFI -->
+          <tr data-cat="finance">
+            <td><span class="badge badge-gold">Finance</span></td>
+            <td class="tool-name">defi_swap</td>
+            <td class="cost">$0.01 + gas</td>
+            <td>Uniswap v3 / Base</td>
+            <td>Execute token swaps on Base L2. Gas estimated at call time.</td>
+          </tr>
+          <tr data-cat="finance">
+            <td><span class="badge badge-gold">Finance</span></td>
+            <td class="tool-name">defi_liquidity_add</td>
+            <td class="cost">$0.015 + gas</td>
+            <td>Uniswap v3 / Base</td>
+            <td>Add liquidity to a pool.</td>
+          </tr>
+          <tr data-cat="finance">
+            <td><span class="badge badge-gold">Finance</span></td>
+            <td class="tool-name">defi_yield_farm</td>
+            <td class="cost">$0.02 + gas</td>
+            <td>Aave / Compound</td>
+            <td>Deposit assets, earn yield. Gas included in estimate.</td>
+          </tr>
+          <tr data-cat="finance">
+            <td><span class="badge badge-gold">Finance</span></td>
+            <td class="tool-name">prediction_market_bet</td>
+            <td class="cost">$0.01 + gas</td>
+            <td>Polymarket / Base</td>
+            <td>Place a bet on a prediction market outcome.</td>
+          </tr>
+          <tr data-cat="finance">
+            <td><span class="badge badge-gold">Finance</span></td>
+            <td class="tool-name">prediction_market_resolve</td>
+            <td class="cost">$0.005 + gas</td>
+            <td>On-chain oracle</td>
+            <td>Resolve a market after outcome.</td>
+          </tr>
+          <tr data-cat="finance">
+            <td><span class="badge badge-gold">Finance</span></td>
+            <td class="tool-name">escrow_create</td>
+            <td class="cost">$0.02 + gas</td>
+            <td>Smart contract / Base</td>
+            <td>Create a new escrow agreement.</td>
+          </tr>
+          <tr data-cat="finance">
+            <td><span class="badge badge-gold">Finance</span></td>
+            <td class="tool-name">escrow_release</td>
+            <td class="cost">$0.01 + gas</td>
+            <td>Smart contract / Base</td>
+            <td>Release funds from escrow.</td>
+          </tr>
+          <tr data-cat="finance">
+            <td><span class="badge badge-gold">Finance</span></td>
+            <td class="tool-name">escrow_dispute</td>
+            <td class="cost">$0.005 + gas</td>
+            <td>Smart contract / Base</td>
+            <td>Flag escrow for dispute resolution.</td>
+          </tr>
+          <tr data-cat="finance">
+            <td><span class="badge badge-gold">Finance</span></td>
+            <td class="tool-name">insurance_claim_file</td>
+            <td class="cost">$0.025</td>
+            <td>Parametric oracle</td>
+            <td>File a parametric insurance claim.</td>
+          </tr>
+          <tr data-cat="finance">
+            <td><span class="badge badge-gold">Finance</span></td>
+            <td class="tool-name">insurance_policy_query</td>
+            <td class="cost">$0.005</td>
+            <td>Policy registry</td>
+            <td>Read policy terms and coverage details.</td>
+          </tr>
+
+          <!-- PAYMENTS -->
+          <tr data-cat="payments">
+            <td><span class="badge badge-green">Payments</span></td>
+            <td class="tool-name">payment_send_usdc</td>
+            <td class="cost">0.1% of amount</td>
+            <td>Base L2</td>
+            <td>Send USDC on Base. Min fee $0.001. Max $5.00.</td>
+          </tr>
+          <tr data-cat="payments">
+            <td><span class="badge badge-green">Payments</span></td>
+            <td class="tool-name">payment_request</td>
+            <td class="cost">$0.002</td>
+            <td>Base L2</td>
+            <td>Generate a payment request link / QR code.</td>
+          </tr>
+          <tr data-cat="payments">
+            <td><span class="badge badge-green">Payments</span></td>
+            <td class="tool-name">payment_status</td>
+            <td class="cost-free">$0.00</td>
+            <td>Base L2 indexer</td>
+            <td>Check transaction status. Always free.</td>
+          </tr>
+          <tr data-cat="payments">
+            <td><span class="badge badge-green">Payments</span></td>
+            <td class="tool-name">invoice_create</td>
+            <td class="cost">$0.003</td>
+            <td>On-chain invoice</td>
+            <td>Create a signed, on-chain invoice.</td>
+          </tr>
+          <tr data-cat="payments">
+            <td><span class="badge badge-green">Payments</span></td>
+            <td class="tool-name">invoice_pay</td>
+            <td class="cost">0.1% of amount</td>
+            <td>Base L2</td>
+            <td>Pay an existing invoice. Min fee $0.001.</td>
+          </tr>
+
+          <!-- ZK & COMPLIANCE -->
+          <tr data-cat="zk">
+            <td><span class="badge badge-purple">ZK</span></td>
+            <td class="tool-name">zk_proof_generate</td>
+            <td class="cost">$0.05</td>
+            <td>Groth16 / Base</td>
+            <td>Generate a ZK proof for a claim. data_retained: false.</td>
+          </tr>
+          <tr data-cat="zk">
+            <td><span class="badge badge-purple">ZK</span></td>
+            <td class="tool-name">zk_proof_verify</td>
+            <td class="cost">$0.01</td>
+            <td>On-chain verifier</td>
+            <td>Verify a ZK proof on-chain.</td>
+          </tr>
+          <tr data-cat="zk">
+            <td><span class="badge badge-purple">ZK</span></td>
+            <td class="tool-name">zk_identity_attest</td>
+            <td class="cost">$0.03</td>
+            <td>ZK identity / Base</td>
+            <td>Attest identity without revealing PII. HIPAA-compatible.</td>
+          </tr>
+          <tr data-cat="zk">
+            <td><span class="badge badge-purple">ZK</span></td>
+            <td class="tool-name">zk_compliance_check</td>
+            <td class="cost">$0.04</td>
+            <td>ZK rules engine</td>
+            <td>Prove compliance with a regulatory rule. No data retained.</td>
+          </tr>
+          <tr data-cat="zk">
+            <td><span class="badge badge-purple">ZK</span></td>
+            <td class="tool-name">kyc_verify</td>
+            <td class="cost">$0.10</td>
+            <td>Persona / ZK layer</td>
+            <td>KYC attestation. PII processed by Persona, not HiveAgent.</td>
+          </tr>
+          <tr data-cat="zk">
+            <td><span class="badge badge-purple">ZK</span></td>
+            <td class="tool-name">aml_screen</td>
+            <td class="cost">$0.08</td>
+            <td>Chainalysis</td>
+            <td>Wallet AML screening against sanctions lists.</td>
+          </tr>
+
+          <!-- ENTERPRISE -->
+          <tr data-cat="enterprise">
+            <td><span class="badge badge-orange">Enterprise</span></td>
+            <td class="tool-name">data_room_create</td>
+            <td class="cost">$0.05</td>
+            <td>Encrypted storage</td>
+            <td>Create an encrypted virtual data room.</td>
+          </tr>
+          <tr data-cat="enterprise">
+            <td><span class="badge badge-orange">Enterprise</span></td>
+            <td class="tool-name">data_room_upload</td>
+            <td class="cost">$0.01 / MB</td>
+            <td>Encrypted storage</td>
+            <td>Upload documents to a data room. Per-MB billing.</td>
+          </tr>
+          <tr data-cat="enterprise">
+            <td><span class="badge badge-orange">Enterprise</span></td>
+            <td class="tool-name">data_room_access_grant</td>
+            <td class="cost">$0.005</td>
+            <td>Access control</td>
+            <td>Grant access to a data room participant.</td>
+          </tr>
+          <tr data-cat="enterprise">
+            <td><span class="badge badge-orange">Enterprise</span></td>
+            <td class="tool-name">tenant_create</td>
+            <td class="cost">$0.10</td>
+            <td>Multi-tenancy</td>
+            <td>Create an isolated tenant namespace.</td>
+          </tr>
+          <tr data-cat="enterprise">
+            <td><span class="badge badge-orange">Enterprise</span></td>
+            <td class="tool-name">audit_log_export</td>
+            <td class="cost">$0.02</td>
+            <td>Immutable log</td>
+            <td>Export tamper-evident audit logs for a time range.</td>
+          </tr>
+          <tr data-cat="enterprise">
+            <td><span class="badge badge-orange">Enterprise</span></td>
+            <td class="tool-name">contract_sign</td>
+            <td class="cost">$0.03</td>
+            <td>eSign / Base</td>
+            <td>Cryptographically sign a contract on-chain.</td>
+          </tr>
+
+          <!-- AI & MODELS -->
+          <tr data-cat="ai">
+            <td><span class="badge badge-blue">AI</span></td>
+            <td class="tool-name">llm_complete</td>
+            <td class="cost">$0.002 / 1k tokens</td>
+            <td>Claude / GPT-4o</td>
+            <td>LLM completion. Model selectable. Input + output tokens billed.</td>
+          </tr>
+          <tr data-cat="ai">
+            <td><span class="badge badge-blue">AI</span></td>
+            <td class="tool-name">embed_text</td>
+            <td class="cost">$0.0001 / 1k tokens</td>
+            <td>text-embedding-3-small</td>
+            <td>Generate text embeddings for semantic search.</td>
+          </tr>
+          <tr data-cat="ai">
+            <td><span class="badge badge-blue">AI</span></td>
+            <td class="tool-name">image_generate</td>
+            <td class="cost">$0.04 / image</td>
+            <td>DALL·E 3 / Flux</td>
+            <td>1024×1024. Higher resolutions billed at 2×.</td>
+          </tr>
+          <tr data-cat="ai">
+            <td><span class="badge badge-blue">AI</span></td>
+            <td class="tool-name">speech_transcribe</td>
+            <td class="cost">$0.006 / minute</td>
+            <td>Whisper large-v3</td>
+            <td>Audio transcription. Billed per audio minute.</td>
+          </tr>
+          <tr data-cat="ai">
+            <td><span class="badge badge-blue">AI</span></td>
+            <td class="tool-name">agent_orchestrate</td>
+            <td class="cost">$0.01 / step</td>
+            <td>HiveAgent planner</td>
+            <td>Multi-step agent orchestration. Billed per executed step.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-box">
+        <div class="info-box-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          Gas fees
+        </div>
+        <p>On-chain tools (DeFi, escrow, payments) incur Base L2 gas in addition to the HiveAgent fee. Gas is estimated at call time and included in the response as <code style="font-size:0.85em;background:var(--surface-2);padding:0 4px;border-radius:3px">estimated_gas_usdc</code>. You only pay actual gas used.</p>
+      </div>
+      <div class="info-box">
+        <div class="info-box-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Volume discounts
+        </div>
+        <p>Enterprise accounts receive tiered discounts on per-call fees:</p>
+        <ul>
+          <li>1M+ calls / month: 20% off all tool fees</li>
+          <li>10M+ calls / month: 40% off all tool fees</li>
+          <li>Custom: negotiate a flat rate for specific tool categories</li>
+        </ul>
+      </div>
+      <div class="info-box">
+        <div class="info-box-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          Billing methods
+        </div>
+        <p>Pay via:</p>
+        <ul>
+          <li>USDC on Base L2 (recommended — lowest fees)</li>
+          <li>Prepaid USD credit balance (via Stripe)</li>
+          <li>Monthly invoice for enterprise accounts ($1k+ / month)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ENTERPRISE CTA -->
+<section class="enterprise-section">
+  <div class="container-wide">
+    <div class="enterprise-card">
+      <div class="enterprise-card-content">
+        <h2>Need a custom arrangement?</h2>
+        <p>Enterprise teams with high volume, HIPAA workflows, or dedicated infrastructure needs should talk to us. We'll put together a pricing structure that works for your scale.</p>
+        <div class="enterprise-features">
+          <div class="enterprise-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Custom rate limits
+          </div>
+          <div class="enterprise-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Volume discounts
+          </div>
+          <div class="enterprise-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            BAA for healthcare
+          </div>
+          <div class="enterprise-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Dedicated infra
+          </div>
+          <div class="enterprise-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Monthly invoicing
+          </div>
+          <div class="enterprise-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            SLA credits
+          </div>
+        </div>
+      </div>
+      <div class="enterprise-card-cta">
+        <a href="mailto:support@hiveagentiq.com?subject=Enterprise Pricing Inquiry" class="btn btn-primary">Contact enterprise sales</a>
+        <a href="./trust.html" class="btn btn-ghost">View trust &amp; security</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section">
+  <div class="container-wide">
+    <div class="section-label">FAQ</div>
+    <h2 class="section-heading" style="margin-bottom: var(--space-8)">Common questions</h2>
+    <div class="faq-grid">
+      <div class="faq-item">
+        <div class="faq-q">When does the free tier reset?</div>
+        <div class="faq-a">The 100 call/day limit resets at midnight UTC every day. The 10 calls/minute limit is a rolling window.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Are sandbox calls charged?</div>
+        <div class="faq-a">No. Sandbox calls are always free on all tiers. Pass <code style="font-size:0.85em;background:var(--surface-2);padding:0 4px;border-radius:3px">sandbox: true</code> in your MCP request or use a sandbox-scoped API token.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How are ZK tool fees structured?</div>
+        <div class="faq-a">ZK tools charge the HiveAgent fee for routing and proof submission. The actual proof computation is client-side and free. Gas fees for on-chain verification are billed separately.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I pay in USD instead of USDC?</div>
+        <div class="faq-a">Yes. You can load a prepaid USD credit balance via Stripe. Credits are converted to USDC at checkout rate and consumed as you make calls. Enterprise accounts can receive monthly invoices.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What happens if I exceed rate limits?</div>
+        <div class="faq-a">You receive an HTTP 429 response with a <code style="font-size:0.85em;background:var(--surface-2);padding:0 4px;border-radius:3px">Retry-After</code> header. No charges for rate-limited requests. Upgrade to Builder for higher limits.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Are gas fees estimated accurately?</div>
+        <div class="faq-a">Yes. The <code style="font-size:0.85em;background:var(--surface-2);padding:0 4px;border-radius:3px">estimated_gas_usdc</code> field is computed using current Base L2 gas price at call time. You are only charged for actual gas consumed — never more than the estimate.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Does the Builder plan include tool fees?</div>
+        <div class="faq-a">No. The $49/month covers your rate limit tier and support level. Per-call tool fees are billed on top, from your USDC balance or prepaid credits.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Is there a minimum spend?</div>
+        <div class="faq-a">No minimum spend. The free tier has no required payment method. Builder plan is $49/month flat; tool usage is charged on top only when you make calls.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer" role="contentinfo">
+  <div class="footer-inner">
+    <p class="footer-copy">© 2026 HiveAgent. Prices in USD, billed in USDC on Base L2. Subject to change with 30-day notice.</p>
+    <ul class="footer-links" role="list">
+      <li><a href="./trust.html">Trust</a></li>
+      <li><a href="./status.html">Status</a></li>
+      <li><a href="https://github.com/fireflyfabs/agentbay-marketplace" target="_blank" rel="noopener">GitHub</a></li>
+      <li><a href="mailto:support@hiveagentiq.com">Support</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script>
+function filterTable(cat, btn) {
+  // Update active button
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const rows = document.querySelectorAll('#feeTableBody tr');
+  rows.forEach(row => {
+    if (cat === 'all' || row.dataset.cat === cat) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+}
+</script>
+
+</body>
+</html>

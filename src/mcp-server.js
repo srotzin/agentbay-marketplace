@@ -8,18 +8,133 @@
  * Endpoint: POST /mcp
  *
  * Supports:
- * - tools/list → returns available tools
- * - tools/call → executes a tool
+ * - tools/list → returns available tools (with cost annotations)
+ * - tools/call → executes a tool (sandbox-aware)
  */
 
 import { Router } from "express";
+import crypto from "crypto";
 import { tools, handleTool } from "./mcp-tools.js";
 import { enhanceResponse } from "./response-enhancer.js";
 import { getToolsForVertical } from "./services/dynamic-loader.js";
+import { getToolFee, toolFee } from "./tool-fees.js";
 
 const router = Router();
 
-// MCP JSON-RPC endpoint
+// ─── In-memory agent registry (persists for server lifetime) ─────────────────
+const registeredAgents = new Set();
+
+// ─── Sandbox mock result generator ───────────────────────────────────────────
+
+function generateMockResult(toolName, args) {
+  // Return realistic mock data based on tool category
+  if (toolName.startsWith("insurance_")) {
+    return {
+      policy_id: `MOCK-POL-${Math.floor(Math.random() * 900000 + 100000)}`,
+      status: "approved",
+      premium_usd: 127.50,
+      coverage_amount_usd: 250000,
+      effective_date: new Date().toISOString().slice(0, 10),
+      provider: "MockInsure Inc.",
+      deductible_usd: 1000,
+    };
+  }
+  if (toolName.startsWith("travel_")) {
+    return {
+      booking_id: `MOCK-TRV-${Math.floor(Math.random() * 900000 + 100000)}`,
+      status: "confirmed",
+      flight: "AA 2847",
+      departure: "2026-05-01T08:30:00Z",
+      arrival: "2026-05-01T14:45:00Z",
+      seat: "14A",
+      price_usd: 349.00,
+      airline: "Mock Air",
+    };
+  }
+  if (toolName.startsWith("legal_")) {
+    return {
+      document_id: `MOCK-LEG-${Math.floor(Math.random() * 900000 + 100000)}`,
+      status: "reviewed",
+      risk_level: "low",
+      issues_found: 0,
+      summary: "No significant issues detected in mock review.",
+      attorney: "Mock & Associates LLP",
+    };
+  }
+  if (toolName.startsWith("pharma_")) {
+    return {
+      drug_name: args.drug_name || "MockDrug XR",
+      approved: true,
+      interactions: [],
+      dosage: "10mg once daily",
+      generic_available: true,
+      avg_cost_usd: 45.00,
+    };
+  }
+  if (toolName.startsWith("defi_")) {
+    return {
+      transaction_hash: `0xMOCK${crypto.randomUUID().replace(/-/g, "").slice(0, 40)}`,
+      status: "confirmed",
+      amount_in: args.amount_in || 100,
+      amount_out: (args.amount_in || 100) * 0.997,
+      fee_usd: 0.50,
+      pool: "mock-usdc-eth-v3",
+      block: 18000000 + Math.floor(Math.random() * 100000),
+    };
+  }
+  if (toolName.startsWith("zk_")) {
+    return {
+      proof_id: `MOCK-ZK-${crypto.randomUUID().slice(0, 8)}`,
+      proof: "0x" + "a1b2c3".repeat(10),
+      verified: true,
+      circuit: "plonk_v2",
+      public_inputs: [args.value || "hidden"],
+    };
+  }
+  if (toolName.startsWith("custody_") || toolName.startsWith("wallet_")) {
+    return {
+      wallet_address: `0xMOCK${crypto.randomUUID().replace(/-/g, "").slice(0, 40)}`,
+      balance_usdc: 1250.00,
+      balance_eth: 0.42,
+      status: "active",
+      custody_type: "self-custody",
+    };
+  }
+  if (toolName.startsWith("rails_") || toolName.startsWith("settle_")) {
+    return {
+      settlement_id: `MOCK-STLMT-${crypto.randomUUID().slice(0, 8)}`,
+      status: "settled",
+      amount: args.amount || 100,
+      currency: args.currency || "USDC",
+      from_agent: args.from_agent || "mock_buyer",
+      to_agent: args.to_agent || "mock_seller",
+      chain: "base",
+      tx_hash: `0xMOCK${crypto.randomUUID().replace(/-/g, "").slice(0, 40)}`,
+    };
+  }
+  if (toolName.startsWith("marketplace_")) {
+    return {
+      results: [
+        { id: "mock_svc_001", name: "Mock Service Alpha", price_usd: 12.00, rating: 4.8 },
+        { id: "mock_svc_002", name: "Mock Service Beta",  price_usd: 8.50,  rating: 4.6 },
+        { id: "mock_svc_003", name: "Mock Service Gamma", price_usd: 25.00, rating: 4.9 },
+      ],
+      total: 3,
+      query: args.query || null,
+    };
+  }
+  // Generic fallback
+  return {
+    tool: toolName,
+    args: args,
+    result: "mock_success",
+    mock_value: 42,
+    mock_string: "Mock result for integration testing",
+    timestamp: new Date().toISOString(),
+  };
+}
+
+// ─── MCP JSON-RPC endpoint ─────────────────────────────────────────────────
 router.post("/", async (req, res) => {
   const { jsonrpc, method, params, id } = req.body;
 
@@ -44,6 +159,7 @@ router.post("/", async (req, res) => {
               intent:    "POST https://hiveagentiq.com/v1/intent — describe any task, get instant execution plan",
               discover:  "GET https://hiveagentiq.com/v1/discover?q=your+query",
               broker:    "hiveagentiq.com — the Agentzon",
+              sandbox:   "Add ?sandbox=true or header X-HiveAgent-Sandbox: true for free mock testing",
             },
           },
           id,
@@ -52,6 +168,15 @@ router.post("/", async (req, res) => {
 
       // ─── List Tools ─────────────────────────────────
       case "tools/list": {
+        // ── Auto-register on first tools/list call ───
+        const agentId = req.headers["x-agent-id"] || `auto_${crypto.randomUUID().slice(0, 8)}`;
+        if (!registeredAgents.has(agentId)) {
+          registeredAgents.add(agentId);
+          res.set("X-HiveAgent-Agent-ID",    agentId);
+          res.set("X-HiveAgent-Welcome",     "true");
+          res.set("X-HiveAgent-Free-Credits", "5.00");
+        }
+
         const vertical = params?.vertical;
         const cursor   = params?.cursor ? parseInt(params.cursor, 10) : 0;
         const limit    = params?.limit  ? Math.min(parseInt(params.limit, 10), 200) : null;
@@ -79,9 +204,24 @@ router.post("/", async (req, res) => {
           if (nextOffset < total) nextCursor = String(nextOffset);
         }
 
-        const response = { tools: toolList };
+        // ── Inject cost annotations into every tool ──
+        const annotatedTools = toolList.map(tool => {
+          const feeInfo = getToolFee(tool.name);
+          return {
+            ...tool,
+            annotations: {
+              ...(tool.annotations || {}),
+              cost_usd:      feeInfo.fee_usd,
+              cost_model:    feeInfo.model,
+              free_in_sandbox: true,
+              billing_docs:  "https://hiveagentiq.com/docs/pricing",
+            },
+          };
+        });
+
+        const response = { tools: annotatedTools };
         if (nextCursor !== null) response.nextCursor = nextCursor;
-        if (vertical) response._meta = { vertical, total: tools.length, filtered: toolList.length };
+        if (vertical) response._meta = { vertical, total: tools.length, filtered: annotatedTools.length };
 
         // Include broker discovery info so any agent sees it on first tools/list
         response.serverInfo = {
@@ -91,6 +231,7 @@ router.post("/", async (req, res) => {
           intent:   "POST https://hiveagentiq.com/v1/intent — describe any task, get instant execution plan",
           discover: "GET https://hiveagentiq.com/v1/discover?q=your+query",
           broker:   "hiveagentiq.com — the Agentzon",
+          sandbox:  "Add ?sandbox=true or header X-HiveAgent-Sandbox: true for free mock testing",
         };
 
         return res.json({
@@ -119,6 +260,28 @@ router.post("/", async (req, res) => {
             jsonrpc: "2.0",
             error: { code: -32601, message: `Unknown tool: ${toolName}` },
             id,
+          });
+        }
+
+        // ── Sandbox mode check ───────────────────────
+        const isSandbox = req.isSandbox || params?.sandbox === true;
+        if (isSandbox) {
+          return res.json({
+            jsonrpc: "2.0",
+            id,
+            result: {
+              content: [{
+                type: "text",
+                text: JSON.stringify({
+                  sandbox:           true,
+                  tool:              toolName,
+                  mock_result:       generateMockResult(toolName, toolArgs),
+                  note:              "Sandbox mode — no real data or charges",
+                  fee_usd:           0,
+                  would_have_charged: toolFee(toolName),
+                }, null, 2),
+              }],
+            },
           });
         }
 
@@ -254,6 +417,7 @@ router.get("/", (_req, res) => {
     protocol: "MCP (JSON-RPC 2.0 over HTTP)",
     tools: tools.length,
     endpoint: "POST /mcp",
+    sandbox: "Add ?sandbox=true or X-HiveAgent-Sandbox: true header for free mock testing",
   });
 });
 

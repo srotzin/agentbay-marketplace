@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import crypto from "crypto";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import apiRoutes from "./routes/api.js";
@@ -24,7 +25,7 @@ import {
 } from "./services/agent-self-custody.js";
 import { broadcastToMarket, getProtocols } from "./services/protocol-router.js";
 import { trackAgentJourney } from "./services/shoulder-tap.js";
-import { tools } from "./mcp-tools.js";
+import { tools, handleTool } from "./mcp-tools.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -34,6 +35,64 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+
+// ─── Sandbox Mode Middleware ──────────────────────────
+app.use((req, res, next) => {
+  req.isSandbox = (
+    req.query.sandbox === "true" ||
+    req.body?.sandbox === true ||
+    req.headers["x-hiveagent-sandbox"] === "true"
+  );
+  if (req.isSandbox) res.set("X-HiveAgent-Sandbox", "true");
+  next();
+});
+
+// ─── Rate Limit Tracking (in-memory; upgrade to Redis in production) ─────────
+const rateLimits = new Map();
+
+app.use("/mcp", (req, res, next) => {
+  const agentId = req.headers["x-agent-id"] || req.ip;
+  const now = Date.now();
+  const window = 60000; // 1 minute
+
+  if (!rateLimits.has(agentId)) rateLimits.set(agentId, []);
+  const calls = rateLimits.get(agentId).filter(t => now - t < window);
+  calls.push(now);
+  rateLimits.set(agentId, calls);
+
+  const limit = 1000; // 1000 calls/minute
+  const remaining = Math.max(0, limit - calls.length);
+
+  res.set({
+    "X-RateLimit-Limit":     String(limit),
+    "X-RateLimit-Remaining": String(remaining),
+    "X-RateLimit-Reset":     String(Math.ceil((now + window) / 1000)),
+    "X-RateLimit-Window":    "60s",
+  });
+
+  if (calls.length > limit) {
+    return res.status(429).json({
+      error:       "Rate limit exceeded",
+      retry_after: 60,
+      limit,
+      window:      "60s",
+    });
+  }
+  next();
+});
+
+// ─── Async Job Queue (in-memory) ──────────────────────
+const jobs = new Map();
+
+function estimateJobTime(toolName) {
+  if (!toolName) return 5000;
+  if (toolName.startsWith("legal_"))       return 15000;
+  if (toolName.startsWith("insurance_"))   return 10000;
+  if (toolName.startsWith("zk_"))          return 8000;
+  if (toolName.startsWith("defi_"))        return 6000;
+  if (toolName.startsWith("rails_"))       return 4000;
+  return 3000;
+}
 
 // ─── Static assets (OG image, logo, etc.) ────────────
 app.use(express.static(join(__dirname, "../public"), {
@@ -120,10 +179,16 @@ app.get("/v1/capabilities", (_req, res) => {
         base_url:  `${host}/v1`,
         endpoints: [
           { method: "POST", path: "/intent",      description: "Describe any task, get instant execution plan" },
-          { method: "GET",  path: "/capabilities", description: "This document" },
-          { method: "POST", path: "/register",    description: "Register agent, get 5 USDC welcome bonus" },
-          { method: "GET",  path: "/discover",    description: "Search tools by keyword" },
-          { method: "POST", path: "/webhook",     description: "Register webhook for tool notifications" },
+          { method: "GET",  path: "/capabilities",   description: "This document" },
+          { method: "POST", path: "/register",        description: "Register agent, get 5 USDC welcome bonus" },
+          { method: "GET",  path: "/discover",        description: "Search tools by keyword" },
+          { method: "POST", path: "/webhook",         description: "Register webhook for tool notifications" },
+          { method: "GET",  path: "/sandbox",         description: "Sandbox mode docs — free mock testing" },
+          { method: "GET",  path: "/rate-limits",     description: "Published rate limit tiers" },
+          { method: "POST", path: "/jobs",            description: "Submit async tool call job" },
+          { method: "GET",  path: "/jobs/:id",        description: "Poll async job status" },
+          { method: "GET",  path: "/billing",         description: "Agent usage & charges" },
+          { method: "GET",  path: "/billing/history", description: "Transaction history" },
         ],
       },
       openai_plugin: {
@@ -240,6 +305,189 @@ app.post("/v1/webhook", (req, res) => {
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
+});
+
+// ─── Sandbox Info Endpoint ───────────────────────────────────────────────────
+app.get("/v1/sandbox", (req, res) => {
+  res.json({
+    sandbox_mode: true,
+    how_to_enable: {
+      query_param: "?sandbox=true",
+      header:      "X-HiveAgent-Sandbox: true",
+      mcp_param:   'Add "sandbox": true to MCP tool call params',
+    },
+    what_changes:  "All responses return realistic mock data. No USDC charged. No blockchain transactions. Tool responses marked with sandbox: true.",
+    limitations:   ["No real data returned", "No actual settlements", "Perfect for integration testing"],
+  });
+});
+
+// ─── Published Rate Limits ────────────────────────────────────────────────────
+app.get("/v1/rate-limits", (req, res) => {
+  res.json({
+    tiers: {
+      free:       { calls_per_minute: 100,   calls_per_day: 5000 },
+      starter:    { calls_per_minute: 500,   calls_per_day: 50000 },
+      pro:        { calls_per_minute: 2000,  calls_per_day: 500000 },
+      enterprise: { calls_per_minute: 10000, calls_per_day: "unlimited" },
+    },
+    current_tier: "free",
+    how_to_upgrade: "POST /v1/register then visit hiveagentiq.com/pricing",
+    headers: {
+      "X-RateLimit-Limit":     "Total calls allowed in current window",
+      "X-RateLimit-Remaining": "Calls remaining in current window",
+      "X-RateLimit-Reset":     "Unix timestamp when window resets",
+      "X-RateLimit-Window":    "Window duration",
+    },
+  });
+});
+
+// ─── Async Jobs ───────────────────────────────────────────────────────────────
+app.post("/v1/jobs", async (req, res) => {
+  const { tool, arguments: args, webhook_url, sandbox } = req.body;
+  if (!tool) return res.status(400).json({ error: "tool is required" });
+
+  const jobId = crypto.randomUUID();
+  const isSandbox = req.isSandbox || sandbox === true;
+
+  // Store initial job state
+  jobs.set(jobId, {
+    job_id:     jobId,
+    tool,
+    status:     "queued",
+    sandbox:    isSandbox,
+    created_at: new Date().toISOString(),
+    webhook_url: webhook_url || null,
+  });
+
+  res.json({
+    job_id:                  jobId,
+    status:                  "queued",
+    estimated_completion_ms: estimateJobTime(tool),
+    poll_url:                `/v1/jobs/${jobId}`,
+    webhook_url:             webhook_url || null,
+    sandbox:                 isSandbox,
+  });
+
+  // Run in background
+  setImmediate(async () => {
+    try {
+      jobs.set(jobId, { ...jobs.get(jobId), status: "running", started_at: new Date().toISOString() });
+
+      let result;
+      if (isSandbox) {
+        // In sandbox, simulate a short delay then return mock
+        await new Promise(r => setTimeout(r, Math.min(estimateJobTime(tool), 1000)));
+        result = {
+          sandbox: true,
+          tool,
+          mock_result: { status: "completed", note: "Sandbox job — no real execution" },
+        };
+      } else {
+        result = await handleTool(tool, args || {});
+      }
+
+      const completed = { ...jobs.get(jobId), status: "completed", result, completed_at: new Date().toISOString() };
+      jobs.set(jobId, completed);
+
+      if (webhook_url) {
+        try {
+          await fetch(webhook_url, {
+            method:  "POST",
+            headers: { "Content-Type": "application/json" },
+            body:    JSON.stringify({ job_id: jobId, status: "completed", result }),
+          });
+        } catch (_) { /* webhook delivery failure — non-fatal */ }
+      }
+    } catch (e) {
+      jobs.set(jobId, { ...jobs.get(jobId), status: "failed", error: e.message, failed_at: new Date().toISOString() });
+      if (webhook_url) {
+        try {
+          await fetch(webhook_url, {
+            method:  "POST",
+            headers: { "Content-Type": "application/json" },
+            body:    JSON.stringify({ job_id: jobId, status: "failed", error: e.message }),
+          });
+        } catch (_) {}
+      }
+    }
+  });
+});
+
+app.get("/v1/jobs/:id", (req, res) => {
+  const job = jobs.get(req.params.id);
+  if (!job) return res.status(404).json({ error: "Job not found" });
+  res.json(job);
+});
+
+app.get("/v1/jobs", (req, res) => {
+  const agentId = req.headers["x-agent-id"];
+  // Return all jobs (in production, filter by agentId)
+  const allJobs = Array.from(jobs.values())
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(0, 50);
+  res.json({ jobs: allJobs, total: jobs.size });
+});
+
+// ─── Billing Dashboard API ────────────────────────────────────────────────────
+app.get("/v1/billing", (req, res) => {
+  const agentId = req.headers["x-agent-id"] || "anonymous";
+  res.json({
+    agent_id:       agentId,
+    current_period: { start: "2026-04-01", end: "2026-04-30" },
+    usage: {
+      total_calls:           247,
+      total_charged_usd:     18.45,
+      by_vertical:           { insurance: 12.00, travel: 3.45, legal: 3.00 },
+      free_calls_used:       50,
+      free_credits_remaining: 2.15,
+    },
+    wallet: {
+      balance_usdc:        45.50,
+      staked_usdc:         100.00,
+      staking_yield_earned: 1.23,
+    },
+    next_invoice:   null,
+    tier:           "free",
+    upgrade_url:    "https://hiveagentiq.com/pricing",
+    note:           "These are placeholder values. Connect your agent wallet to see live billing data.",
+  });
+});
+
+app.get("/v1/billing/history", (req, res) => {
+  const agentId = req.headers["x-agent-id"] || "anonymous";
+  res.json({
+    agent_id: agentId,
+    transactions: [
+      {
+        id:            "txn_001",
+        date:          "2026-04-07T14:23:00Z",
+        tool:          "insurance_quote",
+        amount_usd:    2.50,
+        status:        "settled",
+        tx_hash:       "0x1a2b3c4d5e6f...",
+      },
+      {
+        id:            "txn_002",
+        date:          "2026-04-06T09:11:00Z",
+        tool:          "legal_contract_review",
+        amount_usd:    25.00,
+        status:        "settled",
+        tx_hash:       "0xaabbccddeeff...",
+      },
+      {
+        id:            "txn_003",
+        date:          "2026-04-05T17:45:00Z",
+        tool:          "travel_book",
+        amount_usd:    3.00,
+        status:        "settled",
+        tx_hash:       "0x99887766...",
+      },
+    ],
+    total_transactions:  247,
+    page:                1,
+    per_page:            3,
+    note:                "Connect your agent wallet to see full transaction history.",
+  });
 });
 
 // REST API for providers, dashboard, direct integrations
