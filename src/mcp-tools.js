@@ -1584,9 +1584,10 @@ export async function handleTool(name, args) {
       } catch (e) {
         if (!e.message?.includes("Unknown")) throw e;
       }
-      return await handleCustodyTool(name, args);
+      try {
+        return await handleCustodyTool(name, args);
       } catch (e) {
-        if (!e.message?.includes('Unknown rails tool:')) throw e;
+        if (!e.message?.includes("Unknown")) throw e;
       }
       return handleBrokerTool(name, args);
   }

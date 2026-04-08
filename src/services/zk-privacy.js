@@ -142,6 +142,31 @@ function generateVerificationKey(proofType) {
   };
 }
 
+// ─── Schema Migrations ────────────────────────────────────────────────────────
+const migrations = [
+  "ALTER TABLE zk_proofs ADD COLUMN agent_id TEXT DEFAULT 'anonymous'",
+  "ALTER TABLE zk_proofs ADD COLUMN public_statement TEXT DEFAULT '{}'",
+  "ALTER TABLE zk_proofs ADD COLUMN verification_key TEXT DEFAULT '{}'",
+  "ALTER TABLE zk_proofs ADD COLUMN base_tx_hash TEXT DEFAULT ''",
+  "ALTER TABLE zk_proofs ADD COLUMN expires_at TEXT DEFAULT ''",
+  "ALTER TABLE zk_proofs ADD COLUMN proof_data TEXT DEFAULT '{}'",
+  "ALTER TABLE zk_proofs ADD COLUMN public_inputs TEXT DEFAULT '{}'",
+  "ALTER TABLE zk_proofs ADD COLUMN proof_type TEXT DEFAULT 'unknown'",
+  "ALTER TABLE zk_proofs ADD COLUMN fee_usd REAL DEFAULT 0",
+  "ALTER TABLE zk_verifications ADD COLUMN agent_id TEXT DEFAULT 'anonymous'",
+  "ALTER TABLE zk_private_transfers ADD COLUMN agent_id TEXT DEFAULT 'anonymous'",
+  "ALTER TABLE zk_private_transfers ADD COLUMN from_wallet TEXT DEFAULT ''",
+  "ALTER TABLE zk_private_transfers ADD COLUMN to_wallet TEXT DEFAULT ''",
+  "ALTER TABLE zk_private_transfers ADD COLUMN amount REAL DEFAULT 0",
+  "ALTER TABLE zk_private_transfers ADD COLUMN currency TEXT DEFAULT 'USDC'",
+  "ALTER TABLE zk_private_transfers ADD COLUMN commitment TEXT DEFAULT ''",
+  "ALTER TABLE zk_private_transfers ADD COLUMN nullifier TEXT DEFAULT ''",
+  "ALTER TABLE zk_private_transfers ADD COLUMN stealth_address TEXT DEFAULT ''",
+  "ALTER TABLE zk_private_transfers ADD COLUMN fee_usd REAL DEFAULT 0",
+  "ALTER TABLE zk_private_transfers ADD COLUMN settled_at TEXT DEFAULT ''",
+];
+for (const m of migrations) { try { db.exec(m); } catch(e) {} }
+
 // ─── 1. generateProof ─────────────────────────────────────────────────────────
 
 export function generateProof(dataType, privateData = {}, publicStatement = {}) {

@@ -634,43 +634,43 @@ export async function handlePhase16Tool(name, args) {
 
     case "zk_generate_proof":
       return generateProof(
-        args.dataType,
-        args.privateData,
-        args.publicStatement,
+        args.data_type || args.dataType,
+        args.private_data || args.privateData || {},
+        args.public_statement || args.publicStatement || {},
       );
 
     case "zk_verify_proof":
       return verifyProof(
-        args.proofId,
-        args.expectedStatement,
+        args.proof_id || args.proofId,
+        args.expected_statement || args.expectedStatement,
       );
 
     case "zk_private_transfer":
       return privateTransfer(
         args.amount,
         args.currency,
-        args.fromWallet,
-        args.toWallet,
+        args.from_wallet || args.fromWallet,
+        args.to_wallet || args.toWallet,
         args.proofOfFunds,
       );
 
     case "zk_create_credential":
       return createPrivateCredential(
-        args.credentialType,
+        args.credential_type || args.credentialType,
         args.attributes,
         args.issuer,
       );
 
     case "zk_kyc_check":
       return zkKycCheck(
-        args.agentId,
-        args.requiredChecks,
+        args.agent_id || args.agentId,
+        args.required_checks || args.requiredChecks,
       );
 
     case "zk_private_audit":
       return privateAudit(
         args.transactions,
-        args.auditorPublicKey,
+        args.auditor_public_key || args.auditorPublicKey,
       );
 
     case "zk_dashboard":
