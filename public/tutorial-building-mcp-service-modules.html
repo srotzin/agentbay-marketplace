@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How to Build a New MCP Service Module (HiveAgentIQ / AgentBay)</title>
+  <meta name="description" content="A practical, copy-paste friendly guide to adding a new MCP service module to AgentBay, wiring it into a phase file, and validating it locally." />
+  <link rel="canonical" href="/tutorial-building-mcp-service-modules.html" />
+  <style>
+    :root {
+      --bg: #0b0d12;
+      --panel: #111524;
+      --text: #e8ebf2;
+      --muted: #a8b0c3;
+      --link: #7aa2ff;
+      --code: #0b1020;
+      --border: rgba(255,255,255,.08);
+      --accent: #7aa2ff;
+      --good: #26c281;
+      --warn: #ffcc66;
+    }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: linear-gradient(180deg, var(--bg) 0%, #070810 100%);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      background: rgba(0,0,0,.25);
+      backdrop-filter: blur(8px);
+    }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 28px 20px; }
+    h1 { font-size: 30px; margin: 0 0 6px; }
+    p.lede { margin: 0; color: var(--muted); }
+    main .wrap { padding-top: 22px; }
+    nav.breadcrumb {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0 0 16px;
+    }
+    nav.breadcrumb a { color: var(--link); text-decoration: none; }
+    nav.breadcrumb a:hover { text-decoration: underline; }
+    section {
+      margin: 18px 0;
+      background: rgba(255,255,255,.02);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 18px 8px;
+    }
+    h2 { margin: 0 0 8px; font-size: 20px; }
+    h3 { margin: 12px 0 6px; font-size: 16px; color: #dfe6ff; }
+    code, pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    pre {
+      background: var(--code);
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      overflow-x: auto;
+      color: #d6ddff;
+    }
+    .callout {
+      border-left: 3px solid var(--accent);
+      padding: 10px 12px;
+      background: rgba(122,162,255,.08);
+      border-radius: 10px;
+      color: var(--text);
+    }
+    .ok { border-left-color: var(--good); background: rgba(38,194,129,.08); }
+    .warn { border-left-color: var(--warn); background: rgba(255,204,102,.08); }
+    a { color: var(--link); }
+    ul { margin: 8px 0 14px 22px; }
+    .small { font-size: 13px; color: var(--muted); }
+    footer {
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 860px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>How to Build a New MCP Service Module</h1>
+      <p class="lede">A practical guide for AgentBay contributors: add a new vertical module, wire it into a phase file, and validate it locally.</p>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <nav class="breadcrumb">
+        <a href="/">Home</a> / Tutorial / Building MCP service modules
+      </nav>
+
+      <section>
+        <h2>What you are building</h2>
+        <p>
+          In AgentBay, a <strong>service module</strong> is a small generator that returns one or more MCP tools for a specific vertical.
+          Service modules live in <code>src/services/</code> and are composed into <em>phase files</em> that feed <code>public/openapi.json</code>.
+        </p>
+        <div class="grid">
+          <div class="callout ok">
+            <strong>Goal:</strong> Add a new vertical with a clean, repeatable pattern ("hitl.js style").
+          </div>
+          <div class="callout warn">
+            <strong>Tip:</strong> Start with one tool, validate the schema end-to-end, then scale up.
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Step 0: Pick a vertical and define the tool surface</h2>
+        <p>
+          Before writing code, decide:
+        </p>
+        <ul>
+          <li><strong>Service name</strong> (short, kebab-case): e.g. <code>fraud-monitoring</code></li>
+          <li><strong>What inputs are required</strong> (be strict): strings, enums, arrays</li>
+          <li><strong>What the tool returns</strong>: usually a JSON object with predictable fields</li>
+        </ul>
+        <p class="small">
+          If you are unsure, review existing modules under <code>src/services/</code> and mirror their style.
+        </p>
+      </section>
+
+      <section>
+        <h2>Step 1: Create the service module file</h2>
+        <p>
+          Create a new file under <code>src/services/</code>, exporting a single function.
+          The function should return an <strong>array of tool definitions</strong>.
+        </p>
+        <pre><code>// src/services/fraud-monitoring.js
+
+export function fraudMonitoring() {
+  return [
+    {
+      name: "fraud_monitoring_alert_triage",
+      description: "Triage a fraud alert and return recommended next actions.",
+      inputSchema: {
+        type: "object",
+        additionalProperties: false,
+        required: ["alert"],
+        properties: {
+          alert: {
+            type: "object",
+            description: "The raw alert payload from your provider."
+          },
+          riskTolerance: {
+            type: "string",
+            enum: ["low", "medium", "high"],
+            default: "medium"
+          }
+        }
+      }
+    }
+  ];
+}
+</code></pre>
+        <div class="callout">
+          <strong>Pattern notes</strong>
+          <ul>
+            <li>Prefer <code>additionalProperties: false</code> to keep schemas crisp.</li>
+            <li>Use small, composable tools instead of one giant tool.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section>
+        <h2>Step 2: Wire the module into a phase file</h2>
+        <p>
+          Phase files live under <code>src/mcp-tools/</code> and compose tools from services.
+          If you are adding a new batch, create a new phase file and import your module.
+        </p>
+        <pre><code>// src/mcp-tools/mcp-tools-phaseXX.js
+
+import { fraudMonitoring } from "../services/fraud-monitoring.js";
+
+export const phaseXXTools = [
+  ...fraudMonitoring(),
+];
+</code></pre>
+      </section>
+
+      <section>
+        <h2>Step 3: Register the phase in mcp-tools.js</h2>
+        <p>
+          <code>src/mcp-tools.js</code> collects tool arrays from every phase file.
+          Add your new phase export and append its tools.
+        </p>
+        <pre><code>// src/mcp-tools.js
+
+import { phaseXXTools } from "./mcp-tools/mcp-tools-phaseXX.js";
+
+export const mcpTools = [
+  // ...existing phases...
+  ...phaseXXTools,
+];
+</code></pre>
+      </section>
+
+      <section>
+        <h2>Step 4: Validate locally (fast checks)</h2>
+        <p>
+          Run quick syntax checks on the new files, then run the project build/generation step you normally use.
+        </p>
+        <pre><code># Syntax check
+node --check src/services/fraud-monitoring.js
+node --check src/mcp-tools/mcp-tools-phaseXX.js
+
+# Optional: run whatever script updates public/openapi.json
+# npm test / npm run build / node scripts/generate-openapi.js
+</code></pre>
+        <div class="callout ok">
+          <strong>Done when:</strong> the app boots, your new tool appears in the OpenAPI output, and there are no schema validation errors.
+        </div>
+      </section>
+
+      <section>
+        <h2>Troubleshooting</h2>
+        <h3>My tool does not show up</h3>
+        <ul>
+          <li>Confirm your service function is actually included in a phase file.</li>
+          <li>Confirm the phase export is appended in <code>src/mcp-tools.js</code>.</li>
+          <li>Search for duplicate tool names and rename to be globally unique.</li>
+        </ul>
+
+        <h3>Schema or runtime errors</h3>
+        <ul>
+          <li>Make sure <code>required</code> matches your <code>properties</code>.</li>
+          <li>Set <code>additionalProperties: false</code> to catch typos early.</li>
+          <li>Use strings/enums for stable interfaces; keep objects for nested payloads.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Live reference</h2>
+        <p>
+          Current tool count on the live MCP directory: <strong>850</strong> tools (as of this tutorial update).
+          See <a href="https://hiveagentiq.com/mcp">hiveagentiq.com/mcp</a>.
+        </p>
+        <p class="small">
+          Source: <a href="https://hiveagentiq.com/mcp">https://hiveagentiq.com/mcp</a>
+        </p>
+      </section>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div>Last updated: 2026-04-08</div>
+      <div class="small">This page is part of the AgentBay public docs. Contributions welcome.</div>
+    </div>
+  </footer>
+</body>
+</html>
