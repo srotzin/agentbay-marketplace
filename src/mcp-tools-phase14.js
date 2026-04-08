@@ -1,188 +1,191 @@
 /**
  * HiveAgent MCP Tool Definitions — Phase 14
  *
- * Transactional execution — atomic multi-tool workflows with rollback (3 tools):
+ * Two new verticals wired into MCP — 10 tools total:
  *
- *   tx_execute         — execute a sequence of tool calls as an atomic transaction
- *                        with automatic rollback on failure. Fee: $0.05/transaction.
- *   tx_execute_budget  — budget-capped transactional execution; hard-stops if
- *                        cumulative cost exceeds your limit. Fee: included.
- *   tx_log             — full audit trail for any transaction. Free.
+ *   mining-operations (5 tools):
+ *     mining_register_site          — create a new mine/site record
+ *     mining_report_incident        — log safety/environment/security/equipment incidents
+ *     mining_create_work_order      — create equipment maintenance work orders
+ *     mining_log_ore_batch          — log ore batches and basic contained-metal estimates
+ *     mining_dashboard              — operations dashboard for sites/incidents/work orders
+ *
+ *   aviation-ops (5 tools):
+ *     aviation_create_flight        — create a flight record
+ *     aviation_update_flight_status — update flight status (boarding/departed/etc)
+ *     aviation_report_irrop         — log irregular operations (IRROPS) events
+ *     aviation_plan_turnaround      — plan a station turnaround block
+ *     aviation_ops_dashboard        — ops dashboard for flights/IRROPS/turns
  *
  * Exports:
- *   phase14Tools                    — Array of 3 MCP tool definitions
+ *   phase14Tools                    — Array of 10 MCP tool definitions
  *   handlePhase14Tool(name, args)   — Dispatcher function
  */
 
 import {
-  executeTransaction,
-  executeWithBudget,
-  getTransactionLog,
-} from "./services/transactional-executor.js";
+  miningRegisterSite,
+  miningReportIncident,
+  miningCreateWorkOrder,
+  miningLogOreBatch,
+  miningDashboard,
+} from "./services/mining-operations.js";
 
-// ─── Tool Definitions ─────────────────────────────────────────────────────────
+import {
+  aviationCreateFlight,
+  aviationUpdateFlightStatus,
+  aviationReportIrrop,
+  aviationPlanTurnaround,
+  aviationOpsDashboard,
+} from "./services/aviation-ops.js";
 
 export const phase14Tools = [
-
   {
-    name: "tx_execute",
-    description:
-      "Use when you need to run a multi-step workflow as an atomic transaction with automatic rollback on failure. " +
-      "Specify steps (each with a tool name and args), an optional budget cap, and optionally dry-run first to " +
-      "preview execution and costs without side effects. If any step fails, all previously completed steps are " +
-      "compensated (rolled back) where possible. Returns success status, completed steps, failed step details, " +
-      "rollback outcomes, and total cost. Fee: $0.05 per transaction.",
+    name: "mining_register_site",
+    description: "Register a new mining site (commodity, country, owner).",
     inputSchema: {
       type: "object",
       properties: {
-        steps: {
-          type: "array",
-          description:
-            "Ordered list of tool calls to execute as a single atomic transaction. " +
-            "Each step: { tool (required), args (optional object), compensation (optional override) }",
-          items: {
-            type: "object",
-            properties: {
-              tool: {
-                type: "string",
-                description: "MCP tool name to call (e.g. 'pay_universal', 'hiveagent_defi_swap')",
-              },
-              args: {
-                type: "object",
-                description: "Arguments to pass to the tool",
-              },
-              compensation: {
-                type: "object",
-                description:
-                  "Optional override for the rollback/compensation action. " +
-                  "{ tool: string, args: object, note: string }. " +
-                  "If omitted, HiveAgent infers a compensation action where possible.",
-                properties: {
-                  tool:  { type: "string",  description: "Tool to call for rollback" },
-                  args:  { type: "object",  description: "Args for the rollback tool" },
-                  note:  { type: "string",  description: "Human-readable description of the rollback" },
-                },
-              },
-            },
-            required: ["tool"],
-          },
-          minItems: 1,
-        },
-        budget_usd: {
-          type: "number",
-          description:
-            "Optional hard cost ceiling in USD. Execution stops before any step that would exceed this budget. " +
-            "Include the $0.05 transaction fee in your budget estimate.",
-        },
-        dry_run: {
-          type: "boolean",
-          description:
-            "If true, validates all steps and returns cost estimates and previews without actually executing anything. " +
-            "Use to sanity-check a complex workflow before committing.",
-          default: false,
-        },
+        name: { type: "string" },
+        commodity: { type: "string" },
+        country: { type: "string" },
+        owner: { type: "string" },
       },
-      required: ["steps"],
-    },
-    annotations: {
-      readOnlyHint:   false,
-      destructiveHint: false,
-      idempotentHint: false,
-      openWorldHint:  false,
+      required: ["name", "commodity"],
     },
   },
-
   {
-    name: "tx_execute_budget",
-    description:
-      "Use when you need budget-capped transactional execution. Hard-stops if cumulative cost exceeds your limit — " +
-      "no step that would exceed the budget is executed, and all previously completed steps are rolled back. " +
-      "Identical to tx_execute but budget_usd is required. Returns all tx_execute fields plus budget_remaining.",
+    name: "mining_report_incident",
+    description: "Report a mining incident and get a risk score + suggested actions.",
     inputSchema: {
       type: "object",
       properties: {
-        steps: {
-          type: "array",
-          description: "Ordered list of tool calls. Each: { tool (required), args (optional), compensation (optional) }",
-          items: {
-            type: "object",
-            properties: {
-              tool: { type: "string" },
-              args: { type: "object" },
-              compensation: {
-                type: "object",
-                properties: {
-                  tool: { type: "string" },
-                  args: { type: "object" },
-                  note: { type: "string" },
-                },
-              },
-            },
-            required: ["tool"],
-          },
-          minItems: 1,
-        },
-        budget_usd: {
-          type: "number",
-          description: "Hard cost ceiling in USD. Required. Execution halts and rolls back if this would be exceeded.",
-        },
+        siteId: { type: "string" },
+        category: { type: "string", enum: ["safety", "environment", "security", "equipment"] },
+        severity: { type: "string", enum: ["low", "medium", "high", "critical"] },
+        description: { type: "string" },
       },
-      required: ["steps", "budget_usd"],
-    },
-    annotations: {
-      readOnlyHint:   false,
-      destructiveHint: false,
-      idempotentHint: false,
-      openWorldHint:  false,
+      required: ["siteId", "category", "severity", "description"],
     },
   },
-
   {
-    name: "tx_log",
-    description:
-      "Use when you need the full audit trail of a transactional execution. Returns every step with tool name, " +
-      "input, output, status, cost, duration_ms, and rollback_status. Useful for debugging failed transactions, " +
-      "compliance reporting, or verifying that rollbacks completed successfully. Free — no charge.",
+    name: "mining_create_work_order",
+    description: "Create an equipment maintenance work order at a mining site.",
     inputSchema: {
       type: "object",
       properties: {
-        transaction_id: {
-          type: "string",
-          description: "The transaction ID returned by tx_execute or tx_execute_budget (e.g. 'txn_abc123')",
-        },
+        siteId: { type: "string" },
+        assetTag: { type: "string" },
+        issue: { type: "string" },
+        priority: { type: "string", enum: ["p0", "p1", "p2", "p3"] },
+        estimatedHours: { type: "number" },
       },
-      required: ["transaction_id"],
-    },
-    annotations: {
-      readOnlyHint:   true,
-      destructiveHint: false,
-      idempotentHint: true,
-      openWorldHint:  false,
+      required: ["siteId", "assetTag", "issue"],
     },
   },
+  {
+    name: "mining_log_ore_batch",
+    description: "Log an ore batch and compute simple dry-tonnage and contained grams estimates (if provided grade/moisture).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        siteId: { type: "string" },
+        batchCode: { type: "string" },
+        tonnage: { type: "number" },
+        gradeGpt: { type: ["number", "null"] },
+        moisturePct: { type: ["number", "null"] },
+      },
+      required: ["siteId", "batchCode", "tonnage"],
+    },
+  },
+  {
+    name: "mining_dashboard",
+    description: "Operational dashboard for mining: sites, open incidents, active work orders, and recent ore batches.",
+    inputSchema: { type: "object", properties: {} },
+  },
 
+  {
+    name: "aviation_create_flight",
+    description: "Create a flight record for airline operations.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        flightNumber: { type: "string" },
+        origin: { type: "string" },
+        destination: { type: "string" },
+        aircraftTail: { type: "string" },
+      },
+      required: ["flightNumber", "origin", "destination"],
+    },
+  },
+  {
+    name: "aviation_update_flight_status",
+    description: "Update a flight status (scheduled/boarding/departed/arrived/cancelled/diverted).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        flightId: { type: "string" },
+        status: { type: "string", enum: ["scheduled", "boarding", "departed", "arrived", "cancelled", "diverted"] },
+      },
+      required: ["flightId", "status"],
+    },
+  },
+  {
+    name: "aviation_report_irrop",
+    description: "Report an IRROPS event and get suggested mitigations.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        flightId: { type: "string" },
+        irropType: { type: "string", enum: ["delay", "cancel", "diversion", "aircraft_swap", "crew_issue", "maintenance"] },
+        severity: { type: "string", enum: ["low", "medium", "high", "critical"] },
+        reason: { type: "string" },
+      },
+      required: ["flightId", "irropType", "severity", "reason"],
+    },
+  },
+  {
+    name: "aviation_plan_turnaround",
+    description: "Plan a station turnaround (planned minutes) for a flight.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        flightId: { type: "string" },
+        station: { type: "string" },
+        plannedMinutes: { type: "number" },
+      },
+      required: ["flightId", "station"],
+    },
+  },
+  {
+    name: "aviation_ops_dashboard",
+    description: "Ops dashboard for flights, open IRROPS, and active turnarounds.",
+    inputSchema: { type: "object", properties: {} },
+  },
 ];
 
-// ─── Dispatcher ───────────────────────────────────────────────────────────────
-
-export async function handlePhase14Tool(name, args = {}) {
+export function handlePhase14Tool(name, args = {}) {
   switch (name) {
+    case "mining_register_site":
+      return miningRegisterSite(args.name, args.commodity, args.country, args.owner);
+    case "mining_report_incident":
+      return miningReportIncident(args.siteId, args.category, args.severity, args.description);
+    case "mining_create_work_order":
+      return miningCreateWorkOrder(args.siteId, args.assetTag, args.issue, args.priority, args.estimatedHours);
+    case "mining_log_ore_batch":
+      return miningLogOreBatch(args.siteId, args.batchCode, args.tonnage, args.gradeGpt, args.moisturePct);
+    case "mining_dashboard":
+      return miningDashboard();
 
-    case "tx_execute":
-      return executeTransaction(
-        args.steps,
-        args.budget_usd ?? null,
-        args.dry_run    ?? false
-      );
-
-    case "tx_execute_budget":
-      return executeWithBudget(
-        args.steps,
-        args.budget_usd
-      );
-
-    case "tx_log":
-      return getTransactionLog(args.transaction_id);
+    case "aviation_create_flight":
+      return aviationCreateFlight(args.flightNumber, args.origin, args.destination, args.aircraftTail);
+    case "aviation_update_flight_status":
+      return aviationUpdateFlightStatus(args.flightId, args.status);
+    case "aviation_report_irrop":
+      return aviationReportIrrop(args.flightId, args.irropType, args.severity, args.reason);
+    case "aviation_plan_turnaround":
+      return aviationPlanTurnaround(args.flightId, args.station, args.plannedMinutes);
+    case "aviation_ops_dashboard":
+      return aviationOpsDashboard();
 
     default:
       throw new Error(`Unknown Phase 14 tool: ${name}`);
