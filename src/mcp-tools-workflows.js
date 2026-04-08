@@ -38,6 +38,9 @@ import {
   runEnergyAuditWorkflow,
   runFleetOptimizationWorkflow,
   runTaxFilingWorkflow,
+  runFullRxTransaction,
+  runPharmaSupplyChain,
+  runGlobalDrugPricing,
 } from "./services/workflows.js";
 
 // ─── Tool Definitions ─────────────────────────────────────────────────────────
@@ -836,6 +839,143 @@ export const workflowTools = [
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
   },
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // 19. FULL RX TRANSACTION
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    name: "workflow_full_rx_transaction",
+    description: "Use when you need to process a complete end-to-end prescription transaction in one call — from writing the prescription, through insurance adjudication and formulary verification, to dispense authorization. Triggers: 'fill prescription', 'process Rx', 'adjudicate claim for drug', 'check coverage and dispense', 'prior auth + dispense', 'insurance drug claim workflow'. Returns: prescription details, formulary tier, claim adjudication result, prior auth status, dispense authorization, and recommended next steps. Fee: $1.75.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        drug_name: {
+          type: "string",
+          description: "Name of the drug to prescribe (e.g. 'Metformin', 'Ozempic', 'Eliquis').",
+        },
+        patient_id: {
+          type: "string",
+          description: "Patient identifier for claim adjudication.",
+          default: "patient-001",
+        },
+        prescriber_id: {
+          type: "string",
+          description: "Prescriber NPI or identifier.",
+          default: "prescriber-001",
+        },
+        plan_id: {
+          type: "string",
+          description: "Insurance plan ID (e.g. 'plan-commercial-001', 'plan-medicare-d-001').",
+          default: "plan-commercial-001",
+        },
+        quantity: {
+          type: "number",
+          description: "Quantity dispensed (e.g. 30 tablets).",
+          default: 30,
+        },
+        days_supply: {
+          type: "number",
+          description: "Days supply for the prescription (e.g. 30, 90).",
+          default: 30,
+        },
+        patient_profile: {
+          type: "object",
+          description: "Optional patient profile for eligibility and prior auth checks (age, diagnoses, etc.).",
+          default: {},
+        },
+      },
+      required: ["drug_name"],
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // 20. PHARMA SUPPLY CHAIN
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    name: "workflow_pharma_supply_chain",
+    description: "Use when you need to verify and track a pharmaceutical product through the entire supply chain — from origin to destination, including DSCSA serialization verification and counterfeit risk assessment. Triggers: 'track drug shipment', 'verify DSCSA', 'check counterfeit risk', 'serialized drug verification', 'pharma supply chain audit', 'lot number track and trace', 'drug distribution integrity'. Returns: real-time distribution tracking, DSCSA verification status, chain-of-custody status, counterfeit risk level, and recommended actions. Fee: $1.75.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        drug_name: {
+          type: "string",
+          description: "Name of the drug being tracked (e.g. 'Humira', 'Ozempic').",
+        },
+        ndc: {
+          type: "string",
+          description: "National Drug Code (NDC) in format 00000-0000-00.",
+          default: "00000-0000-00",
+        },
+        lot_number: {
+          type: "string",
+          description: "Manufacturing lot number for DSCSA tracing.",
+          default: "LOT-001",
+        },
+        serial_number: {
+          type: "string",
+          description: "Serialized unit identifier for DSCSA verification.",
+          default: "SN-000001",
+        },
+        origin: {
+          type: "string",
+          description: "Origin country code (e.g. 'US', 'IN', 'DE').",
+          default: "US",
+        },
+        destination: {
+          type: "string",
+          description: "Destination country code (e.g. 'US', 'CA', 'GB').",
+          default: "US",
+        },
+        quantity: {
+          type: "number",
+          description: "Quantity of units in shipment.",
+          default: 1000,
+        },
+      },
+      required: ["drug_name"],
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // 21. GLOBAL DRUG PRICING
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    name: "workflow_global_drug_pricing",
+    description: "Use when you need comprehensive drug pricing intelligence across all 10 major pharmaceutical markets simultaneously, combined with adverse event monitoring and market arbitrage analysis. Triggers: 'drug price across countries', 'global pharma pricing', 'international drug cost comparison', 'reference pricing analysis', 'pharma market intelligence', 'drug arbitrage opportunity', 'IRA negotiation benchmark', 'price comparison US vs EU'. Returns: per-unit prices in USD for US, UK, Germany, France, Japan, Canada, Australia, Brazil, India, China — plus adverse event trends, arbitrage opportunity flag, and market intelligence. Fee: $3.50.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        drug_name: {
+          type: "string",
+          description: "Name of the drug to price globally (e.g. 'Humira', 'Keytruda', 'Ozempic').",
+        },
+        drug_class: {
+          type: "string",
+          description: "Drug class for pricing model (e.g. 'Biologic', 'Small Molecule', 'GLP-1 Receptor Agonist').",
+          default: "Pharmaceutical",
+        },
+        indication: {
+          type: "string",
+          description: "Primary therapeutic indication for the drug.",
+          default: "",
+        },
+        is_generic: {
+          type: "boolean",
+          description: "Whether the drug is a generic formulation (lowers baseline price).",
+          default: false,
+        },
+        is_biologic: {
+          type: "boolean",
+          description: "Whether the drug is a biologic (raises baseline price significantly).",
+          default: false,
+        },
+      },
+      required: ["drug_name"],
+    },
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  },
+
 ];
 
 // ─── Handler ──────────────────────────────────────────────────────────────────
@@ -993,6 +1133,37 @@ export function handleWorkflowTool(name, args = {}) {
         args.transactions ?? [],
         args.accounts ?? [],
         args.jurisdiction ?? "US-federal"
+      );
+
+    case "workflow_full_rx_transaction":
+      return runFullRxTransaction(
+        args.drug_name,
+        args.patient_id ?? "patient-001",
+        args.prescriber_id ?? "prescriber-001",
+        args.plan_id ?? "plan-commercial-001",
+        args.quantity ?? 30,
+        args.days_supply ?? 30,
+        args.patient_profile ?? {}
+      );
+
+    case "workflow_pharma_supply_chain":
+      return runPharmaSupplyChain(
+        args.drug_name,
+        args.ndc ?? "00000-0000-00",
+        args.lot_number ?? "LOT-001",
+        args.serial_number ?? "SN-000001",
+        args.origin ?? "US",
+        args.destination ?? "US",
+        args.quantity ?? 1000
+      );
+
+    case "workflow_global_drug_pricing":
+      return runGlobalDrugPricing(
+        args.drug_name,
+        args.drug_class ?? "Pharmaceutical",
+        args.indication ?? "",
+        args.is_generic ?? false,
+        args.is_biologic ?? false
       );
 
     default:

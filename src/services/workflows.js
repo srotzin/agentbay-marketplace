@@ -820,6 +820,15 @@ export function fullFraudCheck(
 import * as energyUtils from "./energy-utilities.js";
 import * as fleetLogistics from "./fleet-logistics.js";
 import * as taxAccounting from "./tax-accounting.js";
+import {
+  processPrescription,
+  adjudicateClaim,
+  checkFormularyStatus,
+  trackGlobalDistribution,
+  verifyDscsa,
+  calculateGlobalPricing,
+  monitorAdverseEvents,
+} from "./pharma-transactions.js";
 
 // safe() already defined above
 
@@ -881,5 +890,180 @@ export async function runTaxFilingWorkflow(businessType, income, expenses, state
     financial_statement: statement,
     total_cost_usd: 17.5,
     recommended_actions: ["Review deductions", "File before deadline", "Set up quarterly estimates"],
+  };
+}
+
+// ─── Pharma Workflows ─────────────────────────────────────────────────────────
+
+/**
+ * runFullRxTransaction
+ * Prescription → adjudication → formulary check → prior auth → dispense.
+ */
+export async function runFullRxTransaction(
+  drugName,
+  patientId,
+  prescriberId,
+  planId,
+  quantity,
+  daysSupply,
+  patientProfile = {}
+) {
+  const [rx, formulary] = await Promise.all([
+    safe(() =>
+      processPrescription({
+        drug_name: drugName,
+        patient_id: patientId ?? "patient-001",
+        prescriber_id: prescriberId ?? "prescriber-001",
+        quantity: quantity ?? 30,
+        days_supply: daysSupply ?? 30,
+        patient_profile: patientProfile,
+      })
+    ),
+    safe(() =>
+      checkFormularyStatus({
+        drug_name: drugName,
+        plan_id: planId ?? "plan-commercial-001",
+        patient_profile: patientProfile,
+      })
+    ),
+  ]);
+
+  const claim = await safe(() =>
+    adjudicateClaim({
+      rx_number: rx?.rx_number ?? "RX-WORKFLOW",
+      drug_name: drugName,
+      patient_id: patientId ?? "patient-001",
+      plan_id: planId ?? "plan-commercial-001",
+      quantity: quantity ?? 30,
+      days_supply: daysSupply ?? 30,
+      ndc: rx?.ndc ?? "00000-0000-00",
+      prescriber_id: prescriberId ?? "prescriber-001",
+    })
+  );
+
+  const prior_auth_required =
+    formulary?.prior_auth_required ?? claim?.prior_auth_required ?? false;
+
+  return {
+    summary: `Full Rx transaction for ${drugName}: prescription written, formulary verified, claim adjudicated${prior_auth_required ? ", prior authorization required" : ", prior authorization not required"}.`,
+    prescription: rx,
+    formulary_check: formulary,
+    adjudication: claim,
+    prior_auth_required,
+    dispense_status: claim?.approved ? "APPROVED — ready to dispense" : "PENDING — review required",
+    total_cost_usd: (rx?.fee_usd ?? 0.5) + (formulary?.fee_usd ?? 0.25) + (claim?.fee_usd ?? 1.0),
+    recommended_actions: prior_auth_required
+      ? ["Submit prior authorization request", "Notify prescriber", "Hold dispense pending approval"]
+      : ["Dispense medication", "Counsel patient on usage", "Schedule follow-up"],
+  };
+}
+
+/**
+ * runPharmaSupplyChain
+ * Track → verify DSCSA → counterfeit check → distribution analysis.
+ */
+export async function runPharmaSupplyChain(
+  drugName,
+  ndc,
+  lotNumber,
+  serialNumber,
+  origin,
+  destination,
+  quantity
+) {
+  const [tracking, dscsa] = await Promise.all([
+    safe(() =>
+      trackGlobalDistribution({
+        drug_name: drugName,
+        ndc: ndc ?? "00000-0000-00",
+        lot_number: lotNumber ?? "LOT-001",
+        origin_country: origin ?? "US",
+        destination_country: destination ?? "US",
+        quantity: quantity ?? 1000,
+      })
+    ),
+    safe(() =>
+      verifyDscsa({
+        ndc: ndc ?? "00000-0000-00",
+        serial_number: serialNumber ?? "SN-000001",
+        lot_number: lotNumber ?? "LOT-001",
+        drug_name: drugName,
+      })
+    ),
+  ]);
+
+  const counterfeit_risk =
+    dscsa?.verification_status === "VERIFIED" ? "LOW" : "ELEVATED";
+
+  return {
+    summary: `Pharma supply chain for ${drugName} (NDC: ${ndc ?? "N/A"}): tracking active, DSCSA verification ${dscsa?.verification_status ?? "PENDING"}, counterfeit risk ${counterfeit_risk}.`,
+    distribution_tracking: tracking,
+    dscsa_verification: dscsa,
+    counterfeit_risk,
+    chain_of_custody_intact: dscsa?.chain_of_custody_intact ?? false,
+    distribution_status: tracking?.status ?? "IN_TRANSIT",
+    total_cost_usd: (tracking?.fee_usd ?? 0.75) + (dscsa?.fee_usd ?? 1.0),
+    recommended_actions:
+      counterfeit_risk === "ELEVATED"
+        ? ["Quarantine shipment", "Report to FDA MedWatch", "Notify distributor", "Initiate recall if confirmed"]
+        : ["Continue distribution", "File DSCSA transaction records", "Schedule next checkpoint"],
+  };
+}
+
+/**
+ * runGlobalDrugPricing
+ * Drug pricing across all 10 countries + market intelligence.
+ */
+export async function runGlobalDrugPricing(
+  drugName,
+  drugClass,
+  indication,
+  isGeneric,
+  isBiologic
+) {
+  const [pricing, adverseEvents] = await Promise.all([
+    safe(() =>
+      calculateGlobalPricing({
+        drug_name: drugName,
+        drug_class: drugClass ?? "Pharmaceutical",
+        indication: indication ?? "",
+        is_generic: isGeneric ?? false,
+        is_biologic: isBiologic ?? false,
+      })
+    ),
+    safe(() =>
+      monitorAdverseEvents({
+        drug_name: drugName,
+        monitoring_period_days: 30,
+      })
+    ),
+  ]);
+
+  const countries = pricing?.country_prices ?? {};
+  const countryCount = Object.keys(countries).length;
+  const prices = Object.values(countries).map((c) => c.price_per_unit_usd ?? 0);
+  const maxPrice = prices.length ? Math.max(...prices) : 0;
+  const minPrice = prices.length ? Math.min(...prices) : 0;
+
+  return {
+    summary: `Global pricing for ${drugName} across ${countryCount} countries. Price range: $${minPrice.toFixed(2)} – $${maxPrice.toFixed(2)} per unit. Arbitrage spread: ${maxPrice > 0 ? ((maxPrice - minPrice) / maxPrice * 100).toFixed(1) : 0}%.`,
+    drug_name: drugName,
+    global_pricing: pricing,
+    adverse_event_monitoring: adverseEvents,
+    country_count: countryCount,
+    price_range_usd: { min: minPrice, max: maxPrice },
+    arbitrage_opportunity: maxPrice - minPrice > 5,
+    market_intelligence: {
+      highest_price_country: Object.entries(countries).sort((a, b) => (b[1].price_per_unit_usd ?? 0) - (a[1].price_per_unit_usd ?? 0))[0]?.[0] ?? "N/A",
+      lowest_price_country: Object.entries(countries).sort((a, b) => (a[1].price_per_unit_usd ?? 0) - (b[1].price_per_unit_usd ?? 0))[0]?.[0] ?? "N/A",
+      adverse_events_30d: adverseEvents?.total_events_30d ?? 0,
+      safety_signal: adverseEvents?.safety_signal_detected ?? false,
+    },
+    total_cost_usd: (pricing?.fee_usd ?? 2.0) + (adverseEvents?.fee_usd ?? 1.5),
+    recommended_actions: [
+      "Review pricing in high-cost markets for negotiation opportunities",
+      "Monitor adverse event trends before expansion",
+      "File pricing reports with formulary committees",
+    ],
   };
 }

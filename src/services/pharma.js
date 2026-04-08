@@ -17,6 +17,13 @@
 
 import { randomUUID } from "crypto";
 import db from "../db.js";
+import {
+  DRUGS,
+  searchDrugs as searchDrugsLocal,
+  getDrug,
+  getDrugsByClass,
+  getDrugInteractions,
+} from "./pharma-drugs-db.js";
 
 // ─── Schema Init ──────────────────────────────────────────────────────────────
 
@@ -822,12 +829,32 @@ const SEED_TRIALS = [
   `);
 
   const seedDrugs = db.transaction(() => {
+    // Seed legacy SEED_DRUGS (full schema with id, generic, brand, etc.)
     for (const d of SEED_DRUGS) {
       insertDrug.run({
         ...d,
         indications: JSON.stringify(d.indications),
         contraindications: JSON.stringify(d.contraindications),
         interactions: JSON.stringify(d.interactions),
+      });
+    }
+    // Seed 538-drug DRUGS from pharma-drugs-db.js (mapped to DB schema)
+    for (const d of DRUGS) {
+      const nameLower = d.name.toLowerCase().replace(/\s+/g, "-");
+      insertDrug.run({
+        id: `drug-db-${nameLower}`,
+        name: d.name,
+        generic: d.generic_name,
+        brand: (d.brand_names ?? []).join(" / "),
+        drug_class: d.drug_class,
+        mechanism: d.mechanism,
+        indications: JSON.stringify([d.indication]),
+        contraindications: JSON.stringify([]),
+        interactions: JSON.stringify([]),
+        patent_expiry: d.patent_expiry ?? null,
+        fda_status: d.fda_status,
+        half_life: null,
+        route: d.route,
       });
     }
   });
