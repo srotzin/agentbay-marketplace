@@ -53,14 +53,19 @@ export const phase25Tools = [
       required: ["orgName","title","gameTitle"],
     },
     handler: async ({ orgName, title, gameTitle, bracketFormat, durationHours }) =>
-      createEsportsEvent(orgName, title, gameTitle, bracketFormat, durationHours),
+      createEsportsEvent(orgName, title, gameTitle, bracketFormat, durationHours),,
+    inputSchema: { type: "object", properties: {}, required: [],
+    inputSchema: { type: "object", properties: {}, required: [] }
+  }
   },
   {
     name: "gaming.start_event",
     description: "Mark an esports event as live.",
     parameters: {
       type: "object",
-      properties: { eventId: { type: "string" } },
+      properties: { eventId: { type: "string",
+    inputSchema: { type: "object", properties: {}, required: [] }
+  } },
       required: ["eventId"],
     },
     handler: async ({ eventId }) => startEsportsEvent(eventId),
@@ -90,8 +95,9 @@ export const phase25Tools = [
       type: "object",
       properties: {
         grossUsd: { type: "number" },
-        feeBps: { type: "number", default: 250 },
-      },
+        feeBps: { type: "number", default: 250 },,
+    inputSchema: { type: "object", properties: {}, required: [] }
+  },
       required: ["grossUsd"],
     },
     handler: async ({ grossUsd, feeBps }) => quoteCreatorPayout(grossUsd, feeBps),
@@ -123,9 +129,12 @@ export const phase25Tools = [
       type: "object",
       properties: {
         missionName: { type: "string", description: "Seed: Aurora-1, Kepler Relay." },
-        site: { type: "string" },
-        durationMinutes: { type: "number", default: 120 },
-      },
+        site: { type: "string",
+    inputSchema: { type: "object", properties: {}, required: [] }
+  },
+        durationMinutes: { type: "number", default: 120 },,
+    inputSchema: { type: "object", properties: {}, required: [] }
+  },
       required: ["missionName","site"],
     },
     handler: async ({ missionName, site, durationMinutes }) => proposeLaunchWindow(missionName, site, durationMinutes),
@@ -140,7 +149,9 @@ export const phase25Tools = [
         site: { type: "string" },
         opensAtIso: { type: "string" },
         closesAtIso: { type: "string" },
-        probabilityGo: { type: "number", default: 0.7 },
+        probabilityGo: { type: "number", default: 0.7,
+    inputSchema: { type: "object", properties: {}, required: [] }
+  },
         constraints: { type: "object", default: {} },
       },
       required: ["missionName","site","opensAtIso","closesAtIso"],
@@ -156,8 +167,9 @@ export const phase25Tools = [
       properties: {
         missionName: { type: "string" },
         stationName: { type: "string", description: "Seed: Mojave Ground, Troll Station." },
-        purpose: { type: "string", enum: ["telemetry","command","payload","testing","emergency"], default: "telemetry" },
-      },
+        purpose: { type: "string", enum: ["telemetry","command","payload","testing","emergency"], default: "telemetry" },,
+    inputSchema: { type: "object", properties: {}, required: [] }
+  },
       required: ["missionName","stationName"],
     },
     handler: async ({ missionName, stationName, purpose }) => proposeGroundPass(missionName, stationName, purpose),
@@ -171,7 +183,9 @@ export const phase25Tools = [
         missionName: { type: "string" },
         stationName: { type: "string" },
         passStartIso: { type: "string" },
-        passEndIso: { type: "string" },
+        passEndIso: { ,
+    inputSchema: { type: "object", properties: {}, required: [] }
+  }type: "string" },
         purpose: { type: "string", enum: ["telemetry","command","payload","testing","emergency"], default: "telemetry" },
         priority: { type: "string", enum: ["low","normal","high","critical"], default: "normal" },
       },
@@ -192,8 +206,9 @@ export const phase25Tools = [
         severity: { type: "string", enum: ["low","medium","high","critical"], default: "medium" },
         suspectedCause: { type: "string", default: "" },
       },
-      required: ["missionName","subsystem","description"],
-    },
+      required: ["missionName","subsystem","description"],,
+    inputSchema: { type: "object", properties: {}, required: [] }
+  },
     handler: async ({ missionName, subsystem, description, severity, suspectedCause }) =>
       fileSpaceAnomaly(missionName, subsystem, description, severity, suspectedCause),
   },
