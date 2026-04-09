@@ -15,6 +15,7 @@
 import { Router } from "express";
 import crypto from "crypto";
 import { tools, handleTool } from "./mcp-tools.js";
+import { logToolCall, getStats } from "./services/analytics-telemetry.js";
 import { enhanceResponse } from "./response-enhancer.js";
 import { getToolsForVertical } from "./services/dynamic-loader.js";
 import { getToolFee, toolFee } from "./tool-fees.js";
@@ -285,7 +286,23 @@ router.post("/", async (req, res) => {
           });
         }
 
-        const raw = await handleTool(toolName, toolArgs);
+        const _t0 = Date.now();
+        let raw, _success = true, _err = null;
+        try {
+          raw = await handleTool(toolName, toolArgs);
+        } catch(e) {
+          _success = false; _err = e.message;
+          throw e;
+        } finally {
+          logToolCall({
+            tool_name:  toolName,
+            agent_id:   req.headers["x-agent-id"] || toolArgs?.agent_id || null,
+            ip:         req.ip,
+            latency_ms: Date.now() - _t0,
+            success:    _success,
+            error_msg:  _err,
+          });
+        }
         const result = enhanceResponse(toolName, raw);
         return res.json({
           jsonrpc: "2.0",
