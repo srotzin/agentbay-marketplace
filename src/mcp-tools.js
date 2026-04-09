@@ -95,6 +95,7 @@ import { phase4345Tools, handlePhase4345Tool } from "./mcp-tools-phase43-45.js";
 import { phase46Tools, handlePhase46Tool } from "./mcp-tools-phase46.js";
 import { phase47Tools, handlePhase47Tool } from "./mcp-tools-phase47.js";
 import { phase4849Tools, handlePhase4849Tool } from "./mcp-tools-phase48-49.js";
+import { phase48Tools, handlePhase48Tool } from "./mcp-tools-phase48.js";
 import { welcomeTools, handleWelcomeTool } from "./mcp-tools-welcome.js";
 // Pharma Transactions (Rx, Claims, DSCSA, Global Pricing, Narcotics)
 import { pharmaTxTools, handlePharmaTxTool } from "./mcp-tools-pharma-tx.js";
@@ -1042,7 +1043,7 @@ export function handleBrokerTool(name, args = {}) {
   }
 }
 
-export const tools = [...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools];
+export const tools = [...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1781,6 +1782,14 @@ export async function handleTool(name, args) {
     case "scs_find_artifact_by_digest":  return handlePhase4849Tool(name, args);
     case "scs_dependency_scan":          return handlePhase4849Tool(name, args);
     case "scs_list_scans":               return handlePhase4849Tool(name, args);
+
+    // Phase 48 — QVAC + Tether USDT Integration
+    case "qvac_register_agent":           return await handlePhase48Tool(name, args);
+    case "qvac_start_session":            return await handlePhase48Tool(name, args);
+    case "qvac_pay":                      return await handlePhase48Tool(name, args);
+    case "qvac_compatible_models":        return await handlePhase48Tool(name, args);
+    case "qvac_integration_guide":        return await handlePhase48Tool(name, args);
+    case "qvac_status":                   return await handlePhase48Tool(name, args);
 
     default:
       // Try Phase 2 (AI-requested) tools, then Phase 3 (verticals), then Phase 6 (money)
