@@ -1,6 +1,6 @@
 # hiveagent-go
 
-Official Go SDK for the [HiveAgent](https://hiveagentiq.com) MCP API — 908 tools across 40 verticals, including DeFi, escrow, ZK proofs, parametric insurance, payments, and AI models.
+Official Go SDK for the [HiveAgent](https://hiveagentiq.com) MCP API — 1,132 tools across 40 verticals, including DeFi, escrow, ZK proofs, parametric insurance, payments, and AI models.
 
 ## Install
 
@@ -126,7 +126,7 @@ fmt.Printf("Escrow: %s at %s\n", escrow.EscrowID, escrow.ContractAddr)
 
 ### Call any tool directly
 
-The `CallTool` method gives you access to all 908 tools by name:
+The `CallTool` method gives you access to all 1,132 tools by name:
 
 ```go
 result, err := client.CallTool("defi_swap", map[string]interface{}{
