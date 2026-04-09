@@ -49,6 +49,7 @@
  */
 
 import { v4 as uuid } from "uuid";
+import { createHmac, createHash } from "crypto";
 import db from "../db.js";
 
 // ─── Schema ──────────────────────────────────────────────────────────────────
@@ -170,10 +171,9 @@ async function bvnkRequest(method, path, body) {
     const port        = parsedUrl.port || (parsedUrl.protocol === "https:" ? "443" : "80");
     const resource    = parsedUrl.pathname + (parsedUrl.search || "");
     const payloadHash = body
-      ? (() => {
-          const { createHash } = await import("crypto").catch(() => ({ createHash: () => ({ update: () => ({ digest: () => "" }) }) }));
-          return createHash("sha256").update("hawk.1.payload\napplication/json\n" + JSON.stringify(body) + "\n").digest("base64");
-        })()
+      ? createHash("sha256")
+          .update("hawk.1.payload\napplication/json\n" + JSON.stringify(body) + "\n")
+          .digest("base64")
       : "";
 
     const macBase = [
@@ -189,7 +189,6 @@ async function bvnkRequest(method, path, body) {
       "",
     ].join("\n") + "\n";
 
-    const { createHmac } = await import("crypto");
     const mac = createHmac("sha256", hawkSecret).update(macBase).digest("base64");
 
     const hawkHeader = `Hawk id="${hawkId}", ts="${ts}", nonce="${nonce}", mac="${mac}"${payloadHash ? `, hash="${payloadHash}"` : ""}`;
