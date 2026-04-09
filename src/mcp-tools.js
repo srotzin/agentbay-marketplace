@@ -97,6 +97,7 @@ import { phase47Tools, handlePhase47Tool } from "./mcp-tools-phase47.js";
 import { phase4849Tools, handlePhase4849Tool } from "./mcp-tools-phase48-49.js";
 import { phase48Tools, handlePhase48Tool } from "./mcp-tools-phase48.js";
 import { phase4951Tools, handlePhase4951Tool } from "./mcp-tools-phase49-51.js";
+import { phase5254Tools, handlePhase5254Tool } from "./mcp-tools-phase52-54.js";
 import { welcomeTools, handleWelcomeTool } from "./mcp-tools-welcome.js";
 // Pharma Transactions (Rx, Claims, DSCSA, Global Pricing, Narcotics)
 import { pharmaTxTools, handlePharmaTxTool } from "./mcp-tools-pharma-tx.js";
@@ -1044,7 +1045,7 @@ export function handleBrokerTool(name, args = {}) {
   }
 }
 
-export const tools = [...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools];
+export const tools = [...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1812,6 +1813,29 @@ export async function handleTool(name, args) {
     case "data_purchase":               return await handlePhase4951Tool(name, args);
     case "data_stream":                 return await handlePhase4951Tool(name, args);
     case "data_marketplace_dashboard":  return await handlePhase4951Tool(name, args);
+
+    // Phase 52 — Smart Escrow
+    case "escrow_create":            return await handlePhase5254Tool(name, args);
+    case "escrow_fund":              return await handlePhase5254Tool(name, args);
+    case "escrow_submit_milestone":  return await handlePhase5254Tool(name, args);
+    case "escrow_release":           return await handlePhase5254Tool(name, args);
+    case "escrow_dispute":           return await handlePhase5254Tool(name, args);
+    case "escrow_status":            return await handlePhase5254Tool(name, args);
+    case "escrow_dashboard":         return await handlePhase5254Tool(name, args);
+
+    // Phase 53 — Cross-Border Payments
+    case "xborder_corridor_rates":   return await handlePhase5254Tool(name, args);
+    case "xborder_send":             return await handlePhase5254Tool(name, args);
+    case "xborder_track":            return await handlePhase5254Tool(name, args);
+    case "xborder_add_recipient":    return await handlePhase5254Tool(name, args);
+    case "xborder_status":           return await handlePhase5254Tool(name, args);
+
+    // Phase 54 — Content Moderation
+    case "content_moderate":         return await handlePhase5254Tool(name, args);
+    case "content_set_policy":       return await handlePhase5254Tool(name, args);
+    case "content_history":          return await handlePhase5254Tool(name, args);
+    case "content_appeal":           return await handlePhase5254Tool(name, args);
+    case "content_stats":            return await handlePhase5254Tool(name, args);
 
     default:
       // Try Phase 2 (AI-requested) tools, then Phase 3 (verticals), then Phase 6 (money)
