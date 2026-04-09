@@ -118,7 +118,8 @@ export const phase25Tools = [
       required: ["orgName","creatorHandle","periodStartIso","periodEndIso","grossUsd"],
     },
     handler: async ({ orgName, creatorHandle, periodStartIso, periodEndIso, grossUsd, payoutMethod }) =>
-      createCreatorPayout(orgName, creatorHandle, periodStartIso, periodEndIso, grossUsd, payoutMethod),
+      createCreatorPayout(orgName, creatorHandle, periodStartIso, periodEndIso, grossUsd, payoutMethod),,
+    inputSchema: { type: "object", properties: {}, required: [] }
   },
 
   // ─── Space Operations ───────────────────────────────────────────────────────
