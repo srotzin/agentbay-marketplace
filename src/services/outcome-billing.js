@@ -49,7 +49,7 @@ async function collectPlatformFee(feeUsd, context = "") {
 // ─── Schema ──────────────────────────────────────────────────────────────────
 
 db.exec(`
-  CREATE TABLE IF NOT EXISTS outcome_contracts (
+  CREATE TABLE IF NOT EXISTS billing_outcome_contracts (
     id TEXT PRIMARY KEY,
     provider_agent_id TEXT NOT NULL,
     buyer_agent_id TEXT NOT NULL,
@@ -65,9 +65,9 @@ db.exec(`
     created_at TEXT DEFAULT (datetime('now'))
   );
 
-  CREATE TABLE IF NOT EXISTS outcome_events (
+  CREATE TABLE IF NOT EXISTS billing_outcome_events (
     id TEXT PRIMARY KEY,
-    contract_id TEXT NOT NULL REFERENCES outcome_contracts(id),
+    contract_id TEXT NOT NULL REFERENCES billing_outcome_contracts(id),
     provider_agent_id TEXT NOT NULL,
     event_type TEXT NOT NULL,
     outcome_value REAL DEFAULT 1,
@@ -79,7 +79,7 @@ db.exec(`
     timestamp TEXT DEFAULT (datetime('now'))
   );
 
-  CREATE TABLE IF NOT EXISTS outcome_disputes (
+  CREATE TABLE IF NOT EXISTS billing_outcome_disputes (
     id TEXT PRIMARY KEY,
     contract_id TEXT NOT NULL,
     event_id TEXT NOT NULL,
@@ -90,15 +90,15 @@ db.exec(`
     created_at TEXT DEFAULT (datetime('now'))
   );
 
-  CREATE INDEX IF NOT EXISTS idx_oc_provider ON outcome_contracts(provider_agent_id);
-  CREATE INDEX IF NOT EXISTS idx_oc_buyer ON outcome_contracts(buyer_agent_id);
-  CREATE INDEX IF NOT EXISTS idx_oe_contract ON outcome_events(contract_id);
-  CREATE INDEX IF NOT EXISTS idx_oe_status ON outcome_events(status);
+  CREATE INDEX IF NOT EXISTS idx_oc_provider ON billing_outcome_contracts(provider_agent_id);
+  CREATE INDEX IF NOT EXISTS idx_oc_buyer ON billing_outcome_contracts(buyer_agent_id);
+  CREATE INDEX IF NOT EXISTS idx_oe_contract ON billing_outcome_events(contract_id);
+  CREATE INDEX IF NOT EXISTS idx_oe_status ON billing_outcome_events(status);
 `);
 
 // ─── Seed sample contracts ────────────────────────────────────────────────────
 
-const contractCount = db.prepare("SELECT COUNT(*) as c FROM outcome_contracts").get().c;
+const contractCount = db.prepare("SELECT COUNT(*) as c FROM billing_outcome_contracts").get().c;
 if (contractCount === 0) {
   const seeds = [
     { provider: "support-agent-alpha", buyer: "acme-corp-agent", type: "ticket_resolved", price: 0.99, max: 500 },
@@ -108,7 +108,7 @@ if (contractCount === 0) {
   ];
   for (const s of seeds) {
     db.prepare(`
-      INSERT INTO outcome_contracts (id, provider_agent_id, buyer_agent_id, outcome_type, price_per_outcome, max_outcomes, verification_method)
+      INSERT INTO billing_outcome_contracts (id, provider_agent_id, buyer_agent_id, outcome_type, price_per_outcome, max_outcomes, verification_method)
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `).run(uuid(), s.provider, s.buyer, s.type, s.price, s.max,
       OUTCOME_PRICE_DEFAULTS[s.type]?.auto_verify ? "auto" : "manual");
@@ -155,7 +155,7 @@ export function createOutcomeContract({
   const id = uuid();
 
   db.prepare(`
-    INSERT INTO outcome_contracts
+    INSERT INTO billing_outcome_contracts
       (id, provider_agent_id, buyer_agent_id, outcome_type, price_per_outcome, currency, max_outcomes, verification_method)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `).run(id, provider_agent_id, buyer_agent_id, outcome_type, price, defaults.currency, max_outcomes, method);
@@ -188,7 +188,7 @@ export async function reportOutcome({
   if (!contract_id) throw new Error("contract_id is required");
   if (!provider_agent_id) throw new Error("provider_agent_id is required");
 
-  const contract = db.prepare("SELECT * FROM outcome_contracts WHERE id = ?").get(contract_id);
+  const contract = db.prepare("SELECT * FROM billing_outcome_contracts WHERE id = ?").get(contract_id);
   if (!contract) throw new Error("Contract not found");
   if (contract.provider_agent_id !== provider_agent_id) throw new Error("Only the provider can report outcomes");
   if (contract.status !== "active") throw new Error(`Contract is ${contract.status}`);
@@ -204,7 +204,7 @@ export async function reportOutcome({
 
   const eventId = uuid();
   db.prepare(`
-    INSERT INTO outcome_events
+    INSERT INTO billing_outcome_events
       (id, contract_id, provider_agent_id, event_type, outcome_value, outcome_evidence, verified, payment_usdc, fee_usdc, status)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
@@ -216,7 +216,7 @@ export async function reportOutcome({
 
   if (autoVerify) {
     db.prepare(`
-      UPDATE outcome_contracts
+      UPDATE billing_outcome_contracts
       SET outcomes_delivered = outcomes_delivered + 1,
           total_paid = total_paid + ?
       WHERE id = ?
@@ -268,18 +268,18 @@ export async function verifyOutcome({
   if (!buyer_agent_id) throw new Error("buyer_agent_id is required");
   if (approved === undefined) throw new Error("approved (bool) is required");
 
-  const contract = db.prepare("SELECT * FROM outcome_contracts WHERE id = ?").get(contract_id);
+  const contract = db.prepare("SELECT * FROM billing_outcome_contracts WHERE id = ?").get(contract_id);
   if (!contract) throw new Error("Contract not found");
   if (contract.buyer_agent_id !== buyer_agent_id) throw new Error("Only the buyer can verify outcomes");
 
-  const event = db.prepare("SELECT * FROM outcome_events WHERE id = ? AND contract_id = ?").get(event_id, contract_id);
+  const event = db.prepare("SELECT * FROM billing_outcome_events WHERE id = ? AND contract_id = ?").get(event_id, contract_id);
   if (!event) throw new Error("Outcome event not found");
   if (event.status !== "pending") throw new Error(`Event is already ${event.status}`);
 
   if (approved) {
-    db.prepare("UPDATE outcome_events SET verified = 1, status = 'paid' WHERE id = ?").run(event_id);
+    db.prepare("UPDATE billing_outcome_events SET verified = 1, status = 'paid' WHERE id = ?").run(event_id);
     db.prepare(`
-      UPDATE outcome_contracts
+      UPDATE billing_outcome_contracts
       SET outcomes_delivered = outcomes_delivered + 1,
           total_paid = total_paid + ?
       WHERE id = ?
@@ -300,7 +300,7 @@ export async function verifyOutcome({
       message: "Outcome approved. Payment released to provider.",
     };
   } else {
-    db.prepare("UPDATE outcome_events SET status = 'rejected' WHERE id = ?").run(event_id);
+    db.prepare("UPDATE billing_outcome_events SET status = 'rejected' WHERE id = ?").run(event_id);
     return {
       event_id,
       contract_id,
@@ -320,7 +320,7 @@ export function disputeOutcome({ contract_id, event_id, disputing_agent, reason 
   if (!disputing_agent) throw new Error("disputing_agent is required");
   if (!reason) throw new Error("reason is required");
 
-  const contract = db.prepare("SELECT * FROM outcome_contracts WHERE id = ?").get(contract_id);
+  const contract = db.prepare("SELECT * FROM billing_outcome_contracts WHERE id = ?").get(contract_id);
   if (!contract) throw new Error("Contract not found");
 
   if (disputing_agent !== contract.provider_agent_id && disputing_agent !== contract.buyer_agent_id) {
@@ -329,12 +329,12 @@ export function disputeOutcome({ contract_id, event_id, disputing_agent, reason 
 
   const disputeId = uuid();
   db.prepare(`
-    INSERT INTO outcome_disputes (id, contract_id, event_id, disputing_agent, reason)
+    INSERT INTO billing_outcome_disputes (id, contract_id, event_id, disputing_agent, reason)
     VALUES (?, ?, ?, ?, ?)
   `).run(disputeId, contract_id, event_id, disputing_agent, reason);
 
   // Freeze the event
-  db.prepare("UPDATE outcome_events SET status = 'disputed' WHERE id = ?").run(event_id);
+  db.prepare("UPDATE billing_outcome_events SET status = 'disputed' WHERE id = ?").run(event_id);
 
   return {
     dispute_id: disputeId,
@@ -353,11 +353,11 @@ export function disputeOutcome({ contract_id, event_id, disputing_agent, reason 
 export function getContractStatus({ contract_id }) {
   if (!contract_id) throw new Error("contract_id is required");
 
-  const contract = db.prepare("SELECT * FROM outcome_contracts WHERE id = ?").get(contract_id);
+  const contract = db.prepare("SELECT * FROM billing_outcome_contracts WHERE id = ?").get(contract_id);
   if (!contract) throw new Error("Contract not found");
 
-  const events = db.prepare("SELECT * FROM outcome_events WHERE contract_id = ? ORDER BY timestamp DESC LIMIT 20").all(contract_id);
-  const disputes = db.prepare("SELECT * FROM outcome_disputes WHERE contract_id = ?").all(contract_id);
+  const events = db.prepare("SELECT * FROM billing_outcome_events WHERE contract_id = ? ORDER BY timestamp DESC LIMIT 20").all(contract_id);
+  const disputes = db.prepare("SELECT * FROM billing_outcome_disputes WHERE contract_id = ?").all(contract_id);
 
   const pending = events.filter(e => e.status === "pending").length;
   const paid = events.filter(e => e.status === "paid").length;
@@ -378,12 +378,12 @@ export function getContractStatus({ contract_id }) {
  * Platform-wide outcome billing dashboard.
  */
 export function getOutcomeBillingDashboard() {
-  const contracts = db.prepare("SELECT COUNT(*) as c FROM outcome_contracts").get().c;
-  const activeContracts = db.prepare("SELECT COUNT(*) as c FROM outcome_contracts WHERE status = 'active'").get().c;
-  const totalOutcomes = db.prepare("SELECT SUM(outcomes_delivered) as s FROM outcome_contracts").get().s || 0;
-  const totalPaid = db.prepare("SELECT SUM(total_paid) as s FROM outcome_contracts").get().s || 0;
+  const contracts = db.prepare("SELECT COUNT(*) as c FROM billing_outcome_contracts").get().c;
+  const activeContracts = db.prepare("SELECT COUNT(*) as c FROM billing_outcome_contracts WHERE status = 'active'").get().c;
+  const totalOutcomes = db.prepare("SELECT SUM(outcomes_delivered) as s FROM billing_outcome_contracts").get().s || 0;
+  const totalPaid = db.prepare("SELECT SUM(total_paid) as s FROM billing_outcome_contracts").get().s || 0;
   const platformFees = parseFloat((totalPaid * PLATFORM_FEE_PCT).toFixed(4));
-  const disputes = db.prepare("SELECT COUNT(*) as c FROM outcome_disputes WHERE status = 'open'").get().c;
+  const disputes = db.prepare("SELECT COUNT(*) as c FROM billing_outcome_disputes WHERE status = 'open'").get().c;
 
   const byType = db.prepare(`
     SELECT outcome_type,
@@ -391,7 +391,7 @@ export function getOutcomeBillingDashboard() {
            SUM(outcomes_delivered) as delivered,
            SUM(total_paid) as paid_usdc,
            AVG(price_per_outcome) as avg_price
-    FROM outcome_contracts
+    FROM billing_outcome_contracts
     GROUP BY outcome_type
     ORDER BY paid_usdc DESC
   `).all();
@@ -422,13 +422,13 @@ export function getAgentEarnings({ agent_id }) {
   const asProvider = db.prepare(`
     SELECT outcome_type, COUNT(*) as contracts, SUM(outcomes_delivered) as delivered,
            SUM(total_paid * (1 - ?)) as net_earned
-    FROM outcome_contracts WHERE provider_agent_id = ? GROUP BY outcome_type
+    FROM billing_outcome_contracts WHERE provider_agent_id = ? GROUP BY outcome_type
   `).all(PLATFORM_FEE_PCT, agent_id);
 
   const asBuyer = db.prepare(`
     SELECT outcome_type, COUNT(*) as contracts, SUM(outcomes_delivered) as purchased,
            SUM(total_paid) as total_spent
-    FROM outcome_contracts WHERE buyer_agent_id = ? GROUP BY outcome_type
+    FROM billing_outcome_contracts WHERE buyer_agent_id = ? GROUP BY outcome_type
   `).all(agent_id);
 
   const totalEarned = asProvider.reduce((s, r) => s + (r.net_earned || 0), 0);

@@ -91,7 +91,7 @@ db.exec(`
     created_at TEXT DEFAULT (datetime('now'))
   );
 
-  CREATE TABLE IF NOT EXISTS insurance_pool (
+  CREATE TABLE IF NOT EXISTS core_insurance_pool (
     id INTEGER PRIMARY KEY,
     total_premiums_collected_usd REAL DEFAULT 0,
     total_claims_paid_usd REAL DEFAULT 0,
@@ -101,7 +101,7 @@ db.exec(`
   );
 
   -- Initialize pool singleton
-  INSERT OR IGNORE INTO insurance_pool (id, total_premiums_collected_usd, total_claims_paid_usd, reserve_usd, surplus_usd, updated_at)
+  INSERT OR IGNORE INTO core_insurance_pool (id, total_premiums_collected_usd, total_claims_paid_usd, reserve_usd, surplus_usd, updated_at)
   VALUES (1, 0, 0, 0, 0, datetime('now'));
 
   CREATE INDEX IF NOT EXISTS idx_policies_agent ON insurance_policies(agent_id);
@@ -114,14 +114,14 @@ db.exec(`
 // ─── Helpers ──────────────────────────────────────
 
 function updatePool(premiumDelta = 0, claimDelta = 0) {
-  const pool = db.prepare("SELECT * FROM insurance_pool WHERE id = 1").get();
+  const pool = db.prepare("SELECT * FROM core_insurance_pool WHERE id = 1").get();
   const newPremiums = (pool.total_premiums_collected_usd || 0) + premiumDelta;
   const newClaims = (pool.total_claims_paid_usd || 0) + claimDelta;
   const reserve = newPremiums * 0.20; // keep 20% as reserve
   const surplus = newPremiums - newClaims - reserve;
 
   db.prepare(`
-    UPDATE insurance_pool
+    UPDATE core_insurance_pool
     SET total_premiums_collected_usd = ?,
         total_claims_paid_usd = ?,
         reserve_usd = ?,
@@ -415,7 +415,7 @@ export function processMonthlyPremiums() {
  * Insurance pool statistics
  */
 export function getInsuranceStats() {
-  const pool = db.prepare("SELECT * FROM insurance_pool WHERE id = 1").get();
+  const pool = db.prepare("SELECT * FROM core_insurance_pool WHERE id = 1").get();
   const totalPolicies = db.prepare("SELECT COUNT(*) as count FROM insurance_policies WHERE status = 'active'").get().count;
   const totalClaims = db.prepare("SELECT COUNT(*) as count FROM insurance_claims").get().count;
   const pendingClaims = db.prepare("SELECT COUNT(*) as count FROM insurance_claims WHERE status IN ('filed','reviewing')").get().count;

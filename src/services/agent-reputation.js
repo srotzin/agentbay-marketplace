@@ -18,7 +18,7 @@ const LIVE_MODE = !!process.env.REPUTATION_API_KEY;
 // ─── Schema ──────────────────────────────────────────────────────────────────
 
 db.exec(`
-  CREATE TABLE IF NOT EXISTS reputation_profiles (
+  CREATE TABLE IF NOT EXISTS rep_reputation_profiles (
     agent_id TEXT PRIMARY KEY,
     global_score REAL DEFAULT 50,
     total_interactions INTEGER DEFAULT 0,
@@ -35,7 +35,7 @@ db.exec(`
     created_at TEXT DEFAULT (datetime('now'))
   );
 
-  CREATE TABLE IF NOT EXISTS reputation_events (
+  CREATE TABLE IF NOT EXISTS rep_reputation_events (
     id TEXT PRIMARY KEY,
     agent_id TEXT NOT NULL,
     event_type TEXT NOT NULL,
@@ -44,7 +44,7 @@ db.exec(`
     timestamp TEXT DEFAULT (datetime('now'))
   );
 
-  CREATE TABLE IF NOT EXISTS reputation_endorsements (
+  CREATE TABLE IF NOT EXISTS rep_endorsements (
     id TEXT PRIMARY KEY,
     from_agent_id TEXT NOT NULL,
     to_agent_id TEXT NOT NULL,
@@ -54,7 +54,7 @@ db.exec(`
     timestamp TEXT DEFAULT (datetime('now'))
   );
 
-  CREATE TABLE IF NOT EXISTS reputation_stakes (
+  CREATE TABLE IF NOT EXISTS rep_stakes (
     id TEXT PRIMARY KEY,
     agent_id TEXT NOT NULL,
     amount_usdc REAL NOT NULL,
@@ -63,14 +63,14 @@ db.exec(`
     created_at TEXT DEFAULT (datetime('now'))
   );
 
-  CREATE INDEX IF NOT EXISTS idx_rp_score ON reputation_profiles(global_score DESC);
-  CREATE INDEX IF NOT EXISTS idx_re_agent ON reputation_events(agent_id);
-  CREATE INDEX IF NOT EXISTS idx_rend_to ON reputation_endorsements(to_agent_id);
+  CREATE INDEX IF NOT EXISTS idx_rp_score ON rep_reputation_profiles(global_score DESC);
+  CREATE INDEX IF NOT EXISTS idx_re_agent ON rep_reputation_events(agent_id);
+  CREATE INDEX IF NOT EXISTS idx_rend_to ON rep_endorsements(to_agent_id);
 `);
 
 // ─── Seed 15 agents with varied scores ───────────────────────────────────────
 
-const profileCount = db.prepare("SELECT COUNT(*) as c FROM reputation_profiles").get().c;
+const profileCount = db.prepare("SELECT COUNT(*) as c FROM rep_reputation_profiles").get().c;
 if (profileCount === 0) {
   const seedAgents = [
     { id: "oracle-agent-001",    score: 98, success: 412, fail: 8,  resp: 210,  uptime: 99.98, stake: 1000, verified: 1, provider: "kya",      badges: ["top_performer","identity_verified","high_stake"] },
@@ -91,7 +91,7 @@ if (profileCount === 0) {
   ];
 
   const insertProfile = db.prepare(`
-    INSERT INTO reputation_profiles
+    INSERT INTO rep_reputation_profiles
       (agent_id, global_score, total_interactions, successful_outcomes, failed_outcomes,
        response_time_avg_ms, uptime_pct, verified_identity, identity_provider, stake_usdc, badges)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -114,7 +114,7 @@ if (profileCount === 0) {
   ];
   for (const e of endorsements) {
     db.prepare(`
-      INSERT INTO reputation_endorsements (id, from_agent_id, to_agent_id, capability, strength)
+      INSERT INTO rep_endorsements (id, from_agent_id, to_agent_id, capability, strength)
       VALUES (?, ?, ?, ?, ?)
     `).run(uuid(), e.from, e.to, e.cap, e.strength);
   }
@@ -153,13 +153,13 @@ function calcGlobalScore(profile) {
 export function getReputation({ agent_id }) {
   if (!agent_id) throw new Error("agent_id is required");
 
-  let profile = db.prepare("SELECT * FROM reputation_profiles WHERE agent_id = ?").get(agent_id);
+  let profile = db.prepare("SELECT * FROM rep_reputation_profiles WHERE agent_id = ?").get(agent_id);
   if (!profile) {
     // Auto-create on first lookup
     db.prepare(`
-      INSERT OR IGNORE INTO reputation_profiles (agent_id) VALUES (?)
+      INSERT OR IGNORE INTO rep_reputation_profiles (agent_id) VALUES (?)
     `).run(agent_id);
-    profile = db.prepare("SELECT * FROM reputation_profiles WHERE agent_id = ?").get(agent_id);
+    profile = db.prepare("SELECT * FROM rep_reputation_profiles WHERE agent_id = ?").get(agent_id);
   }
 
   const total = profile.successful_outcomes + profile.failed_outcomes;
@@ -170,11 +170,11 @@ export function getReputation({ agent_id }) {
   const computedScore = calcGlobalScore(profile);
 
   const endorsements = db.prepare(`
-    SELECT * FROM reputation_endorsements WHERE to_agent_id = ? ORDER BY strength DESC LIMIT 10
+    SELECT * FROM rep_endorsements WHERE to_agent_id = ? ORDER BY strength DESC LIMIT 10
   `).all(agent_id);
 
   const recentEvents = db.prepare(`
-    SELECT * FROM reputation_events WHERE agent_id = ? ORDER BY timestamp DESC LIMIT 10
+    SELECT * FROM rep_reputation_events WHERE agent_id = ? ORDER BY timestamp DESC LIMIT 10
   `).all(agent_id);
 
   return {
@@ -217,11 +217,11 @@ export function recordEvent({ agent_id, event_type, impact, description }) {
   }
 
   // Auto-create profile if missing
-  db.prepare("INSERT OR IGNORE INTO reputation_profiles (agent_id) VALUES (?)").run(agent_id);
+  db.prepare("INSERT OR IGNORE INTO rep_reputation_profiles (agent_id) VALUES (?)").run(agent_id);
 
   const eventId = uuid();
   db.prepare(`
-    INSERT INTO reputation_events (id, agent_id, event_type, impact, description)
+    INSERT INTO rep_reputation_events (id, agent_id, event_type, impact, description)
     VALUES (?, ?, ?, ?, ?)
   `).run(eventId, agent_id, event_type, impact ?? 0, description || null);
 
@@ -229,7 +229,7 @@ export function recordEvent({ agent_id, event_type, impact, description }) {
   switch (event_type) {
     case "job_completed":
       db.prepare(`
-        UPDATE reputation_profiles
+        UPDATE rep_reputation_profiles
         SET successful_outcomes = successful_outcomes + 1,
             total_interactions = total_interactions + 1
         WHERE agent_id = ?
@@ -237,24 +237,24 @@ export function recordEvent({ agent_id, event_type, impact, description }) {
       break;
     case "dispute_lost":
       db.prepare(`
-        UPDATE reputation_profiles
+        UPDATE rep_reputation_profiles
         SET disputes_lost = disputes_lost + 1,
             failed_outcomes = failed_outcomes + 1
         WHERE agent_id = ?
       `).run(agent_id);
       break;
     case "dispute_won":
-      db.prepare("UPDATE reputation_profiles SET disputes_won = disputes_won + 1 WHERE agent_id = ?").run(agent_id);
+      db.prepare("UPDATE rep_reputation_profiles SET disputes_won = disputes_won + 1 WHERE agent_id = ?").run(agent_id);
       break;
     case "late_delivery":
-      db.prepare("UPDATE reputation_profiles SET failed_outcomes = failed_outcomes + 1 WHERE agent_id = ?").run(agent_id);
+      db.prepare("UPDATE rep_reputation_profiles SET failed_outcomes = failed_outcomes + 1 WHERE agent_id = ?").run(agent_id);
       break;
   }
 
   // Recalculate score
-  const profile = db.prepare("SELECT * FROM reputation_profiles WHERE agent_id = ?").get(agent_id);
+  const profile = db.prepare("SELECT * FROM rep_reputation_profiles WHERE agent_id = ?").get(agent_id);
   const newScore = calcGlobalScore(profile);
-  db.prepare("UPDATE reputation_profiles SET global_score = ? WHERE agent_id = ?").run(newScore, agent_id);
+  db.prepare("UPDATE rep_reputation_profiles SET global_score = ? WHERE agent_id = ?").run(newScore, agent_id);
 
   return {
     event_id: eventId,
@@ -276,17 +276,17 @@ export function endorseAgent({ from_agent_id, to_agent_id, capability, strength 
   if (from_agent_id === to_agent_id) throw new Error("Agents cannot endorse themselves");
   if (strength < 1 || strength > 5) throw new Error("strength must be 1-5");
 
-  db.prepare("INSERT OR IGNORE INTO reputation_profiles (agent_id) VALUES (?)").run(to_agent_id);
+  db.prepare("INSERT OR IGNORE INTO rep_reputation_profiles (agent_id) VALUES (?)").run(to_agent_id);
 
   const endorsementId = uuid();
   db.prepare(`
-    INSERT INTO reputation_endorsements (id, from_agent_id, to_agent_id, capability, strength, comment)
+    INSERT INTO rep_endorsements (id, from_agent_id, to_agent_id, capability, strength, comment)
     VALUES (?, ?, ?, ?, ?, ?)
   `).run(endorsementId, from_agent_id, to_agent_id, capability, strength, comment || null);
 
   // Give a small score boost for strong endorsements
   if (strength >= 4) {
-    db.prepare("UPDATE reputation_profiles SET global_score = MIN(100, global_score + 0.5) WHERE agent_id = ?").run(to_agent_id);
+    db.prepare("UPDATE rep_reputation_profiles SET global_score = MIN(100, global_score + 0.5) WHERE agent_id = ?").run(to_agent_id);
   }
 
   return {
@@ -307,27 +307,27 @@ export function stakeReputation({ agent_id, amount_usdc, lock_days = 30 }) {
   if (!agent_id) throw new Error("agent_id is required");
   if (!amount_usdc || amount_usdc <= 0) throw new Error("amount_usdc must be positive");
 
-  db.prepare("INSERT OR IGNORE INTO reputation_profiles (agent_id) VALUES (?)").run(agent_id);
+  db.prepare("INSERT OR IGNORE INTO rep_reputation_profiles (agent_id) VALUES (?)").run(agent_id);
 
   const lockedUntil = new Date();
   lockedUntil.setDate(lockedUntil.getDate() + lock_days);
 
   const stakeId = uuid();
   db.prepare(`
-    INSERT INTO reputation_stakes (id, agent_id, amount_usdc, locked_until)
+    INSERT INTO rep_stakes (id, agent_id, amount_usdc, locked_until)
     VALUES (?, ?, ?, ?)
   `).run(stakeId, agent_id, amount_usdc, lockedUntil.toISOString());
 
-  db.prepare("UPDATE reputation_profiles SET stake_usdc = stake_usdc + ? WHERE agent_id = ?").run(amount_usdc, agent_id);
+  db.prepare("UPDATE rep_reputation_profiles SET stake_usdc = stake_usdc + ? WHERE agent_id = ?").run(amount_usdc, agent_id);
 
   // Recalculate score with new stake
-  const profile = db.prepare("SELECT * FROM reputation_profiles WHERE agent_id = ?").get(agent_id);
+  const profile = db.prepare("SELECT * FROM rep_reputation_profiles WHERE agent_id = ?").get(agent_id);
   const newScore = calcGlobalScore(profile);
-  db.prepare("UPDATE reputation_profiles SET global_score = ? WHERE agent_id = ?").run(newScore, agent_id);
+  db.prepare("UPDATE rep_reputation_profiles SET global_score = ? WHERE agent_id = ?").run(newScore, agent_id);
 
   // Record event
   db.prepare(`
-    INSERT INTO reputation_events (id, agent_id, event_type, impact, description)
+    INSERT INTO rep_reputation_events (id, agent_id, event_type, impact, description)
     VALUES (?, ?, 'stake_deposited', ?, ?)
   `).run(uuid(), agent_id, amount_usdc * 0.1, `Staked ${amount_usdc} USDC for ${lock_days} days`);
 
@@ -356,30 +356,30 @@ export function verifyIdentity({ agent_id, identity_provider, verification_proof
     throw new Error(`identity_provider must be one of: ${validProviders.join(", ")}`);
   }
 
-  db.prepare("INSERT OR IGNORE INTO reputation_profiles (agent_id) VALUES (?)").run(agent_id);
+  db.prepare("INSERT OR IGNORE INTO rep_reputation_profiles (agent_id) VALUES (?)").run(agent_id);
 
   db.prepare(`
-    UPDATE reputation_profiles
+    UPDATE rep_reputation_profiles
     SET verified_identity = 1, identity_provider = ?
     WHERE agent_id = ?
   `).run(identity_provider, agent_id);
 
   // Add identity_verified badge
-  const profile = db.prepare("SELECT * FROM reputation_profiles WHERE agent_id = ?").get(agent_id);
+  const profile = db.prepare("SELECT * FROM rep_reputation_profiles WHERE agent_id = ?").get(agent_id);
   const badges = JSON.parse(profile.badges || "[]");
   if (!badges.includes("identity_verified")) {
     badges.push("identity_verified");
-    db.prepare("UPDATE reputation_profiles SET badges = ? WHERE agent_id = ?").run(JSON.stringify(badges), agent_id);
+    db.prepare("UPDATE rep_reputation_profiles SET badges = ? WHERE agent_id = ?").run(JSON.stringify(badges), agent_id);
   }
 
   // Record the event and bump score slightly
   db.prepare(`
-    INSERT INTO reputation_events (id, agent_id, event_type, impact, description)
+    INSERT INTO rep_reputation_events (id, agent_id, event_type, impact, description)
     VALUES (?, ?, 'identity_verified', 5, ?)
   `).run(uuid(), agent_id, `Identity verified via ${identity_provider}`);
 
   const newScore = Math.min(100, (profile.global_score || 50) + 2);
-  db.prepare("UPDATE reputation_profiles SET global_score = ? WHERE agent_id = ?").run(newScore, agent_id);
+  db.prepare("UPDATE rep_reputation_profiles SET global_score = ? WHERE agent_id = ?").run(newScore, agent_id);
 
   return {
     agent_id,
@@ -405,8 +405,8 @@ export function getLeaderboard({ category, limit = 10 } = {}) {
     // Filter by badge/capability
     profiles = db.prepare(`
       SELECT rp.*, COUNT(re.id) as endorsement_count
-      FROM reputation_profiles rp
-      LEFT JOIN reputation_endorsements re ON re.to_agent_id = rp.agent_id AND re.capability LIKE ?
+      FROM rep_reputation_profiles rp
+      LEFT JOIN rep_endorsements re ON re.to_agent_id = rp.agent_id AND re.capability LIKE ?
       GROUP BY rp.agent_id
       ORDER BY rp.global_score DESC
       LIMIT ?
@@ -414,8 +414,8 @@ export function getLeaderboard({ category, limit = 10 } = {}) {
   } else {
     profiles = db.prepare(`
       SELECT rp.*, COUNT(re.id) as endorsement_count
-      FROM reputation_profiles rp
-      LEFT JOIN reputation_endorsements re ON re.to_agent_id = rp.agent_id
+      FROM rep_reputation_profiles rp
+      LEFT JOIN rep_endorsements re ON re.to_agent_id = rp.agent_id
       GROUP BY rp.agent_id
       ORDER BY rp.global_score DESC
       LIMIT ?
@@ -436,7 +436,7 @@ export function getLeaderboard({ category, limit = 10 } = {}) {
       endorsement_count: p.endorsement_count || 0,
     })),
     category: category || "overall",
-    total_agents: db.prepare("SELECT COUNT(*) as c FROM reputation_profiles").get().c,
+    total_agents: db.prepare("SELECT COUNT(*) as c FROM rep_reputation_profiles").get().c,
     live_mode: LIVE_MODE,
   };
 }

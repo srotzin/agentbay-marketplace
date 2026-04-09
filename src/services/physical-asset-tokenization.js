@@ -275,8 +275,8 @@ function seedAssets() {
   const seedTx = db.transaction(() => {
     for (const asset of SEED_ASSETS) {
       insertAsset.run(asset);
-      insertProv.run(asset.id, "Asset tokenized", `Initial tokenization of ${asset.name}. ${asset.tokens_sold} tokens distributed at launch.`, 1);
-      insertProv.run(asset.id, "Custody confirmed", `Custody arrangement confirmed with ${asset.custody_provider}. Proof of ownership recorded on IPFS.`, 1);
+      insertProv.run(asset.id, "Asset tokenized", `Initial tokenization of ${asset.name}. ${asset.tokens_sold} tokens sold at launch.`);
+      insertProv.run(asset.id, "Custody confirmed", `Custody arrangement confirmed with ${asset.custody_provider}. Proof of ownership recorded on IPFS.`);
     }
   });
   seedTx();

@@ -15,7 +15,7 @@ const LIVE_MODE = !!process.env.ORCHESTRATION_API_KEY;
 
 // ─── Schema bootstrap ─────────────────────────────────────────────────────────
 db.exec(`
-  CREATE TABLE IF NOT EXISTS orchestration_workflows (
+  CREATE TABLE IF NOT EXISTS mas_workflows (
     id                   INTEGER PRIMARY KEY AUTOINCREMENT,
     orchestrator_agent_id TEXT NOT NULL,
     title                TEXT NOT NULL,
@@ -27,7 +27,7 @@ db.exec(`
     created_at           TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
-  CREATE TABLE IF NOT EXISTS workflow_tasks (
+  CREATE TABLE IF NOT EXISTS mas_workflow_tasks (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
     workflow_id      INTEGER NOT NULL,
     task_title       TEXT NOT NULL,
@@ -41,7 +41,7 @@ db.exec(`
     completed_at     TEXT
   );
 
-  CREATE TABLE IF NOT EXISTS agent_capabilities (
+  CREATE TABLE IF NOT EXISTS mas_agent_capabilities (
     agent_id         TEXT PRIMARY KEY,
     capabilities     TEXT NOT NULL DEFAULT '[]',
     hourly_rate_usdc REAL NOT NULL DEFAULT 1.0,
@@ -51,7 +51,7 @@ db.exec(`
     completed_tasks  INTEGER NOT NULL DEFAULT 0
   );
 
-  CREATE TABLE IF NOT EXISTS orchestration_payments (
+  CREATE TABLE IF NOT EXISTS mas_orchestration_payments (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     workflow_id INTEGER NOT NULL,
     task_id     INTEGER,
@@ -176,7 +176,7 @@ const SPECIALIST_AGENTS = [
 ];
 
 const insertAgent = db.prepare(`
-  INSERT OR IGNORE INTO agent_capabilities
+  INSERT OR IGNORE INTO mas_agent_capabilities
     (agent_id, capabilities, hourly_rate_usdc, per_task_rate_usdc, availability, reputation_score, completed_tasks)
   VALUES
     (@agent_id, @capabilities, @hourly_rate_usdc, @per_task_rate_usdc, @availability, @reputation_score, @completed_tasks)
@@ -221,7 +221,7 @@ async function collectPlatformFee(amount_usdc, context = {}) {
 function findBestAgent(capability_needed, budget_usdc) {
   const agents = db
     .prepare(
-      `SELECT * FROM agent_capabilities WHERE availability = 'available'`
+      `SELECT * FROM mas_agent_capabilities WHERE availability = 'available'`
     )
     .all();
 
@@ -312,7 +312,7 @@ export async function createWorkflow(args) {
 
   // Create workflow record
   const workflowResult = db.prepare(`
-    INSERT INTO orchestration_workflows
+    INSERT INTO mas_workflows
       (orchestrator_agent_id, title, objective, budget_usdc, status)
     VALUES (?, ?, ?, ?, 'planning')
   `).run(orchestrator_agent_id, title, objective, budget_usdc || 0);
@@ -332,7 +332,7 @@ export async function createWorkflow(args) {
       : parseFloat((task_budget * 0.8).toFixed(4));
 
     const taskResult = db.prepare(`
-      INSERT INTO workflow_tasks
+      INSERT INTO mas_workflow_tasks
         (workflow_id, task_title, assigned_agent_id, capability_needed, budget_usdc, cost_usdc, status)
       VALUES (?, ?, ?, ?, ?, ?, 'assigned')
     `).run(
@@ -358,7 +358,7 @@ export async function createWorkflow(args) {
 
   // Update workflow to ready
   db.prepare(
-    "UPDATE orchestration_workflows SET status = 'ready', spent_usdc = 0 WHERE id = ?"
+    "UPDATE mas_workflows SET status = 'ready', spent_usdc = 0 WHERE id = ?"
   ).run(workflow_id);
 
   const platform_fee_estimate = parseFloat(
@@ -394,7 +394,7 @@ export async function runWorkflow(args) {
   }
 
   const workflow = db
-    .prepare("SELECT * FROM orchestration_workflows WHERE id = ?")
+    .prepare("SELECT * FROM mas_workflows WHERE id = ?")
     .get(workflow_id);
 
   if (!workflow) throw new Error(`Workflow ${workflow_id} not found`);
@@ -409,11 +409,11 @@ export async function runWorkflow(args) {
   }
 
   db.prepare(
-    "UPDATE orchestration_workflows SET status = 'running' WHERE id = ?"
+    "UPDATE mas_workflows SET status = 'running' WHERE id = ?"
   ).run(workflow_id);
 
   const tasks = db
-    .prepare("SELECT * FROM workflow_tasks WHERE workflow_id = ? ORDER BY id ASC")
+    .prepare("SELECT * FROM mas_workflow_tasks WHERE workflow_id = ? ORDER BY id ASC")
     .all(workflow_id);
 
   const task_results = [];
@@ -427,7 +427,7 @@ export async function runWorkflow(args) {
     const result_text = simulateTaskResult(task.task_title, task.capability_needed);
 
     db.prepare(`
-      UPDATE workflow_tasks
+      UPDATE mas_workflow_tasks
       SET status = 'completed',
           result = ?,
           cost_usdc = ?,
@@ -444,7 +444,7 @@ export async function runWorkflow(args) {
       });
 
       db.prepare(`
-        INSERT INTO orchestration_payments
+        INSERT INTO mas_orchestration_payments
           (workflow_id, task_id, from_agent, to_agent, amount_usdc, fee_usdc)
         VALUES (?, ?, ?, ?, ?, ?)
       `).run(
@@ -458,7 +458,7 @@ export async function runWorkflow(args) {
 
       // Update agent stats
       db.prepare(`
-        UPDATE agent_capabilities
+        UPDATE mas_agent_capabilities
         SET completed_tasks = completed_tasks + 1
         WHERE agent_id = ?
       `).run(task.assigned_agent_id);
@@ -483,7 +483,7 @@ export async function runWorkflow(args) {
   const workflow_summary = `Workflow "${workflow.title}" completed. ${tasks.length} tasks executed across ${new Set(tasks.map((t) => t.capability_needed)).size} specialties.`;
 
   db.prepare(`
-    UPDATE orchestration_workflows
+    UPDATE mas_workflows
     SET status = 'completed',
         spent_usdc = ?,
         result = ?
@@ -522,17 +522,17 @@ export async function workflowStatus(args) {
   if (!workflow_id) throw new Error("workflow_id is required");
 
   const workflow = db
-    .prepare("SELECT * FROM orchestration_workflows WHERE id = ?")
+    .prepare("SELECT * FROM mas_workflows WHERE id = ?")
     .get(workflow_id);
 
   if (!workflow) throw new Error(`Workflow ${workflow_id} not found`);
 
   const tasks = db
-    .prepare("SELECT * FROM workflow_tasks WHERE workflow_id = ? ORDER BY id ASC")
+    .prepare("SELECT * FROM mas_workflow_tasks WHERE workflow_id = ? ORDER BY id ASC")
     .all(workflow_id);
 
   const payments = db
-    .prepare("SELECT * FROM orchestration_payments WHERE workflow_id = ? ORDER BY paid_at DESC")
+    .prepare("SELECT * FROM mas_orchestration_payments WHERE workflow_id = ? ORDER BY paid_at DESC")
     .all(workflow_id);
 
   const completed_tasks = tasks.filter((t) => t.status === "completed").length;
@@ -606,7 +606,7 @@ export async function hireAgent(args) {
 
   // Create a single-task workflow
   const workflowResult = db.prepare(`
-    INSERT INTO orchestration_workflows
+    INSERT INTO mas_workflows
       (orchestrator_agent_id, title, objective, budget_usdc, status)
     VALUES (?, ?, ?, ?, 'ready')
   `).run(
@@ -619,7 +619,7 @@ export async function hireAgent(args) {
   const workflow_id = workflowResult.lastInsertRowid;
 
   const taskResult = db.prepare(`
-    INSERT INTO workflow_tasks
+    INSERT INTO mas_workflow_tasks
       (workflow_id, task_title, assigned_agent_id, capability_needed, budget_usdc, cost_usdc, status)
     VALUES (?, ?, ?, ?, ?, ?, 'assigned')
   `).run(
@@ -641,7 +641,7 @@ export async function hireAgent(args) {
 
   return {
     hired_agent_id: bestAgent.agent_id,
-    agent_capabilities: JSON.parse(bestAgent.capabilities),
+    mas_agent_capabilities: JSON.parse(bestAgent.capabilities),
     agent_reputation: bestAgent.reputation_score,
     agent_completed_tasks: bestAgent.completed_tasks,
     agreed_price,
@@ -669,7 +669,7 @@ export async function completeTask(args) {
   }
 
   const task = db
-    .prepare("SELECT * FROM workflow_tasks WHERE id = ?")
+    .prepare("SELECT * FROM mas_workflow_tasks WHERE id = ?")
     .get(task_id);
 
   if (!task) throw new Error(`Task ${task_id} not found`);
@@ -678,7 +678,7 @@ export async function completeTask(args) {
   }
 
   const workflow = db
-    .prepare("SELECT * FROM orchestration_workflows WHERE id = ?")
+    .prepare("SELECT * FROM mas_workflows WHERE id = ?")
     .get(task.workflow_id);
 
   if (!workflow || workflow.orchestrator_agent_id !== orchestrator_agent_id) {
@@ -688,7 +688,7 @@ export async function completeTask(args) {
   const now = new Date().toISOString();
 
   db.prepare(`
-    UPDATE workflow_tasks
+    UPDATE mas_workflow_tasks
     SET status = 'completed',
         result = ?,
         completed_at = ?
@@ -703,7 +703,7 @@ export async function completeTask(args) {
 
   if (task.assigned_agent_id) {
     db.prepare(`
-      INSERT INTO orchestration_payments
+      INSERT INTO mas_orchestration_payments
         (workflow_id, task_id, from_agent, to_agent, amount_usdc, fee_usdc)
       VALUES (?, ?, ?, ?, ?, ?)
     `).run(
@@ -716,7 +716,7 @@ export async function completeTask(args) {
     );
 
     db.prepare(`
-      UPDATE agent_capabilities
+      UPDATE mas_agent_capabilities
       SET completed_tasks = completed_tasks + 1
       WHERE agent_id = ?
     `).run(task.assigned_agent_id);
@@ -724,7 +724,7 @@ export async function completeTask(args) {
 
   // Update workflow spent
   db.prepare(`
-    UPDATE orchestration_workflows
+    UPDATE mas_workflows
     SET spent_usdc = spent_usdc + ?
     WHERE id = ?
   `).run(task.cost_usdc, task.workflow_id);
@@ -732,13 +732,13 @@ export async function completeTask(args) {
   // Check if all workflow tasks are done
   const remainingTasks = db
     .prepare(
-      "SELECT COUNT(*) as cnt FROM workflow_tasks WHERE workflow_id = ? AND status != 'completed'"
+      "SELECT COUNT(*) as cnt FROM mas_workflow_tasks WHERE workflow_id = ? AND status != 'completed'"
     )
     .get(task.workflow_id);
 
   if (remainingTasks.cnt === 0) {
     db.prepare(
-      "UPDATE orchestration_workflows SET status = 'completed' WHERE id = ?"
+      "UPDATE mas_workflows SET status = 'completed' WHERE id = ?"
     ).run(task.workflow_id);
   }
 
@@ -754,7 +754,7 @@ export async function completeTask(args) {
     fee_collected: feeResult.collected,
     result,
     completed_at: now,
-    all_workflow_tasks_done: remainingTasks.cnt === 0,
+    all_mas_workflow_tasks_done: remainingTasks.cnt === 0,
   };
 }
 
@@ -770,7 +770,7 @@ export async function getOrchestrationDashboard() {
          SUM(CASE WHEN status = 'running'   THEN 1 ELSE 0 END) AS active_workflows,
          SUM(CASE WHEN status = 'planning' OR status = 'ready' THEN 1 ELSE 0 END) AS queued_workflows,
          SUM(spent_usdc)                                 AS total_volume_usdc
-       FROM orchestration_workflows`
+       FROM mas_workflows`
     )
     .get();
 
@@ -781,7 +781,7 @@ export async function getOrchestrationDashboard() {
          SUM(CASE WHEN availability = 'available' THEN 1 ELSE 0 END) AS available_agents,
          AVG(reputation_score)                                  AS avg_reputation,
          SUM(completed_tasks)                                   AS total_tasks_completed
-       FROM agent_capabilities`
+       FROM mas_agent_capabilities`
     )
     .get();
 
@@ -791,7 +791,7 @@ export async function getOrchestrationDashboard() {
          COUNT(*)       AS total_payments,
          SUM(amount_usdc) AS total_paid_usdc,
          SUM(fee_usdc)  AS total_fee_revenue_usdc
-       FROM orchestration_payments`
+       FROM mas_orchestration_payments`
     )
     .get();
 
@@ -802,7 +802,7 @@ export async function getOrchestrationDashboard() {
               COUNT(*) AS task_count,
               AVG(cost_usdc) AS avg_cost_usdc,
               SUM(cost_usdc) AS total_volume_usdc
-       FROM workflow_tasks
+       FROM mas_workflow_tasks
        WHERE status = 'completed'
        GROUP BY capability_needed
        ORDER BY task_count DESC
@@ -814,7 +814,7 @@ export async function getOrchestrationDashboard() {
   const top_agents = db
     .prepare(
       `SELECT agent_id, reputation_score, completed_tasks, per_task_rate_usdc, availability
-       FROM agent_capabilities
+       FROM mas_agent_capabilities
        ORDER BY reputation_score DESC, completed_tasks DESC
        LIMIT 5`
     )
@@ -822,7 +822,7 @@ export async function getOrchestrationDashboard() {
 
   // All available capabilities
   const all_capabilities = db
-    .prepare("SELECT agent_id, capabilities, availability FROM agent_capabilities")
+    .prepare("SELECT agent_id, capabilities, availability FROM mas_agent_capabilities")
     .all()
     .flatMap((a) => JSON.parse(a.capabilities));
 

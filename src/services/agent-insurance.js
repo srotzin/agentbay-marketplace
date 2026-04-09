@@ -55,11 +55,13 @@ db.exec(`
     resolved_at TEXT
   );
 
-  CREATE TABLE IF NOT EXISTS insurance_pool (
+  CREATE TABLE IF NOT EXISTS agent_insurance_pool (
     id INTEGER PRIMARY KEY DEFAULT 1,
-    total_premium_collected REAL DEFAULT 0,
-    total_claims_paid REAL DEFAULT 0,
-    reserve_usdc REAL DEFAULT 0,
+    total_premiums_collected_usd REAL DEFAULT 0,
+    total_claims_paid_usd REAL DEFAULT 0,
+    reserve_usd REAL DEFAULT 0,
+    surplus_usd REAL DEFAULT 0,
+    updated_at TEXT DEFAULT (datetime('now')),
     last_updated TEXT DEFAULT (datetime('now'))
   );
 
@@ -69,9 +71,9 @@ db.exec(`
 `);
 
 // Initialize pool if empty
-const poolRow = db.prepare("SELECT COUNT(*) as c FROM insurance_pool").get().c;
+const poolRow = db.prepare("SELECT COUNT(*) as c FROM agent_insurance_pool").get().c;
 if (poolRow === 0) {
-  db.prepare("INSERT INTO insurance_pool (id, total_premium_collected, total_claims_paid, reserve_usdc) VALUES (1, 0, 0, 10000)").run();
+  db.prepare("INSERT OR IGNORE INTO agent_insurance_pool (id) VALUES (1)").run();
 }
 
 // ─── Policy definitions ───────────────────────────────────────────────────────
@@ -178,9 +180,9 @@ export async function purchasePolicy(args) {
   const reserve_add = tier.premium_usdc - platformCut;
 
   db.prepare(`
-    UPDATE insurance_pool
-    SET total_premium_collected = total_premium_collected + ?,
-        reserve_usdc = reserve_usdc + ?,
+    UPDATE agent_insurance_pool
+    SET total_premiums_collected_usd = total_premiums_collected_usd + ?,
+        reserve_usd = reserve_usd + ?,
         last_updated = datetime('now')
   `).run(tier.premium_usdc, reserve_add);
 
@@ -269,7 +271,7 @@ export async function processClaim(args) {
   const policy = db.prepare("SELECT * FROM insurance_policies WHERE id = ?").get(claim.policy_id);
   if (!policy) throw new Error(`Policy ${claim.policy_id} not found.`);
 
-  const pool = db.prepare("SELECT * FROM insurance_pool WHERE id = 1").get();
+  const pool = db.prepare("SELECT * FROM agent_insurance_pool WHERE id = 1").get();
   const incident = INCIDENT_APPROVAL[claim.incident_type];
 
   // Auto-underwriting decision
@@ -287,8 +289,8 @@ export async function processClaim(args) {
     const raw_approve = Math.min(claim.amount_claimed - policy.deductible_usdc, max_payout);
     amount_approved = Math.max(0, parseFloat(raw_approve.toFixed(2)));
 
-    if (pool.reserve_usdc < amount_approved) {
-      amount_approved = parseFloat(pool.reserve_usdc.toFixed(2));
+    if (pool.reserve_usd < amount_approved) {
+      amount_approved = parseFloat(pool.reserve_usd.toFixed(2));
       decision_reason = `Approved (partial): pool reserve limited payout to $${amount_approved} USDC.`;
     } else {
       decision_reason = `Approved: $${amount_approved} USDC payout after deductible ($${policy.deductible_usdc}).`;
@@ -298,9 +300,9 @@ export async function processClaim(args) {
 
     // Update pool
     db.prepare(`
-      UPDATE insurance_pool
-      SET total_claims_paid = total_claims_paid + ?,
-          reserve_usdc = reserve_usdc - ?,
+      UPDATE agent_insurance_pool
+      SET total_claims_paid_usd = total_claims_paid_usd + ?,
+          reserve_usd = reserve_usd - ?,
           last_updated = datetime('now')
     `).run(amount_approved, amount_approved);
   }
@@ -373,7 +375,7 @@ export function getPolicyStatus(args) {
 // ─── 5. getInsuranceDashboard ─────────────────────────────────────────────────
 
 export function getInsuranceDashboard() {
-  const pool = db.prepare("SELECT * FROM insurance_pool WHERE id = 1").get();
+  const pool = db.prepare("SELECT * FROM agent_insurance_pool WHERE id = 1").get();
   const totalPolicies = db.prepare("SELECT COUNT(*) as n FROM insurance_policies").get().n;
   const activePolicies = db.prepare("SELECT COUNT(*) as n FROM insurance_policies WHERE status = 'active'").get().n;
   const totalClaims = db.prepare("SELECT COUNT(*) as n FROM insurance_claims").get().n;
@@ -393,17 +395,17 @@ export function getInsuranceDashboard() {
     FROM insurance_claims GROUP BY incident_type ORDER BY total_claimed DESC
   `).all();
 
-  const platformRevenue = parseFloat((pool.total_premium_collected * PLATFORM_FEE_PCT).toFixed(2));
+  const platformRevenue = parseFloat((pool.total_premiums_collected_usd * PLATFORM_FEE_PCT).toFixed(2));
 
   return {
     integration: "Agent Insurance (Phase 35)",
     signal: "EU AI Act liability up to 4% global revenue. $25M Arup deepfake loss. $3.2M manufacturing attack. Agents need coverage.",
     pool: {
-      total_premium_collected_usdc: parseFloat(pool.total_premium_collected.toFixed(2)),
-      total_claims_paid_usdc:       parseFloat(pool.total_claims_paid.toFixed(2)),
-      reserve_usdc:                 parseFloat(pool.reserve_usdc.toFixed(2)),
-      loss_ratio_pct:               pool.total_premium_collected > 0
-        ? parseFloat((pool.total_claims_paid / pool.total_premium_collected * 100).toFixed(1))
+      total_premiums_collected_usd_usdc: parseFloat(pool.total_premiums_collected_usd.toFixed(2)),
+      total_claims_paid_usd_usdc:       parseFloat(pool.total_claims_paid_usd.toFixed(2)),
+      reserve_usd:                 parseFloat(pool.reserve_usd.toFixed(2)),
+      loss_ratio_pct:               pool.total_premiums_collected_usd > 0
+        ? parseFloat((pool.total_claims_paid_usd / pool.total_premiums_collected_usd * 100).toFixed(1))
         : 0,
       platform_revenue_usdc:        platformRevenue,
     },
