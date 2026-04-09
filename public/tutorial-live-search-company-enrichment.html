@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Live Company Enrichment (Best-Effort) — HiveAgent Tutorial</title>
+  <meta name="description" content="A practical guide to enriching a company name into a usable, cited set of links using HiveAgent live tools with best-effort fallbacks." />
+  <link rel="canonical" href="/tutorial-live-search-company-enrichment.html" />
+  <style>
+    :root{--bg:#0b1020;--card:#111a33;--text:#e9eefc;--muted:#aab6df;--accent:#7aa2ff;--border:rgba(122,162,255,.22);--code:#0a0f1f;}
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;line-height:1.5;background:radial-gradient(900px 500px at 20% 0%, #14224a 0%, var(--bg) 45%);color:var(--text);}
+    header,main,footer{max-width:980px;margin:0 auto;padding:24px;}
+    header{padding-top:44px;padding-bottom:12px;}
+    h1{font-size:38px;letter-spacing:-.02em;margin:0 0 10px;}
+    p.lead{color:var(--muted);font-size:18px;margin:0 0 22px;}
+    .grid{display:grid;gap:14px;grid-template-columns:1fr;}
+    @media(min-width:900px){.grid{grid-template-columns:1fr 1fr;}}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));border:1px solid var(--border);border-radius:14px;padding:18px;}
+    h2{font-size:20px;margin:0 0 10px;}
+    h3{font-size:16px;margin:18px 0 8px;}
+    a{color:var(--accent);text-decoration:none;}
+    a:hover{text-decoration:underline;}
+    code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;}
+    pre{background:var(--code);border:1px solid rgba(255,255,255,.08);padding:14px;border-radius:12px;overflow:auto;}
+    .pill{display:inline-block;font-size:12px;color:var(--muted);border:1px solid rgba(255,255,255,.12);padding:3px 10px;border-radius:999px;margin-right:8px;}
+    .steps ol{margin:0 0 0 18px;padding:0;}
+    .steps li{margin:6px 0;color:var(--muted);}
+    .callout{border-left:3px solid var(--accent);padding:10px 12px;background:rgba(122,162,255,.08);border-radius:10px;color:var(--muted);}
+    footer{padding-top:14px;padding-bottom:44px;color:var(--muted);font-size:13px;}
+    .small{font-size:13px;color:var(--muted);}
+  </style>
+</head>
+<body>
+<header>
+  <div class="pill">Tutorial</div>
+  <div class="pill">Live Intelligence</div>
+  <div class="pill">Company Enrichment</div>
+  <h1>Live Company Enrichment (Best‑Effort)</h1>
+  <p class="lead">Turn an ambiguous company string (e.g., “Acme”, “Acme AI”, “Acme Inc.”) into a usable set of links and attributes using HiveAgent live tools with robust fallbacks.</p>
+</header>
+
+<main>
+  <div class="grid">
+    <section class="card">
+      <h2>What you get</h2>
+      <ul class="small">
+        <li>A canonical company identity (best‑effort): website domain + confidence</li>
+        <li>Useful public links: LinkedIn, Wikipedia, Crunchbase (if available)</li>
+        <li>Hints for follow‑on tooling: news, jobs, filings, funding, traffic</li>
+        <li>Citations suitable for agent outputs (links attached to each claim)</li>
+      </ul>
+      <div class="callout">
+        This pattern is designed for agent reliability: prefer deterministic sources when possible; when not possible, label results as best‑effort and provide links for verification.
+      </div>
+    </section>
+
+    <section class="card steps">
+      <h2>Recommended workflow</h2>
+      <ol>
+        <li><strong>Resolve</strong> company name → likely website + LinkedIn</li>
+        <li><strong>Validate</strong> identity with 1–2 independent sources</li>
+        <li><strong>Enrich</strong> with high‑value attributes (industry, HQ, size)</li>
+        <li><strong>Package</strong> as a small JSON object with citations</li>
+      </ol>
+      <p class="small">If you only do one step, do identity resolution + validation.</p>
+    </section>
+  </div>
+
+  <section class="card" style="margin-top:14px;">
+    <h2>Example: minimal identity resolution</h2>
+    <p class="small">Goal: convert an input name into a short, verifiable set of links. Output should be compact, with explicit uncertainty.</p>
+    <pre><code>{
+  "input": "Acme AI",
+  "resolved": {
+    "name": "Acme AI",
+    "website": {"url": "https://acme.ai", "confidence": 0.72},
+    "linkedin": {"company_url": "https://www.linkedin.com/company/acme-ai/", "confidence": 0.64}
+  },
+  "notes": [
+    "Best-effort match; verify company identity before using in downstream actions."
+  ]
+}</code></pre>
+  </section>
+
+  <section class="card" style="margin-top:14px;">
+    <h2>Tooling pattern (agent-side)</h2>
+    <h3>1) Try direct “company profile” lookup</h3>
+    <p class="small">If your stack includes a provider-specific company lookup, call it first. This is fast and typically returns a canonical LinkedIn company URL when it succeeds.</p>
+
+    <h3>2) Fall back to a general live search</h3>
+    <p class="small">When direct lookups fail (common for small companies, rebrands, or ambiguous names), run a web search for: website + LinkedIn + alternate spellings.</p>
+
+    <h3>3) Cross-check</h3>
+    <p class="small">Pick one additional confirmation source. Typical candidates: the company website footer, Wikipedia, or a reputable directory.</p>
+
+    <h3>4) Emit a compact “company card”</h3>
+    <p class="small">Store only the essentials and attach citations to each field so downstream agents can trust and trace.</p>
+
+    <pre><code>// Pseudocode: orchestrate live enrichment with best-effort fallbacks
+async function enrichCompany({ name }) {
+  const direct = await tools.live_linkedin_company({ query: name });
+  if (direct?.companyUrl) {
+    return {
+      name: direct.name ?? name,
+      linkedin: { url: direct.companyUrl, citations: [direct.citation] },
+      website: direct.website ? { url: direct.website, citations: [direct.citation] } : null,
+      confidence: 0.7,
+      notes: ["Direct lookup; still recommended to confirm identity."]
+    };
+  }
+
+  const search = await tools.live_web_search({ query: `${name} official website linkedin` });
+  const website = pickLikelyDomain(search.results);
+  const linkedin = pickLinkedInCompany(search.results);
+
+  return {
+    name,
+    website: website ? { url: website.url, citations: [website.citation] } : null,
+    linkedin: linkedin ? { url: linkedin.url, citations: [linkedin.citation] } : null,
+    confidence: 0.45,
+    notes: ["Search-based best-effort match; verify before use."]
+  };
+}</code></pre>
+
+    <div class="callout">
+      If your pipeline can only tolerate high precision, gate downstream actions (e.g., outreach, enrichment purchases) on a minimum confidence threshold and/or human review.
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:14px;">
+    <h2>Quality checklist</h2>
+    <ul class="small">
+      <li>Do LinkedIn company name and website domain correspond?</li>
+      <li>Is the company location consistent across sources?</li>
+      <li>Did you avoid mixing similarly named companies?</li>
+      <li>Did you label best-effort results and provide verification links?</li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  <div>Last updated: 2026-04-09.</div>
+  <div>Tip: pair this tutorial with <a href="/tutorial-building-mcp-service-modules.html">Building MCP service modules</a> and <a href="/tutorial-mcp-tools-phases.html">MCP tools phases</a>.</div>
+</footer>
+</body>
+</html>
