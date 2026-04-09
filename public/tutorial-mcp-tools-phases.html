@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How MCP tools phases work in AgentBay</title>
+  <meta name="description" content="A practical guide to how AgentBay organizes MCP tools into phases, how to add a new tool, and how to validate your changes." />
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; line-height: 1.55; margin: 0; }
+    header, main, footer { max-width: 980px; margin: 0 auto; padding: 20px; }
+    header { padding-top: 36px; }
+    h1 { font-size: 2rem; margin: 0 0 8px; }
+    .sub { opacity: 0.8; margin: 0 0 18px; }
+    nav a { margin-right: 14px; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    pre { padding: 14px; border: 1px solid rgba(127,127,127,0.25); border-radius: 8px; overflow: auto; }
+    .callout { border-left: 4px solid #6aa5ff; padding: 10px 12px; background: rgba(106,165,255,0.12); border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; margin: 14px 0; }
+    th, td { border: 1px solid rgba(127,127,127,0.25); padding: 8px 10px; vertical-align: top; }
+    th { text-align: left; }
+    .small { font-size: 0.95rem; opacity: 0.85; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>How MCP tools phases work in AgentBay</h1>
+    <p class="sub">A practical guide for adding and validating new tools without turning <code>mcp-tools.js</code> into a monolith.</p>
+    <nav class="small">
+      <a href="/">Home</a>
+      <a href="/docs">Docs</a>
+    </nav>
+  </header>
+
+  <main>
+    <section>
+      <h2>Why phases exist</h2>
+      <p>
+        As AgentBay grows, the MCP tools catalog keeps expanding. If every tool definition lived in a single file,
+        it would become hard to review, merge, and validate. Phases solve that by splitting the tool registry
+        into small, thematic files that are loaded in order.
+      </p>
+      <div class="callout">
+        <strong>Design goal:</strong> Keep each phase easy to understand and safe to change, while still producing
+        one complete exported tool list.
+      </div>
+    </section>
+
+    <section>
+      <h2>What a phase file looks like</h2>
+      <p>
+        Phase files typically live under <code>src/mcp-tools-phases/</code> and export an array of tool definitions.
+        Each tool definition follows a consistent schema (name, description, params, handler binding).
+      </p>
+      <pre><code>// src/mcp-tools-phases/phase-XX-*.js
+
+export default [
+  {
+    name: 'vertical__example__do_thing',
+    description: 'Does a thing for the Example vertical.',
+    inputSchema: {
+      type: 'object',
+      properties: { id: { type: 'string' } },
+      required: ['id']
+    },
+    handler: async ({ id }, ctx) =&gt; {
+      // ctx.services.exampleService.doThing(id)
+      return { ok: true };
+    }
+  }
+];</code></pre>
+    </section>
+
+    <section>
+      <h2>How phases get assembled</h2>
+      <p>
+        The top-level aggregator (commonly <code>src/mcp-tools.js</code>) imports the phase files and concatenates
+        them into one tool list. This keeps ordering explicit and makes it trivial to add or remove phases.
+      </p>
+      <pre><code>// src/mcp-tools.js
+
+import phase20 from './mcp-tools-phases/phase-20-hitl.js';
+import phase21 from './mcp-tools-phases/phase-21-new-verticals.js';
+
+export const tools = [
+  ...phase20,
+  ...phase21,
+];</code></pre>
+      <p class="small">
+        The exact filenames and phase numbers vary by repo; the pattern is: add a new phase file, then wire it into the
+        aggregator.
+      </p>
+    </section>
+
+    <section>
+      <h2>Recommended workflow to add a new tool</h2>
+      <ol>
+        <li>Create or pick a phase file that matches your vertical/theme.</li>
+        <li>Implement the service module under <code>src/services/</code> if the tool needs new backend logic.</li>
+        <li>Expose the tool in the phase file (bind the handler to the service).</li>
+        <li>Wire the phase into <code>src/mcp-tools.js</code> if it’s a new phase file.</li>
+        <li>Validate syntax and linting.</li>
+      </ol>
+      <table>
+        <thead>
+          <tr>
+            <th>Check</th>
+            <th>Command</th>
+            <th>What it catches</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Syntax (fast)</td>
+            <td><code>node --check path/to/file.js</code></td>
+            <td>Typos, missing brackets, invalid imports</td>
+          </tr>
+          <tr>
+            <td>Unit tests</td>
+            <td><code>npm test</code></td>
+            <td>Regression in behavior</td>
+          </tr>
+          <tr>
+            <td>Smoke run</td>
+            <td><code>node src/mcp-server.js</code></td>
+            <td>Runtime wiring issues (services not registered, missing env vars)</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Common pitfalls</h2>
+      <ul>
+        <li>
+          <strong>Tool name collisions:</strong> keep names namespaced (e.g., <code>vertical__domain__action</code>).
+        </li>
+        <li>
+          <strong>Overly large phase files:</strong> once a phase grows beyond a few dozen tools, split it.
+        </li>
+        <li>
+          <strong>Handlers doing too much:</strong> move business logic into a service module so the handler stays thin.
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Next steps</h2>
+      <p>
+        If you’re adding a new vertical, start by cloning the structure of an existing vertical service (for example,
+        a HITL-style module), then add a small phase file that exposes only a few high-value tools.
+      </p>
+    </section>
+  </main>
+
+  <footer class="small">
+    <p>Last updated: 2026-04-09</p>
+  </footer>
+</body>
+</html>
