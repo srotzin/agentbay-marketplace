@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Incident Status MCP Tools: Declare, Update, Resolve & Publish Status Pages</title>
+  <meta name="description" content="A practical guide to using HiveAgent MCP incident-status tools to declare incidents, post updates, resolve, and generate status page summaries." />
+  <style>
+    :root { --bg:#0b1020; --card:#0f1733; --text:#e7ecff; --muted:#a9b4e0; --link:#8db3ff; --border:#23305c; }
+    html, body { height:100%; }
+    body { margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; background: linear-gradient(180deg, var(--bg), #070a14); color: var(--text); }
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 42px 20px 70px; }
+    .hero { border:1px solid var(--border); background: radial-gradient(1200px 600px at 30% 20%, #15235a, var(--card)); padding: 26px 24px; border-radius: 16px; }
+    h1 { margin: 0 0 10px; font-size: 30px; line-height: 1.2; }
+    .sub { color: var(--muted); margin: 0; line-height: 1.6; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 18px; margin-top: 18px; }
+    @media (min-width: 900px) { .grid { grid-template-columns: 1.1fr 0.9fr; } }
+    .card { border:1px solid var(--border); background: rgba(8, 12, 26, 0.6); border-radius: 16px; padding: 18px 18px; }
+    h2 { margin: 0 0 10px; font-size: 18px; }
+    h3 { margin: 18px 0 8px; font-size: 15px; color: #d6ddff; }
+    pre { overflow:auto; padding: 14px; border-radius: 12px; border:1px solid var(--border); background: #060914; color: #dce3ff; font-size: 13px; line-height: 1.5; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    ul { margin: 8px 0 0 18px; color: var(--muted); }
+    li { margin: 6px 0; }
+    .callout { border-left: 3px solid #5577ff; padding: 10px 12px; background: rgba(85,119,255,0.08); border-radius: 10px; color: var(--muted); }
+    .small { font-size: 12px; color: var(--muted); }
+    .footer { margin-top: 26px; color: var(--muted); font-size: 12px; }
+    .pill { display:inline-block; padding: 3px 10px; border:1px solid var(--border); border-radius: 999px; background: rgba(255,255,255,0.03); color: var(--muted); font-size: 12px; margin-right: 8px; }
+    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono"; font-size: 12px; padding: 1px 6px; border:1px solid var(--border); border-radius: 6px; background: rgba(255,255,255,0.03); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div style="margin-bottom:10px">
+        <span class="pill">Tutorial</span>
+        <span class="pill">Incident Response</span>
+        <span class="pill">MCP Tools</span>
+      </div>
+      <h1>Incident Status MCP Tools: declare → update → resolve</h1>
+      <p class="sub">
+        This guide shows a repeatable workflow for production incident communication using HiveAgent MCP tools.
+        You will declare an incident, post structured updates, resolve it, and generate a status-page-ready summary.
+      </p>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Why this pattern works</h2>
+        <ul>
+          <li><b>Speed:</b> one tool to declare, one to post an update, one to resolve.</li>
+          <li><b>Consistency:</b> the tools enforce a minimal incident schema (impact, severity, timestamps, updates).</li>
+          <li><b>Multi-channel ready:</b> the same update objects can be used for a status page, Slack, email, or Zendesk macros.</li>
+        </ul>
+
+        <h3>Tools used (incident-status vertical)</h3>
+        <ul>
+          <li><code>incident_status_declare</code> — open an incident and set impact + severity</li>
+          <li><code>incident_status_update</code> — add timeline updates and mitigation notes</li>
+          <li><code>incident_status_resolve</code> — close incident with RCA summary</li>
+          <li><code>incident_status_summary</code> — produce a status-page-style narrative summary</li>
+        </ul>
+
+        <h3>Pre-flight checklist</h3>
+        <ul>
+          <li>Know the affected services/components (API, dashboard, payments, etc.).</li>
+          <li>Pick a severity scale and stick to it (SEV-1..SEV-4 or similar).</li>
+          <li>Decide your update cadence (e.g., every 15 minutes for SEV-1).</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Minimal incident schema</h2>
+        <p class="sub">These are the fields you should always include for reliable downstream formatting.</p>
+        <pre><code>{
+  "title": "API latency and elevated 5xx",
+  "severity": "SEV-1",
+  "impact": {
+    "user_impact": "Checkout timeouts for some users",
+    "regions": ["eu-west"],
+    "components": ["api", "checkout"]
+  },
+  "started_at": "2026-04-09T16:20:00Z"
+}</code></pre>
+        <div class="callout">
+          Tip: keep the title short and user-facing. Avoid internal hostnames or ticket IDs.
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <h2>Step-by-step workflow</h2>
+
+      <h3>1) Declare the incident</h3>
+      <pre><code>// Declare an incident
+{
+  "tool": "incident_status_declare",
+  "args": {
+    "title": "API latency and elevated 5xx",
+    "severity": "SEV-1",
+    "impact": {
+      "user_impact": "Checkout timeouts for some users",
+      "regions": ["eu-west"],
+      "components": ["api", "checkout"]
+    },
+    "started_at": "2026-04-09T16:20:00Z"
+  }
+}
+
+// Returns
+{
+  "incident_id": "inc_01H...",
+  "status": "open"
+}</code></pre>
+
+      <h3>2) Post a customer-facing update</h3>
+      <pre><code>{
+  "tool": "incident_status_update",
+  "args": {
+    "incident_id": "inc_01H...",
+    "message": "We are investigating elevated API latency and 5xx errors affecting checkout.",
+    "status": "investigating",
+    "timestamp": "2026-04-09T16:28:00Z"
+  }
+}</code></pre>
+
+      <h3>3) Add mitigation updates</h3>
+      <pre><code>{
+  "tool": "incident_status_update",
+  "args": {
+    "incident_id": "inc_01H...",
+    "message": "We have rolled back a configuration change and are monitoring recovery.",
+    "status": "mitigating",
+    "timestamp": "2026-04-09T16:42:00Z"
+  }
+}</code></pre>
+
+      <h3>4) Resolve with a short RCA summary</h3>
+      <pre><code>{
+  "tool": "incident_status_resolve",
+  "args": {
+    "incident_id": "inc_01H...",
+    "resolved_at": "2026-04-09T17:05:00Z",
+    "resolution": {
+      "summary": "A misconfigured rate limiter caused elevated 5xx errors. We rolled back to a safe configuration.",
+      "followups": [
+        "Add staged rollout + canary checks to rate limiter changes",
+        "Add alert for rate limiter saturation"
+      ]
+    }
+  }
+}</code></pre>
+
+      <h3>5) Generate a status-page narrative summary</h3>
+      <pre><code>{
+  "tool": "incident_status_summary",
+  "args": {
+    "incident_id": "inc_01H...",
+    "format": "status_page"
+  }
+}
+
+// Returns
+{
+  "summary": "Between 16:20 and 17:05 UTC, some users experienced checkout timeouts due to elevated API errors..."
+}</code></pre>
+
+      <div class="callout">
+        Operational rule of thumb: if you can’t say what changed since the last update, still post an update that says that (it reduces support load).
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <h2>Recommended templates</h2>
+
+      <h3>Investigating</h3>
+      <pre><code>We are investigating reports of [symptom].
+Impact: [who is affected, what they see].
+Next update: [time].</code></pre>
+
+      <h3>Identified / Mitigating</h3>
+      <pre><code>We identified [cause class] and are applying mitigation.
+Current status: [what changed since last update].
+ETA: [if known] or Next update: [time].</code></pre>
+
+      <h3>Resolved</h3>
+      <pre><code>The incident is resolved.
+Root cause: [short, user-safe explanation].
+Prevention: [1–3 follow-ups].</code></pre>
+
+      <p class="small">
+        Note: avoid sharing sensitive internal details in customer updates. Keep technical details for internal postmortems.
+      </p>
+    </div>
+
+    <div class="footer">
+      <div>Sources: This page is based on the HiveAgent MCP incident-status tools as implemented in the AgentBay repository.</div>
+      <div style="margin-top:6px">Next: see <a href="/tutorial-mcp-tools-phases.html">MCP tool phases guide</a> for how verticals are grouped and shipped.</div>
+    </div>
+  </div>
+</body>
+</html>
