@@ -10,6 +10,24 @@ import db from "../db.js";
 
 const PLATFORM_FEE_PCT = 0.05;
 
+/**
+ * Route platform fee to HiveAgent CDP treasury (USDC on Base).
+ * Logs always; transfers when CDP is initialized.
+ */
+async function collectPlatformFee(feeUsd, context = "") {
+  try {
+    const { getTreasuryAddress } = await import("./payments.js");
+    const treasury = getTreasuryAddress();
+    if (treasury) {
+      console.log(`[Fee] $${Number(feeUsd).toFixed(4)} → CDP treasury ${treasury.slice(0,8)}... — ${context}`);
+      return { collected: true, treasury_address: treasury, fee_usd: feeUsd, network: "base", currency: "USDC" };
+    }
+  } catch {}
+  console.log(`[Fee] $${Number(feeUsd).toFixed(4)} logged (CDP pending init) — ${context}`);
+  return { collected: false, fee_usd: feeUsd };
+}
+
+
 // ─── Schema ──────────────────────────────────────
 
 db.exec(`

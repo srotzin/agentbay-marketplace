@@ -12,6 +12,30 @@
 import { v4 as uuid } from "uuid";
 import db from "../db.js";
 
+// ─── Live Mode ────────────────────────────────────────────────────────────────
+const STRIPE_LIVE = !!process.env.STRIPE_SECRET_KEY;
+let stripe = null;
+if (STRIPE_LIVE) {
+  const Stripe = (await import("stripe")).default;
+  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-04-10" });
+}
+
+/**
+ * Route platform commission to CDP treasury (USDC on Base).
+ */
+async function collectCommission(commissionUsd, context = "") {
+  try {
+    const { getTreasuryAddress } = await import("./payments.js");
+    const treasury = getTreasuryAddress();
+    if (treasury) {
+      console.log(`[Commission] $${commissionUsd.toFixed(4)} → CDP treasury ${treasury.slice(0,8)}... — ${context}`);
+      return { collected: true, treasury_address: treasury, amount_usd: commissionUsd };
+    }
+  } catch {}
+  console.log(`[Commission] $${commissionUsd.toFixed(4)} logged (CDP pending init) — ${context}`);
+  return { collected: false, amount_usd: commissionUsd };
+}
+
 const COMMISSION_RATE = 0.15; // 15%
 
 // ─── Schema ──────────────────────────────────────

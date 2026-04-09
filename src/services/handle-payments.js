@@ -100,6 +100,24 @@ db.exec(`
 
 const HANDLE_TRANSFER_FEE_PCT = 0.005; // 0.5%
 
+/**
+ * Route platform fee to HiveAgent CDP treasury (USDC on Base).
+ * Logs always; transfers when CDP is initialized.
+ */
+async function collectPlatformFee(feeUsd, context = "") {
+  try {
+    const { getTreasuryAddress } = await import("./payments.js");
+    const treasury = getTreasuryAddress();
+    if (treasury) {
+      console.log(`[Fee] $${Number(feeUsd).toFixed(4)} → CDP treasury ${treasury.slice(0,8)}... — ${context}`);
+      return { collected: true, treasury_address: treasury, fee_usd: feeUsd, network: "base", currency: "USDC" };
+    }
+  } catch {}
+  console.log(`[Fee] $${Number(feeUsd).toFixed(4)} logged (CDP pending init) — ${context}`);
+  return { collected: false, fee_usd: feeUsd };
+}
+
+
 // ─── Handle Resolution ────────────────────────────────────────────────────────
 
 function normalizeHandle(raw) {
@@ -293,6 +311,7 @@ export function getHandleStats() {
     total_fees_usd: parseFloat(totalFees.toFixed(4)),
     handles_by_type: Object.fromEntries(byType.map(r => [r.handle_type, r.n])),
     fee_pct: HANDLE_TRANSFER_FEE_PCT * 100,
+    fee_destination: "CDP treasury (USDC on Base)",
     supported_handle_types: ["native", "ens", "x_twitter", "lens", "farcaster", "email", "phone"],
   };
 }

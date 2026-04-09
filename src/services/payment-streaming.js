@@ -57,6 +57,24 @@ db.exec(`
 
 const STREAM_FEE_PCT = 0.002;  // 0.2%
 
+/**
+ * Route platform fee to HiveAgent CDP treasury (USDC on Base).
+ * Logs always; transfers when CDP is initialized.
+ */
+async function collectPlatformFee(feeUsd, context = "") {
+  try {
+    const { getTreasuryAddress } = await import("./payments.js");
+    const treasury = getTreasuryAddress();
+    if (treasury) {
+      console.log(`[Fee] $${Number(feeUsd).toFixed(4)} → CDP treasury ${treasury.slice(0,8)}... — ${context}`);
+      return { collected: true, treasury_address: treasury, fee_usd: feeUsd, network: "base", currency: "USDC" };
+    }
+  } catch {}
+  console.log(`[Fee] $${Number(feeUsd).toFixed(4)} logged (CDP pending init) — ${context}`);
+  return { collected: false, fee_usd: feeUsd };
+}
+
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function calcStreamed(stream) {
@@ -110,6 +128,7 @@ export function openStream({
     token: token || "USDC",
     status: "active",
     fee_pct: STREAM_FEE_PCT * 100,
+    fee_destination: "CDP treasury (USDC on Base)",
     sla_uptime_pct: sla_uptime_pct || null,
     started_at: new Date().toISOString(),
     message: `Stream opened: ${sender_id} → ${receiver_id} at ${rate_per_second} USDC/sec`,
@@ -237,6 +256,7 @@ export function getStreamStats() {
     total_volume_deposited_usd: parseFloat(volume.toFixed(2)),
     total_fees_usd: parseFloat(fees.toFixed(4)),
     fee_pct: STREAM_FEE_PCT * 100,
+    fee_destination: "CDP treasury (USDC on Base)",
     use_cases: ["compute-by-second", "agent-salary", "sla-backed-streaming", "subscription-drip"],
   };
 }

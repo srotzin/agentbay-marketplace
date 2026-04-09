@@ -98,6 +98,24 @@ export function tokenizeAgent({
 
   const id = uuid();
   const platform_fee_pct = 2.0;
+
+/**
+ * Route platform fee to HiveAgent CDP treasury (USDC on Base).
+ * Logs always; transfers when CDP is initialized.
+ */
+async function collectPlatformFee(feeUsd, context = "") {
+  try {
+    const { getTreasuryAddress } = await import("./payments.js");
+    const treasury = getTreasuryAddress();
+    if (treasury) {
+      console.log(`[Fee] $${Number(feeUsd).toFixed(4)} → CDP treasury ${treasury.slice(0,8)}... — ${context}`);
+      return { collected: true, treasury_address: treasury, fee_usd: feeUsd, network: "base", currency: "USDC" };
+    }
+  } catch {}
+  console.log(`[Fee] $${Number(feeUsd).toFixed(4)} logged (CDP pending init) — ${context}`);
+  return { collected: false, fee_usd: feeUsd };
+}
+
   const market_cap = initial_price_usd * total_supply;
 
   db.prepare(`

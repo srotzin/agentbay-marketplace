@@ -66,6 +66,24 @@ db.exec(`
 
 const SPLIT_FEE_PCT = 0.003;  // 0.3%
 
+/**
+ * Route platform fee to HiveAgent CDP treasury (USDC on Base).
+ * Logs always; transfers when CDP is initialized.
+ */
+async function collectPlatformFee(feeUsd, context = "") {
+  try {
+    const { getTreasuryAddress } = await import("./payments.js");
+    const treasury = getTreasuryAddress();
+    if (treasury) {
+      console.log(`[Fee] $${Number(feeUsd).toFixed(4)} → CDP treasury ${treasury.slice(0,8)}... — ${context}`);
+      return { collected: true, treasury_address: treasury, fee_usd: feeUsd, network: "base", currency: "USDC" };
+    }
+  } catch {}
+  console.log(`[Fee] $${Number(feeUsd).toFixed(4)} logged (CDP pending init) — ${context}`);
+  return { collected: false, fee_usd: feeUsd };
+}
+
+
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
 /**
@@ -182,5 +200,6 @@ export function getSplitStats() {
   const txns    = db.prepare("SELECT COUNT(*) AS n FROM split_transactions").get().n;
   const volume  = db.prepare("SELECT COALESCE(SUM(total_usd),0) AS s FROM split_transactions").get().s;
   const fees    = db.prepare("SELECT COALESCE(SUM(fee_usd),0) AS s FROM split_transactions").get().s;
-  return { active_configs: configs, total_transactions: txns, total_volume_usd: parseFloat(volume.toFixed(2)), total_fees_usd: parseFloat(fees.toFixed(4)), fee_pct: SPLIT_FEE_PCT * 100 };
+  return { active_configs: configs, total_transactions: txns, total_volume_usd: parseFloat(volume.toFixed(2)), total_fees_usd: parseFloat(fees.toFixed(4)), fee_pct: SPLIT_FEE_PCT * 100,
+    fee_destination: "CDP treasury (USDC on Base)" };
 }

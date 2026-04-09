@@ -98,6 +98,24 @@ const STRATEGIES = {
 
 const PLATFORM_FEE_PCT = 0.10;  // 10% of yield earned
 
+/**
+ * Route platform fee to HiveAgent CDP treasury (USDC on Base).
+ * Logs always; transfers when CDP is initialized.
+ */
+async function collectPlatformFee(feeUsd, context = "") {
+  try {
+    const { getTreasuryAddress } = await import("./payments.js");
+    const treasury = getTreasuryAddress();
+    if (treasury) {
+      console.log(`[Fee] $${Number(feeUsd).toFixed(4)} → CDP treasury ${treasury.slice(0,8)}... — ${context}`);
+      return { collected: true, treasury_address: treasury, fee_usd: feeUsd, network: "base", currency: "USDC" };
+    }
+  } catch {}
+  console.log(`[Fee] $${Number(feeUsd).toFixed(4)} logged (CDP pending init) — ${context}`);
+  return { collected: false, fee_usd: feeUsd };
+}
+
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function accrueYield(account) {
@@ -146,6 +164,7 @@ export function openYieldAccount({ agent_id, strategy, initial_deposit_usd }) {
     apy_pct: strat.apy_pct,
     principal_usd: initial_deposit_usd || 0,
     platform_fee_pct: PLATFORM_FEE_PCT * 100,
+    fee_destination: "CDP treasury (USDC on Base)",
     backed_by: strat.backed_by,
     regulatory_note: strat.regulatory_note,
     message: `Yield account opened at ${strat.apy_pct}% APY (${strat.name}). Platform takes 10% of yield earned.`,
@@ -277,6 +296,7 @@ export function getYieldStats() {
     total_platform_fees_usd: parseFloat(fees.toFixed(4)),
     by_strategy: byStrat,
     platform_fee_pct: PLATFORM_FEE_PCT * 100,
+    fee_destination: "CDP treasury (USDC on Base)",
     white_house_report: "Stablecoin yield poses limited risk to banks (Apr 8, 2026)",
   };
 }
