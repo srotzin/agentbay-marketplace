@@ -157,23 +157,71 @@ async function bvnkRequest(method, path, body) {
 
   try {
     const url = `${BVNK_BASE_URL}${path}`;
+
+    // BVNK uses Hawk authentication (HMAC-based).
+    // We generate the Hawk Authorization header manually here.
+    // Hawk spec: https://github.com/mozilla/hawk
+    const hawkId     = process.env.BVNK_API_KEY;
+    const hawkSecret = process.env.BVNK_API_SECRET;
+    const ts         = Math.floor(Date.now() / 1000);
+    const nonce       = Math.random().toString(36).slice(2, 10);
+    const parsedUrl   = new URL(url);
+    const host        = parsedUrl.hostname;
+    const port        = parsedUrl.port || (parsedUrl.protocol === "https:" ? "443" : "80");
+    const resource    = parsedUrl.pathname + (parsedUrl.search || "");
+    const payloadHash = body
+      ? (() => {
+          const { createHash } = await import("crypto").catch(() => ({ createHash: () => ({ update: () => ({ digest: () => "" }) }) }));
+          return createHash("sha256").update("hawk.1.payload\napplication/json\n" + JSON.stringify(body) + "\n").digest("base64");
+        })()
+      : "";
+
+    const macBase = [
+      "hawk.1.header",
+      ts,
+      nonce,
+      method.toUpperCase(),
+      resource,
+      host,
+      port,
+      payloadHash,
+      "",
+      "",
+    ].join("\n") + "\n";
+
+    const { createHmac } = await import("crypto");
+    const mac = createHmac("sha256", hawkSecret).update(macBase).digest("base64");
+
+    const hawkHeader = `Hawk id="${hawkId}", ts="${ts}", nonce="${nonce}", mac="${mac}"${payloadHash ? `, hash="${payloadHash}"` : ""}`;
+
     const opts = {
       method,
       headers: {
         "Content-Type": "application/json",
-        // Hawk auth — simplified bearer fallback for initial integration
-        // Full Hawk signing: https://github.com/hueniverse/hawk
-        "Authorization": `Bearer ${process.env.BVNK_API_KEY}`,
-        "X-Merchant-Id": process.env.BVNK_MERCHANT_ID || "",
+        "Accept": "application/json",
+        "Authorization": hawkHeader,
       },
     };
+    if (process.env.BVNK_MERCHANT_ID) opts.headers["X-Merchant-Id"] = process.env.BVNK_MERCHANT_ID;
     if (body) opts.body = JSON.stringify(body);
-    const res  = await fetch(url, opts);
-    const data = await res.json();
-    if (!res.ok) throw new Error(`BVNK API ${res.status}: ${JSON.stringify(data)}`);
+
+    const res = await fetch(url, opts);
+
+    // Safe JSON parsing — BVNK may return empty body on some responses
+    const text = await res.text();
+    let data = {};
+    if (text && text.trim().startsWith("{") || text.trim().startsWith("[")) {
+      try { data = JSON.parse(text); } catch { data = { raw: text }; }
+    } else if (text) {
+      data = { raw: text };
+    }
+
+    if (!res.ok) {
+      throw new Error(`BVNK API ${res.status}: ${JSON.stringify(data)}`);
+    }
     return data;
   } catch (e) {
-    console.error(`BVNK API error: ${e.message}`);
+    console.error(`[BVNK] API error: ${e.message}`);
     throw e;
   }
 }
