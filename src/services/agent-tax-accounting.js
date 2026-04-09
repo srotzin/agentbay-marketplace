@@ -51,6 +51,7 @@ try {
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS accounting_ledger (
     id              TEXT PRIMARY KEY,
@@ -94,6 +95,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_ledger_year      ON accounting_ledger(agent_id, tax_year);
   CREATE INDEX IF NOT EXISTS idx_tax_sum_agent    ON tax_summaries(agent_id, tax_year);
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

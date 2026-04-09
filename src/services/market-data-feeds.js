@@ -17,6 +17,7 @@ const COINGECKO_BASE = "https://api.coingecko.com/api/v3";
 
 // ─── Schema ──────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS market_data_cache (
     symbol TEXT PRIMARY KEY,
@@ -50,6 +51,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_alerts_agent ON price_alerts(agent_id);
   CREATE INDEX IF NOT EXISTS idx_alerts_symbol ON price_alerts(symbol);
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Seed realistic market data ───────────────────────────────────────────────
 

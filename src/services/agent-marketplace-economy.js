@@ -44,6 +44,7 @@ async function collectPlatformFee(feeUsdc, context = "") {
 
 // ─── Schema Initialization ────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS marketplace_listings (
     id             TEXT PRIMARY KEY,
@@ -120,6 +121,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_mkt_txns_seller          ON marketplace_transactions(seller_agent_id);
   CREATE INDEX IF NOT EXISTS idx_mkt_reviews_reviewed     ON marketplace_reviews(reviewed_agent_id);
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Seed 10 Diverse Listings ─────────────────────────────────────────────────
 

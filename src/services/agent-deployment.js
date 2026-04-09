@@ -32,6 +32,7 @@ try {
 
 // ─── Schema ──────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS agent_deployments (
     id TEXT PRIMARY KEY,
@@ -83,6 +84,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_logs_agent ON deployment_logs(agent_id);
   CREATE INDEX IF NOT EXISTS idx_slas_agent ON agent_slas(agent_id);
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Platform fee ─────────────────────────────────────────────────────────────
 

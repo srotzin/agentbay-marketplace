@@ -25,6 +25,7 @@ const MODERATION_FEE_USD = 0.001; // $0.001 per check
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS moderation_results (
     id              TEXT PRIMARY KEY,
@@ -66,6 +67,7 @@ db.exec(`
     FOREIGN KEY (result_id) REFERENCES moderation_results(id)
   );
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Seed Default Policies ────────────────────────────────────────────────────
 

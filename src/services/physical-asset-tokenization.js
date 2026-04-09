@@ -32,6 +32,7 @@ const RENTAL_FEE_PCT    = 0.10;   // 10%
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS physical_assets (
     id                   TEXT PRIMARY KEY,
@@ -95,6 +96,7 @@ db.exec(`
     timestamp   TEXT DEFAULT (datetime('now'))
   );
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Platform fee ─────────────────────────────────────────────────────────────
 

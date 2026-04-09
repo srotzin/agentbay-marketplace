@@ -25,6 +25,7 @@ const PLATFORM_FEE_PCT = 0.02; // 2% on every release
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS smart_escrows (
     id                    TEXT PRIMARY KEY,
@@ -83,6 +84,7 @@ db.exec(`
     FOREIGN KEY (escrow_id) REFERENCES smart_escrows(id)
   );
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

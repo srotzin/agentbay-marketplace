@@ -45,6 +45,7 @@ const PLATFORM_FEE_RATE = 0.001; // 0.1% on AP2 payment volume
 
 // ─── DB Schema ────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS ap2_wallets (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -90,6 +91,7 @@ db.exec(`
     updated_at TEXT DEFAULT (datetime('now'))
   );
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

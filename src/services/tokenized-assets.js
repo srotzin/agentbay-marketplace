@@ -20,6 +20,7 @@ const PLATFORM_FEE_PCT = 0.0025; // 0.25% on buy/sell
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS tokenized_assets (
     id                   TEXT PRIMARY KEY,
@@ -67,6 +68,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_agent_holdings_asset   ON agent_holdings(asset_id);
   CREATE INDEX IF NOT EXISTS idx_asset_txns_agent       ON asset_transactions(agent_id);
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Seed Assets ──────────────────────────────────────────────────────────────
 

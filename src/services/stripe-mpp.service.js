@@ -30,6 +30,7 @@ const db = new Database(DB_PATH);
 
 const LIVE_MODE = !!process.env.STRIPE_SECRET_KEY;
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS mpp_sessions (
     id TEXT PRIMARY KEY,
@@ -54,6 +55,7 @@ db.exec(`
     paid_at TEXT DEFAULT (datetime('now'))
   );
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 function uid(p="") { return `${p}${crypto.randomBytes(6).toString("hex")}`; }
 

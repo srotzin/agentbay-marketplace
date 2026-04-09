@@ -35,6 +35,7 @@ const A2A_BASE = "https://a2a.googleapis.com/v1";
 
 // ─── DB Schema ────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS a2a_agents (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -64,6 +65,7 @@ db.exec(`
     completed_at TEXT
   );
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Seed Agents ──────────────────────────────────────────────────────────────
 

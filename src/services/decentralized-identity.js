@@ -30,6 +30,7 @@ try {
 
 // ─── Schema ──────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS did_identities (
     agent_id TEXT PRIMARY KEY,
@@ -77,6 +78,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_vc_type ON verifiable_credentials(credential_type);
   CREATE INDEX IF NOT EXISTS idx_zk_agent ON zk_proofs(agent_id);
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 

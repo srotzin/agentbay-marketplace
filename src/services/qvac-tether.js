@@ -29,6 +29,7 @@ const LIVE_MODE = !!process.env.QVAC_API_KEY;
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS qvac_agents (
     id             TEXT PRIMARY KEY,
@@ -80,6 +81,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_qvac_sessions_agent   ON qvac_sessions(qvac_agent_id);
   CREATE INDEX IF NOT EXISTS idx_qvac_payments_from    ON qvac_payments(from_qvac_agent);
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Seed QVAC-compatible models ──────────────────────────────────────────────
 

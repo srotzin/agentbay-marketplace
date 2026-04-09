@@ -41,6 +41,7 @@ try {
 
 // ─── Schema ──────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS credit_profiles (
     agent_id TEXT PRIMARY KEY,
@@ -80,6 +81,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_credit_payments_agent ON credit_payments(agent_id);
   CREATE INDEX IF NOT EXISTS idx_credit_payments_loan ON credit_payments(loan_id);
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Credit tiers ─────────────────────────────────────────────────────────────
 

@@ -48,6 +48,7 @@ async function collectPlatformFee(feeUsd, context = "") {
 
 // ─── Schema ──────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS billing_outcome_contracts (
     id TEXT PRIMARY KEY,
@@ -95,6 +96,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_oe_contract ON billing_outcome_events(contract_id);
   CREATE INDEX IF NOT EXISTS idx_oe_status ON billing_outcome_events(status);
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Seed sample contracts ────────────────────────────────────────────────────
 

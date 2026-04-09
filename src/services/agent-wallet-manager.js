@@ -30,6 +30,7 @@ try {
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS managed_wallets (
     id            TEXT PRIMARY KEY,
@@ -86,6 +87,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_wallet_txns_agent     ON wallet_transactions(agent_id);
   CREATE INDEX IF NOT EXISTS idx_wallet_alerts_wallet  ON wallet_alerts(wallet_id);
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Chain config ─────────────────────────────────────────────────────────────
 

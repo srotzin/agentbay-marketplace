@@ -23,6 +23,7 @@ const GPT4O_COST_PER_1K = 0.005; // baseline for savings calculation
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS llm_routes (
     id                    TEXT PRIMARY KEY,
@@ -57,6 +58,7 @@ db.exec(`
     available               INTEGER DEFAULT 1
   );
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Seed Model Stats ─────────────────────────────────────────────────────────
 

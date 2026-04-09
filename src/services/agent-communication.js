@@ -31,6 +31,7 @@ try {
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS agent_messages (
     id             TEXT PRIMARY KEY,
@@ -87,6 +88,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_negotiations_init ON agent_negotiations(initiator_agent_id);
   CREATE INDEX IF NOT EXISTS idx_negotiations_cp   ON agent_negotiations(counterparty_agent_id);
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Agent directory (simulated registered agents) ────────────────────────────
 

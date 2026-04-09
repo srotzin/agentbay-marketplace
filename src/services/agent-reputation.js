@@ -17,6 +17,7 @@ const LIVE_MODE = !!process.env.REPUTATION_API_KEY;
 
 // ─── Schema ──────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS rep_reputation_profiles (
     agent_id TEXT PRIMARY KEY,
@@ -67,6 +68,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_re_agent ON rep_reputation_events(agent_id);
   CREATE INDEX IF NOT EXISTS idx_rend_to ON rep_endorsements(to_agent_id);
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Seed 15 agents with varied scores ───────────────────────────────────────
 

@@ -21,6 +21,7 @@ const PLATFORM_FEE_PCT = 0.15; // 15% on all purchases and streams
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS data_marketplace_listings (
     id                TEXT PRIMARY KEY,
@@ -71,6 +72,7 @@ db.exec(`
     total_paid_usdc           REAL DEFAULT 0
   );
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Seed Listings ────────────────────────────────────────────────────────────
 

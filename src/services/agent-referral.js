@@ -27,6 +27,7 @@ const BASE_JOIN_URL = "https://hiveagentiq.com/join?ref=";
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS referral_codes (
     code           TEXT PRIMARY KEY,
@@ -66,6 +67,7 @@ db.exec(`
     created_at      TEXT DEFAULT (datetime('now'))
   );
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Seed referral tiers ───────────────────────────────────────────────────────
 

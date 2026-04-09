@@ -45,6 +45,7 @@ const PLATFORM_FEE_RATE = 0.0015; // 0.15%
 
 // ─── DB Schema ────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS paypal_orders (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -84,6 +85,7 @@ db.exec(`
     registered_at TEXT DEFAULT (datetime('now'))
   );
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Seed Merchants ───────────────────────────────────────────────────────────
 

@@ -26,6 +26,7 @@ const PLATFORM_FEE_PCT = 0.20; // 20% of premiums
 
 // ─── Schema ──────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS insurance_policies (
     id TEXT PRIMARY KEY,
@@ -69,6 +70,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_claims_policy ON insurance_claims(policy_id);
   CREATE INDEX IF NOT EXISTS idx_claims_agent ON insurance_claims(agent_id);
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // Initialize pool if empty
 const poolRow = db.prepare("SELECT COUNT(*) as c FROM agent_insurance_pool").get().c;

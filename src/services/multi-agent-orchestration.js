@@ -14,6 +14,7 @@ import db from "../db.js";
 const LIVE_MODE = !!process.env.ORCHESTRATION_API_KEY;
 
 // ─── Schema bootstrap ─────────────────────────────────────────────────────────
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS mas_workflows (
     id                   INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -62,6 +63,7 @@ db.exec(`
     paid_at     TEXT NOT NULL DEFAULT (datetime('now'))
   );
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Seed specialist agents ───────────────────────────────────────────────────
 const SPECIALIST_AGENTS = [

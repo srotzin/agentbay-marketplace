@@ -21,6 +21,7 @@ const REBALANCE_THRESHOLD  = 0.5;  // Rebalance if >0.5% APY improvement availab
 
 // ─── Schema ──────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS yield_positions (
     id TEXT PRIMARY KEY,
@@ -67,6 +68,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_yield_positions_status ON yield_positions(status);
   CREATE INDEX IF NOT EXISTS idx_rebalance_agent ON rebalance_history(agent_id);
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Seed protocols ───────────────────────────────────────────────────────────
 

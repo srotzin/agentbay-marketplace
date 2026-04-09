@@ -31,6 +31,7 @@ try {
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS compliance_profiles (
     agent_id               TEXT PRIMARY KEY,
@@ -79,6 +80,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_comp_reports_agent ON compliance_reports(agent_id);
   CREATE INDEX IF NOT EXISTS idx_comp_incidents     ON regulatory_incidents(agent_id);
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Compliance rule definitions ──────────────────────────────────────────────
 

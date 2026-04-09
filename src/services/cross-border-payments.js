@@ -22,6 +22,7 @@ const PLATFORM_FEE_PCT = 0.005; // 0.5% platform fee per payment
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS cross_border_payments (
     id                  TEXT PRIMARY KEY,
@@ -79,6 +80,7 @@ db.exec(`
     created_at      TEXT DEFAULT (datetime('now'))
   );
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Seed Corridors ───────────────────────────────────────────────────────────
 

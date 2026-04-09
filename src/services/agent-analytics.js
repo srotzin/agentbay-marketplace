@@ -21,6 +21,7 @@ const LIVE_MODE = !!process.env.ANALYTICS_API_KEY;
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS analytics_events (
     id         TEXT PRIMARY KEY,
@@ -69,6 +70,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_revenue_attr_agent     ON revenue_attribution(agent_id);
   CREATE INDEX IF NOT EXISTS idx_perf_bench_agent       ON performance_benchmarks(agent_id);
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Revenue sources ──────────────────────────────────────────────────────────
 

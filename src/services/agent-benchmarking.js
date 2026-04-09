@@ -24,6 +24,7 @@ const PLATFORM_FEE_PCT = 0.15; // 15% platform fee on paid benchmarks
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS agent_benchmarks (
     id                TEXT PRIMARY KEY,
@@ -59,6 +60,7 @@ db.exec(`
     last_updated      TEXT DEFAULT (datetime('now'))
   );
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

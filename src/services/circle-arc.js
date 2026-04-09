@@ -34,6 +34,7 @@ const LIVE_MODE = !!(process.env.ARC_RPC_URL && process.env.ARC_PRIVATE_KEY);
 const ARC_TESTNET_RPC = "https://rpc.arc-testnet.circle.com";
 const ARC_EXPLORER  = "https://explorer.arc-testnet.circle.com";
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS arc_wallets (
     id TEXT PRIMARY KEY,
@@ -68,6 +69,7 @@ db.exec(`
     deployed_at TEXT DEFAULT (datetime('now'))
   );
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 function uid(p="") { return `${p}${crypto.randomBytes(6).toString("hex")}`; }
 function simAddress() { return "0x" + crypto.randomBytes(20).toString("hex"); }

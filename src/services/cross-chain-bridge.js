@@ -20,6 +20,7 @@ const LIVE_MODE = !!(process.env.LIFI_API_KEY || process.env.ACROSS_API_KEY);
 
 // ─── Schema ──────────────────────────────────────────────────────────────────
 
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS bridge_routes (
     id TEXT PRIMARY KEY,
@@ -51,6 +52,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_bridge_routes_agent ON bridge_routes(agent_id);
   CREATE INDEX IF NOT EXISTS idx_bridge_routes_status ON bridge_routes(status);
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Seed protocols ───────────────────────────────────────────────────────────
 

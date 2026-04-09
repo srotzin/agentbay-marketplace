@@ -15,6 +15,7 @@ import db from "../db.js";
 const LIVE_MODE = !!(process.env.OPENAI_API_KEY || process.env.ANTHROPIC_API_KEY);
 
 // ─── Schema bootstrap ─────────────────────────────────────────────────────────
+try {
 db.exec(`
   CREATE TABLE IF NOT EXISTS model_accounts (
     agent_id       TEXT PRIMARY KEY,
@@ -58,6 +59,7 @@ db.exec(`
     UNIQUE(provider, model)
   );
 `);
+} catch(e) { console.warn("[DB Schema]", e.message); }
 
 // ─── Seed model pricing ───────────────────────────────────────────────────────
 const PRICING_SEED = [
