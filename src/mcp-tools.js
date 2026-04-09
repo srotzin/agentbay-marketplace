@@ -85,6 +85,7 @@ import { phase21Tools, handlePhase21Tool } from "./mcp-tools-phase21.js";
 import { phase22Tools, handlePhase22Tool } from "./mcp-tools-phase22.js";
 import { phase24Tools, handlePhase24Tool } from "./mcp-tools-phase24.js";
 import { welcomeTools, handleWelcomeTool } from "./mcp-tools-welcome.js";
+import { phase25Tools, handlePhase25Tool } from "./mcp-tools-phase25.js";
 // Pharma Transactions (Rx, Claims, DSCSA, Global Pricing, Narcotics)
 import { pharmaTxTools, handlePharmaTxTool } from "./mcp-tools-pharma-tx.js";
 // A2A Tokenization Rails — ATS-1 token standard, multi-chain settlement, protocol router
@@ -1031,7 +1032,7 @@ export function handleBrokerTool(name, args = {}) {
   }
 }
 
-export const tools = [...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools];
+export const tools = [...welcomeTools, ...phase25Tools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
