@@ -96,6 +96,7 @@ import { phase46Tools, handlePhase46Tool } from "./mcp-tools-phase46.js";
 import { phase47Tools, handlePhase47Tool } from "./mcp-tools-phase47.js";
 import { phase4849Tools, handlePhase4849Tool } from "./mcp-tools-phase48-49.js";
 import { phase48Tools, handlePhase48Tool } from "./mcp-tools-phase48.js";
+import { phase4951Tools, handlePhase4951Tool } from "./mcp-tools-phase49-51.js";
 import { welcomeTools, handleWelcomeTool } from "./mcp-tools-welcome.js";
 // Pharma Transactions (Rx, Claims, DSCSA, Global Pricing, Narcotics)
 import { pharmaTxTools, handlePharmaTxTool } from "./mcp-tools-pharma-tx.js";
@@ -1043,7 +1044,7 @@ export function handleBrokerTool(name, args = {}) {
   }
 }
 
-export const tools = [...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools];
+export const tools = [...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1790,6 +1791,27 @@ export async function handleTool(name, args) {
     case "qvac_compatible_models":        return await handlePhase48Tool(name, args);
     case "qvac_integration_guide":        return await handlePhase48Tool(name, args);
     case "qvac_status":                   return await handlePhase48Tool(name, args);
+
+    // Phase 49 — Agent Benchmarking
+    case "benchmark_run":               return await handlePhase4951Tool(name, args);
+    case "benchmark_compare_agents":    return await handlePhase4951Tool(name, args);
+    case "benchmark_leaderboard":       return await handlePhase4951Tool(name, args);
+    case "benchmark_agent_profile":     return await handlePhase4951Tool(name, args);
+    case "benchmark_insights":          return await handlePhase4951Tool(name, args);
+
+    // Phase 50 — LLM Router
+    case "llm_route_task":              return await handlePhase4951Tool(name, args);
+    case "llm_router_preferences":      return await handlePhase4951Tool(name, args);
+    case "llm_routing_history":         return await handlePhase4951Tool(name, args);
+    case "llm_model_leaderboard":       return await handlePhase4951Tool(name, args);
+    case "llm_router_status":           return await handlePhase4951Tool(name, args);
+
+    // Phase 51 — Data Marketplace
+    case "data_list":                   return await handlePhase4951Tool(name, args);
+    case "data_search":                 return await handlePhase4951Tool(name, args);
+    case "data_purchase":               return await handlePhase4951Tool(name, args);
+    case "data_stream":                 return await handlePhase4951Tool(name, args);
+    case "data_marketplace_dashboard":  return await handlePhase4951Tool(name, args);
 
     default:
       // Try Phase 2 (AI-requested) tools, then Phase 3 (verticals), then Phase 6 (money)
