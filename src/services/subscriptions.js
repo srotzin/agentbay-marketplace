@@ -15,9 +15,20 @@ import db from "../db.js";
 // ─── Live Mode ────────────────────────────────────────────────────────────────
 const STRIPE_LIVE = !!process.env.STRIPE_SECRET_KEY;
 let stripe = null;
-if (STRIPE_LIVE) {
-  const Stripe = (await import("stripe")).default;
-  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-04-10" });
+let _subStripeInit = false;
+
+async function getStripe() {
+  if (_subStripeInit) return stripe;
+  _subStripeInit = true;
+  if (STRIPE_LIVE) {
+    try {
+      const Stripe = (await import("stripe")).default;
+      stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-04-10" });
+    } catch (e) {
+      console.log("[Subscriptions/Stripe] SDK not available:", e.message);
+    }
+  }
+  return stripe;
 }
 
 /**

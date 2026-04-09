@@ -1116,7 +1116,7 @@ export async function handleTool(name, args) {
       return mkt.getCategories();
 
     case "hiveagent_stats":
-      return mkt.getMarketplaceStats();
+      return await mkt.getMarketplaceStats();
 
     // ─── Escrow & Settlement ──────────────────
     case "hiveagent_escrow_lock":

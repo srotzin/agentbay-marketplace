@@ -29,11 +29,20 @@ const LIVE_MODE = !!process.env.STRIPE_SECRET_KEY;
 const WRAPPER_FEE = 0.001;
 
 let stripe = null;
-if (LIVE_MODE) {
-  try {
-    const Stripe = (await import("stripe")).default;
-    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-04-10" });
-  } catch {}
+let _stripeInitialized = false;
+
+async function getStripe() {
+  if (_stripeInitialized) return stripe;
+  _stripeInitialized = true;
+  if (LIVE_MODE) {
+    try {
+      const Stripe = (await import("stripe")).default;
+      stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-04-10" });
+    } catch (e) {
+      console.log("[Stripe] SDK not available — simulation mode:", e.message);
+    }
+  }
+  return stripe;
 }
 
 db.exec(`
@@ -76,7 +85,7 @@ export async function createCustomer(args) {
   const { agent_id, email, name, metadata = {} } = args;
   let customer_id;
   if (LIVE_MODE) {
-    const c = await stripe.customers.create({ email, name, metadata });
+    const c = await (await getStripe()).customers.create({ email, name, metadata });
     customer_id = c.id;
   } else {
     customer_id = simId("cus");
@@ -93,7 +102,7 @@ export async function createPaymentIntent(args) {
 
   let pi_id, client_secret, status;
   if (LIVE_MODE) {
-    const pi = await stripe.paymentIntents.create({
+    const pi = await (await getStripe()).paymentIntents.create({
       amount, currency, customer: customer_id,
       description, payment_method_types,
     });
@@ -125,7 +134,7 @@ export async function createSubscription(args) {
 
   let sub_id, status, amount, currency, interval;
   if (LIVE_MODE) {
-    const sub = await stripe.subscriptions.create({
+    const sub = await (await getStripe()).subscriptions.create({
       customer: customer_id, items: [{ price: price_id }],
       trial_period_days: trial_days,
     });
@@ -157,10 +166,10 @@ export async function createInvoice(args) {
   let inv_id, hosted_url, status;
   if (LIVE_MODE) {
     if (amount_cents) {
-      await stripe.invoiceItems.create({ customer: customer_id, amount: amount_cents, currency, description });
+      await (await getStripe()).invoiceItems.create({ customer: customer_id, amount: amount_cents, currency, description });
     }
-    const inv = await stripe.invoices.create({ customer: customer_id, auto_advance });
-    const finalized = await stripe.invoices.finalizeInvoice(inv.id);
+    const inv = await (await getStripe()).invoices.create({ customer: customer_id, auto_advance });
+    const finalized = await (await getStripe()).invoices.finalizeInvoice(inv.id);
     inv_id = finalized.id; hosted_url = finalized.hosted_invoice_url; status = finalized.status;
   } else {
     inv_id = simId("in"); hosted_url = `https://invoice.stripe.com/i/${inv_id}`; status = "open";
@@ -185,7 +194,7 @@ export async function createCheckoutSession(args) {
 
   let session_id, url, status;
   if (LIVE_MODE) {
-    const session = await stripe.checkout.sessions.create({
+    const session = await (await getStripe()).checkout.sessions.create({
       line_items, mode: checkoutMode, success_url, cancel_url,
       customer: customer_id,
     });
@@ -206,8 +215,8 @@ export async function listCustomers(args) {
   const { email, limit = 10 } = args;
   if (LIVE_MODE) {
     const result = email
-      ? await stripe.customers.search({ query: `email:'${email}'`, limit })
-      : await stripe.customers.list({ limit });
+      ? await (await getStripe()).customers.search({ query: `email:'${email}'`, limit })
+      : await (await getStripe()).customers.list({ limit });
     return { success: true, customers: result.data, count: result.data.length, mode: "live" };
   }
   const rows = db.prepare("SELECT * FROM stripe_customers LIMIT ?").all(limit);
@@ -221,7 +230,7 @@ export async function createRefund(args) {
 
   let refund_id, status, refund_amount;
   if (LIVE_MODE) {
-    const r = await stripe.refunds.create({ payment_intent: payment_intent_id, amount, reason });
+    const r = await (await getStripe()).refunds.create({ payment_intent: payment_intent_id, amount, reason });
     refund_id = r.id; status = r.status; refund_amount = r.amount;
   } else {
     refund_id = simId("re"); status = "succeeded"; refund_amount = amount || 0;
