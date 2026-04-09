@@ -89,6 +89,7 @@ import { phase26Tools, handlePhase26Tool } from "./mcp-tools-phase26.js";
 import { phase2730Tools, handlePhase2730Tool } from "./mcp-tools-phase27-30.js";
 import { phase3133Tools, handlePhase3133Tool } from "./mcp-tools-phase31-33.js";
 import { phase3436Tools, handlePhase3436Tool } from "./mcp-tools-phase34-36.js";
+import { phase3739Tools, handlePhase3739Tool } from "./mcp-tools-phase37-39.js";
 import { welcomeTools, handleWelcomeTool } from "./mcp-tools-welcome.js";
 // Pharma Transactions (Rx, Claims, DSCSA, Global Pricing, Narcotics)
 import { pharmaTxTools, handlePharmaTxTool } from "./mcp-tools-pharma-tx.js";
@@ -1036,7 +1037,7 @@ export function handleBrokerTool(name, args = {}) {
   }
 }
 
-export const tools = [...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools];
+export const tools = [...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1672,6 +1673,30 @@ export async function handleTool(name, args) {
     case "yield_portfolio":             return handlePhase3436Tool(name, args);
     case "yield_dashboard":             return handlePhase3436Tool(name, args);
     case "yield_compare_protocols":     return handlePhase3436Tool(name, args);
+
+    // Phase 37 — Agent Wallet Manager
+    case "wallet_create":                return await handlePhase3739Tool(name, args);
+    case "wallet_get_balances":          return handlePhase3739Tool(name, args);
+    case "wallet_set_spending_policy":   return handlePhase3739Tool(name, args);
+    case "wallet_get_activity":          return handlePhase3739Tool(name, args);
+    case "wallet_rotate":               return await handlePhase3739Tool(name, args);
+    case "wallet_dashboard":            return handlePhase3739Tool(name, args);
+
+    // Phase 38 — Tokenized Assets
+    case "rwa_list_assets":             return handlePhase3739Tool(name, args);
+    case "rwa_buy_asset":               return await handlePhase3739Tool(name, args);
+    case "rwa_sell_asset":              return await handlePhase3739Tool(name, args);
+    case "rwa_claim_yield":             return await handlePhase3739Tool(name, args);
+    case "rwa_get_portfolio":           return handlePhase3739Tool(name, args);
+    case "rwa_status":                  return handlePhase3739Tool(name, args);
+
+    // Phase 39 — Agent Analytics
+    case "analytics_track_event":       return handlePhase3739Tool(name, args);
+    case "analytics_get_performance":   return handlePhase3739Tool(name, args);
+    case "analytics_revenue_attribution": return handlePhase3739Tool(name, args);
+    case "analytics_get_benchmarks":    return handlePhase3739Tool(name, args);
+    case "analytics_top_performers":    return handlePhase3739Tool(name, args);
+    case "analytics_platform_dashboard": return handlePhase3739Tool(name, args);
 
     default:
       // Try Phase 2 (AI-requested) tools, then Phase 3 (verticals), then Phase 6 (money)
