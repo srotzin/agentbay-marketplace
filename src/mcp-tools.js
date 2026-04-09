@@ -101,6 +101,8 @@ import { phase5254Tools, handlePhase5254Tool } from "./mcp-tools-phase52-54.js";
 import { phase55Tools, handlePhase55Tool } from "./mcp-tools-phase55.js";
 import { onboardingTools, handleOnboardingTool } from "./mcp-tools-onboarding.js";
 import { welcomeTools, handleWelcomeTool } from "./mcp-tools-welcome.js";
+// THE AGENT HIGHWAY — enter with a task, exit with a result (7 tools)
+import { highwayTools, handleHighwayTool } from "./mcp-tools-highway.js";
 // THE BAIT: HiveMemory + HiveEval + HiveRelay + HivePulse + HiveContext (30 hooks)
 import { baitTools, handleBaitTool } from "./mcp-tools-bait.js";
 // Pharma Transactions (Rx, Claims, DSCSA, Global Pricing, Narcotics)
@@ -1049,7 +1051,7 @@ export function handleBrokerTool(name, args = {}) {
   }
 }
 
-export const tools = [...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...onboardingTools];
+export const tools = [...highwayTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...onboardingTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1840,6 +1842,15 @@ export async function handleTool(name, args) {
     case "content_history":          return await handlePhase5254Tool(name, args);
     case "content_appeal":           return await handlePhase5254Tool(name, args);
     case "content_stats":            return await handlePhase5254Tool(name, args);
+
+    // ─── THE AGENT HIGHWAY: Enter, Travel, Exit ─────────────────────────────────
+    case "highway_enter":     return await handleHighwayTool(name, args);
+    case "highway_milestone": return await handleHighwayTool(name, args);
+    case "highway_offramp":   return await handleHighwayTool(name, args);
+    case "highway_traffic":   return await handleHighwayTool(name, args);
+    case "highway_exit":      return await handleHighwayTool(name, args);
+    case "highway_status":    return await handleHighwayTool(name, args);
+    case "highway_routes":    return await handleHighwayTool(name, args);
 
     // ─── THE BAIT: HiveMemory + HiveEval + HiveRelay + HivePulse + HiveContext ──
     case "memory_set":           return handleBaitTool(name, args);
