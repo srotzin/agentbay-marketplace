@@ -20,6 +20,14 @@ import db from "../db.js";
 
 const LIVE_MODE = !!process.env.CDP_API_KEY_ID;
 
+// ─── Migration: drop stale tables if schema changed ───────────────────────────
+try {
+  const drops = ['managed_wallets', 'wallet_transactions', 'spending_policies', 'wallet_alerts'];
+  for (const t of drops) {
+    try { db.exec(`DROP TABLE IF EXISTS ${t}`); } catch {}
+  }
+} catch {}
+
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
 db.exec(`

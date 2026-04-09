@@ -41,6 +41,14 @@ const TAX_RATES = {
   },
 };
 
+// ─── Migration: drop stale tables if schema changed ───────────────────────────
+try {
+  const drops = ['accounting_ledger', 'tax_summaries', 'agent_entities'];
+  for (const t of drops) {
+    try { db.exec(`DROP TABLE IF EXISTS ${t}`); } catch {}
+  }
+} catch {}
+
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
 db.exec(`

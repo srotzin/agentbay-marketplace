@@ -25,6 +25,20 @@ import db from "../db.js";
 const LIVE_MODE = !!process.env.CREDIT_API_KEY;
 const ORIGINATION_FEE_PCT = 0.02;
 
+// ─── Migration: handle existing tables with different schemas ─────────────────
+// Drop and recreate tables that may exist with wrong schema from older versions
+// This is safe — Render DB is ephemeral across deploys
+try {
+  // Check if agent_id column exists in credit_profiles
+  const cols = db.prepare("PRAGMA table_info(credit_profiles)").all();
+  const hasAgentId = cols.some(c => c.name === 'agent_id');
+  if (cols.length > 0 && !hasAgentId) {
+    db.exec("DROP TABLE IF EXISTS credit_profiles");
+    db.exec("DROP TABLE IF EXISTS credit_loans");
+    db.exec("DROP TABLE IF EXISTS credit_payments");
+  }
+} catch {}
+
 // ─── Schema ──────────────────────────────────────────────────────────────────
 
 db.exec(`

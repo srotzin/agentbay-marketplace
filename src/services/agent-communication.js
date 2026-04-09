@@ -21,6 +21,14 @@ import db from "../db.js";
 
 const LIVE_MODE = !!process.env.COMM_API_KEY;
 
+// ─── Migration: drop stale tables if schema changed ───────────────────────────
+try {
+  const drops = ['agent_messages', 'message_threads', 'agent_negotiations', 'agent_broadcasts'];
+  for (const t of drops) {
+    try { db.exec(`DROP TABLE IF EXISTS ${t}`); } catch {}
+  }
+} catch {}
+
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
 db.exec(`

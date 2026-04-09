@@ -20,6 +20,14 @@ import db from "../db.js";
 
 const LIVE_MODE = !!process.env.DID_API_KEY;
 
+// ─── Migration: drop stale tables if schema changed ───────────────────────────
+try {
+  const drops = ['did_identities', 'verifiable_credentials', 'zk_proofs', 'did_auth_sessions'];
+  for (const t of drops) {
+    try { db.exec(`DROP TABLE IF EXISTS ${t}`); } catch {}
+  }
+} catch {}
+
 // ─── Schema ──────────────────────────────────────────────────────────────────
 
 db.exec(`

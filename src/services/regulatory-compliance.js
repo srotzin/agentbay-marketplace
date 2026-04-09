@@ -21,6 +21,14 @@ import db from "../db.js";
 
 const LIVE_MODE = !!process.env.COMPLIANCE_API_KEY;
 
+// ─── Migration: drop stale tables if schema changed ───────────────────────────
+try {
+  const drops = ['compliance_profiles', 'compliance_checks', 'compliance_reports', 'regulatory_incidents'];
+  for (const t of drops) {
+    try { db.exec(`DROP TABLE IF EXISTS ${t}`); } catch {}
+  }
+} catch {}
+
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
 db.exec(`
