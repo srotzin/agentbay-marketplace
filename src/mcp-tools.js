@@ -99,6 +99,7 @@ import { phase48Tools, handlePhase48Tool } from "./mcp-tools-phase48.js";
 import { phase4951Tools, handlePhase4951Tool } from "./mcp-tools-phase49-51.js";
 import { phase5254Tools, handlePhase5254Tool } from "./mcp-tools-phase52-54.js";
 import { phase55Tools, handlePhase55Tool } from "./mcp-tools-phase55.js";
+import { onboardingTools, handleOnboardingTool } from "./mcp-tools-onboarding.js";
 import { welcomeTools, handleWelcomeTool } from "./mcp-tools-welcome.js";
 // THE BAIT: HiveMemory + HiveEval + HiveRelay + HivePulse + HiveContext (30 hooks)
 import { baitTools, handleBaitTool } from "./mcp-tools-bait.js";
@@ -1048,7 +1049,7 @@ export function handleBrokerTool(name, args = {}) {
   }
 }
 
-export const tools = [...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools];
+export const tools = [...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...onboardingTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1872,6 +1873,11 @@ export async function handleTool(name, args) {
 
     // Phase 55 — Live Intelligence
     case "company_linkedin_profile": return await handlePhase55Tool(name, args);
+
+    // Onboarding tools
+    case "agent_onboarding_status":
+    case "agent_onboarding_dashboard":
+      return await handleOnboardingTool(name, args);
 
     default:
       // Try Phase 2 (AI-requested) tools, then Phase 3 (verticals), then Phase 6 (money)

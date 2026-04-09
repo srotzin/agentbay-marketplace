@@ -314,6 +314,17 @@ router.post("/", async (req, res) => {
           });
         }
         const result = enhanceResponse(toolName, raw);
+        // Agent onboarding nudge
+        try {
+          const agentId = req.headers["x-agent-id"] || toolArgs?.agent_id || null;
+          if (agentId) {
+            const { trackAndNudge } = await import("./services/agent-onboarding.js");
+            const nudge = await trackAndNudge({ agent_id: agentId, tool_name: toolName, platform: req.headers["x-platform"] || "unknown" });
+            if (nudge && result && typeof result === "object") {
+              result._hiveagent_tip = nudge;
+            }
+          }
+        } catch {}
         return res.json({
           jsonrpc: "2.0",
           result: {
