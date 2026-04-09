@@ -80,6 +80,7 @@ import { phase17Tools, handlePhase17Tool } from "./mcp-tools-phase17.js";
 // Science & research ops: clinical trials + grants (Phase 18)
 import { phase18Tools, handlePhase18Tool } from "./mcp-tools-phase18.js";
 import { phase19Tools, handlePhase19Tool } from "./mcp-tools-phase19.js";
+import { phase21Tools, handlePhase21Tool } from "./mcp-tools-phase21.js";
 // Pharma Transactions (Rx, Claims, DSCSA, Global Pricing, Narcotics)
 import { pharmaTxTools, handlePharmaTxTool } from "./mcp-tools-pharma-tx.js";
 // A2A Tokenization Rails — ATS-1 token standard, multi-chain settlement, protocol router
@@ -1026,7 +1027,7 @@ export function handleBrokerTool(name, args = {}) {
   }
 }
 
-export const tools = [...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools];
+export const tools = [...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase21Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1591,6 +1592,11 @@ export async function handleTool(name, args) {
       }
       try {
         return await handlePhase19Tool(name, args);
+      } catch (e) {
+        if (!e.message?.includes('Unknown')) throw e;
+      }
+      try {
+        return await handlePhase21Tool(name, args);
       } catch (e) {
         if (!e.message?.includes('Unknown')) throw e;
       }
