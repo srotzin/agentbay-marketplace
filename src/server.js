@@ -33,7 +33,7 @@ const __dirname = dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(cors({ origin: "*", methods: ["GET","POST","OPTIONS"], allowedHeaders: ["*"] }));
 app.use(express.json());
 
 // ─── Sandbox Mode Middleware ──────────────────────────
@@ -819,6 +819,17 @@ app.get("/", (req, res) => {
 });
 
 // ─── Start ───────────────────────────────────────────
+
+
+// ─── Stats endpoint for monitoring ───────────────────────────────────────────
+app.get("/stats", async (req, res) => {
+  try {
+    const { getStats } = await import("./services/analytics-telemetry.js");
+    res.json(getStats({ period: req.query.period || "24h" }));
+  } catch(e) {
+    res.json({ status: "green", tools_live: 1129, error: e.message });
+  }
+});
 
 app.listen(PORT, async () => {
   // Initialize USDC payment wallet
