@@ -407,3 +407,28 @@ export function getBenchmarkInsights() {
     last_updated: new Date().toISOString(),
   };
 }
+
+// ─── Legacy compat export (used by mcp-tools-phase10.js) ─────────────────────
+export async function createTestSuite(args) {
+  const { agent_id, suite_name, tasks = [] } = args || {};
+  return {
+    suite_id: "suite-" + Math.random().toString(36).slice(2,10),
+    agent_id, suite_name,
+    tasks_queued: tasks.length,
+    status: "created",
+    run_command: `Call benchmark_run for each task to execute the suite.`,
+  };
+}
+
+// ─── Legacy compat stubs ─────────────────────────────────────────────────────
+export async function evaluateOutput(args) {
+  return { success: true, function: "evaluateOutput", args, note: "Use benchmark_run, benchmark_compare_agents, or benchmark_agent_profile for full functionality." };
+}
+
+export async function getTestHistory(args) {
+  return { success: true, function: "getTestHistory", args, note: "Use benchmark_run, benchmark_compare_agents, or benchmark_agent_profile for full functionality." };
+}
+
+export async function generateTestReport(args) {
+  return { success: true, function: "generateTestReport", args, note: "Use benchmark_run, benchmark_compare_agents, or benchmark_agent_profile for full functionality." };
+}
