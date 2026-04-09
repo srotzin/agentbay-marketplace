@@ -198,7 +198,7 @@ async function bvnkRequest(method, path, body) {
       headers: {
         "Content-Type": "application/json",
         "Accept": "application/json",
-        "Authorization": hawkHeader,
+        "Authorization": `Bearer ${process.env.BVNK_API_KEY}`,
       },
     };
     if (process.env.BVNK_MERCHANT_ID) opts.headers["X-Merchant-Id"] = process.env.BVNK_MERCHANT_ID;
