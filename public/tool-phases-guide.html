@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How HiveAgent Tool Phases Work (and How to Add Your Own)</title>
+  <meta name="description" content="A technical guide to HiveAgentIQ tool phases: how phases are organized, how mcp-tools-phase files map into mcp-tools.js, and a checklist for adding a new phase safely." />
+  <style>
+    :root { --fg:#111; --muted:#555; --bg:#fff; --card:#f7f7f7; --border:#e5e5e5; --link:#0b5fff; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; color: var(--fg); background: var(--bg); line-height: 1.55; }
+    header { padding: 48px 18px 18px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, #fafafa, #fff); }
+    main { max-width: 920px; margin: 0 auto; padding: 24px 18px 72px; }
+    h1 { font-size: 34px; margin: 0 0 8px; letter-spacing: -0.02em; }
+    .lede { color: var(--muted); max-width: 72ch; margin: 0; }
+    nav.toc { margin-top: 18px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); }
+    nav.toc a { color: var(--link); text-decoration: none; }
+    nav.toc a:hover { text-decoration: underline; }
+    section { margin-top: 34px; }
+    h2 { font-size: 22px; margin: 0 0 10px; }
+    h3 { font-size: 16px; margin: 18px 0 8px; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    pre { padding: 12px 14px; background: #0b1020; color: #e8eeff; border-radius: 10px; overflow-x: auto; border: 1px solid #1f2a4a; }
+    .card { border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: #fff; }
+    ul { padding-left: 18px; }
+    .callout { background: #fff7e6; border: 1px solid #ffe1a3; }
+    .small { color: var(--muted); font-size: 14px; }
+    footer { border-top: 1px solid var(--border); padding: 18px; color: var(--muted); font-size: 14px; }
+  </style>
+</head>
+<body>
+  <header>
+    <main style="padding:0 18px; max-width:920px;">
+      <h1>How HiveAgent Tool Phases Work (and How to Add Your Own)</h1>
+      <p class="lede">HiveAgentIQ organizes MCP tools into “phases” so the tool catalog can grow without becoming a single, unmaintainable file. This guide explains the structure and provides a safe checklist for adding a new phase.</p>
+      <nav class="toc" aria-label="Table of contents">
+        <strong>Contents</strong>
+        <ul>
+          <li><a href="#what-is-a-phase">What is a tool phase?</a></li>
+          <li><a href="#how-files-are-organized">How files are organized</a></li>
+          <li><a href="#how-dispatch-works">How dispatch works in <code>mcp-tools.js</code></a></li>
+          <li><a href="#adding-new-phase">Checklist: add a new phase safely</a></li>
+          <li><a href="#common-errors">Common errors and how to avoid them</a></li>
+        </ul>
+      </nav>
+    </main>
+  </header>
+
+  <main>
+    <section id="what-is-a-phase">
+      <h2>What is a tool phase?</h2>
+      <div class="card">
+        <p>A “phase” is a small, versioned module that exports a set of MCP tool definitions (name, description, input schema, and handler). Instead of putting hundreds of tools in one file, HiveAgentIQ breaks the catalog into sequential phase files (for example <code>mcp-tools-phase17.js</code>, <code>mcp-tools-phase25.js</code>).</p>
+        <p class="small">This is a code-organization pattern: phases do not necessarily represent chronological releases in production; they represent manageable batches of tools with consistent wiring.</p>
+      </div>
+    </section>
+
+    <section id="how-files-are-organized">
+      <h2>How files are organized</h2>
+      <div class="card">
+        <p>In the repository, phase files typically live alongside the rest of the MCP tool wiring, and each phase file exports a function (or object) in the same style as prior phases.</p>
+        <h3>Typical shape of a phase module</h3>
+        <pre><code>// mcp-tools-phaseNN.js
+
+export function registerPhaseNN({ registerTool }) {
+  registerTool({
+    name: 'some_tool',
+    description: '…',
+    inputSchema: { /* JSON schema */ },
+    handler: async (args, ctx) =&gt; { /* … */ }
+  })
+}
+</code></pre>
+        <p class="small">Exact names vary. The key is consistency with the existing phase pattern in your codebase.</p>
+      </div>
+    </section>
+
+    <section id="how-dispatch-works">
+      <h2>How dispatch works in <code>mcp-tools.js</code></h2>
+      <div class="card">
+        <p><code>mcp-tools.js</code> is the router and registry. It imports each phase module, registers tools for listing, and ensures incoming tool calls are dispatched to the correct handler.</p>
+        <p>When you add a new phase:</p>
+        <ul>
+          <li>You add a new import for the phase file.</li>
+          <li>You register the phase in the tool registration pipeline so its tools appear in <code>tools/list</code>.</li>
+          <li>You ensure the dispatch logic recognizes the new tools (often automatic if the registry is shared).</li>
+        </ul>
+        <p class="small">If the system uses explicit switch cases for phases, update them too. If it uses a shared map, only the import + registration are needed.</p>
+      </div>
+    </section>
+
+    <section id="adding-new-phase">
+      <h2>Checklist: add a new phase safely</h2>
+      <div class="card">
+        <ol>
+          <li><strong>Pick a phase number</strong> that doesn’t exist yet.</li>
+          <li><strong>Create the phase file</strong> and copy the structure from the most recent phase.</li>
+          <li><strong>Keep tools cohesive</strong>: a phase should have a clear theme (example: “Security hardening” or “New verticals”).</li>
+          <li><strong>Update <code>mcp-tools.js</code></strong> to import and register the phase.</li>
+          <li><strong>Run a syntax check</strong> on new/changed files:</li>
+        </ol>
+        <pre><code>node --check path/to/new-file.js
+</code></pre>
+        <ol start="6">
+          <li><strong>Run tool listing locally</strong> (or in your test environment) and confirm your new tools appear.</li>
+          <li><strong>Sanity test at least one handler</strong> end-to-end.</li>
+        </ol>
+        <div class="card callout" style="margin-top:14px;">
+          <strong>Tip:</strong> If you are adding API-backed tools, implement safe JSON parsing and include error messages that are helpful to the agent (not just stack traces).
+        </div>
+      </div>
+    </section>
+
+    <section id="common-errors">
+      <h2>Common errors and how to avoid them</h2>
+      <div class="card">
+        <h3>Tools don’t appear in <code>tools/list</code></h3>
+        <ul>
+          <li>Phase file exists but was not imported in <code>mcp-tools.js</code>.</li>
+          <li>The registration function wasn’t invoked.</li>
+          <li>The exported symbol name doesn’t match what <code>mcp-tools.js</code> expects.</li>
+        </ul>
+
+        <h3>Runtime error on first tool call</h3>
+        <ul>
+          <li>Handler throws on undefined optional fields; add defaults.</li>
+          <li>External API response is not JSON; use guarded parsing.</li>
+          <li>Missing environment variables; validate at startup and return actionable errors.</li>
+        </ul>
+
+        <h3>Duplicate tool names</h3>
+        <ul>
+          <li>Search for existing tool names before adding a new one; collisions can break dispatch.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <main style="padding:0 18px; max-width:920px;">
+      <div>Last updated: 2026-04-09</div>
+      <div class="small">This page is part of the AgentBay public docs directory.</div>
+    </main>
+  </footer>
+</body>
+</html>
