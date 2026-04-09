@@ -90,6 +90,7 @@ import { phase2730Tools, handlePhase2730Tool } from "./mcp-tools-phase27-30.js";
 import { phase3133Tools, handlePhase3133Tool } from "./mcp-tools-phase31-33.js";
 import { phase3436Tools, handlePhase3436Tool } from "./mcp-tools-phase34-36.js";
 import { phase3739Tools, handlePhase3739Tool } from "./mcp-tools-phase37-39.js";
+import { phase4042Tools, handlePhase4042Tool } from "./mcp-tools-phase40-42.js";
 import { welcomeTools, handleWelcomeTool } from "./mcp-tools-welcome.js";
 // Pharma Transactions (Rx, Claims, DSCSA, Global Pricing, Narcotics)
 import { pharmaTxTools, handlePharmaTxTool } from "./mcp-tools-pharma-tx.js";
@@ -1037,7 +1038,7 @@ export function handleBrokerTool(name, args = {}) {
   }
 }
 
-export const tools = [...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools];
+export const tools = [...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1697,6 +1698,31 @@ export async function handleTool(name, args) {
     case "analytics_get_benchmarks":    return handlePhase3739Tool(name, args);
     case "analytics_top_performers":    return handlePhase3739Tool(name, args);
     case "analytics_platform_dashboard": return handlePhase3739Tool(name, args);
+
+    // Phase 40 — Tax & Accounting
+    case "tax_record_transaction":     return handlePhase4042Tool(name, args);
+    case "tax_get_pnl":                return handlePhase4042Tool(name, args);
+    case "tax_calculate":              return handlePhase4042Tool(name, args);
+    case "tax_generate_report":        return handlePhase4042Tool(name, args);
+    case "tax_set_entity":             return handlePhase4042Tool(name, args);
+    case "tax_accounting_dashboard":   return handlePhase4042Tool(name, args);
+
+    // Phase 41 — Regulatory Compliance
+    case "compliance_assess":          return handlePhase4042Tool(name, args);
+    case "compliance_check":           return handlePhase4042Tool(name, args);
+    case "compliance_generate_report": return handlePhase4042Tool(name, args);
+    case "compliance_ai_act_risk":     return handlePhase4042Tool(name, args);
+    case "compliance_report_incident": return handlePhase4042Tool(name, args);
+    case "compliance_dashboard":       return handlePhase4042Tool(name, args);
+
+    // Phase 42 — Inter-Agent Communication
+    case "comm_send_message":          return handlePhase4042Tool(name, args);
+    case "comm_get_messages":          return handlePhase4042Tool(name, args);
+    case "comm_start_negotiation":     return handlePhase4042Tool(name, args);
+    case "comm_counter_offer":         return handlePhase4042Tool(name, args);
+    case "comm_accept_negotiation":    return handlePhase4042Tool(name, args);
+    case "comm_broadcast":             return handlePhase4042Tool(name, args);
+    case "comm_agent_directory":       return handlePhase4042Tool(name, args);
 
     default:
       // Try Phase 2 (AI-requested) tools, then Phase 3 (verticals), then Phase 6 (money)
