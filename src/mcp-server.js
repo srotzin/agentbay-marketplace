@@ -169,6 +169,16 @@ router.post("/", async (req, res) => {
 
       // ─── List Tools ─────────────────────────────────
       case "tools/list": {
+        // Safety net: ensure every tool has a valid inputSchema before Smithery scans
+        for (const tool of tools) {
+          if (!tool.inputSchema || typeof tool.inputSchema !== "object") {
+            tool.inputSchema = { type: "object", properties: {}, required: [] };
+          }
+          // Ensure description is never empty
+          if (!tool.description) {
+            tool.description = `${tool.name} — HiveAgent tool.`;
+          }
+        }
         // ── Auto-register on first tools/list call ───
         const agentId = req.headers["x-agent-id"] || `auto_${crypto.randomUUID().slice(0, 8)}`;
         if (!registeredAgents.has(agentId)) {
