@@ -92,6 +92,7 @@ import { phase3436Tools, handlePhase3436Tool } from "./mcp-tools-phase34-36.js";
 import { phase3739Tools, handlePhase3739Tool } from "./mcp-tools-phase37-39.js";
 import { phase4042Tools, handlePhase4042Tool } from "./mcp-tools-phase40-42.js";
 import { phase4345Tools, handlePhase4345Tool } from "./mcp-tools-phase43-45.js";
+import { phase46Tools, handlePhase46Tool } from "./mcp-tools-phase46.js";
 import { welcomeTools, handleWelcomeTool } from "./mcp-tools-welcome.js";
 // Pharma Transactions (Rx, Claims, DSCSA, Global Pricing, Narcotics)
 import { pharmaTxTools, handlePharmaTxTool } from "./mcp-tools-pharma-tx.js";
@@ -1039,7 +1040,7 @@ export function handleBrokerTool(name, args = {}) {
   }
 }
 
-export const tools = [...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools];
+export const tools = [...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1747,6 +1748,16 @@ export async function handleTool(name, args) {
     case "deploy_set_sla":              return handlePhase4345Tool(name, args);
     case "deploy_check_sla":            return await handlePhase4345Tool(name, args);
     case "deploy_dashboard":            return handlePhase4345Tool(name, args);
+
+    // Phase 46 — Physical Asset Tokenization (Fireblocks, iVault, Coppercoin)
+    case "rwa_mint_asset":               return await handlePhase46Tool(name, args);
+    case "rwa_buy_tokens":               return await handlePhase46Tool(name, args);
+    case "rwa_list_for_rental":          return handlePhase46Tool(name, args);
+    case "rwa_rent_asset":               return await handlePhase46Tool(name, args);
+    case "rwa_get_valuation":            return handlePhase46Tool(name, args);
+    case "rwa_get_portfolio":            return handlePhase46Tool(name, args);
+    case "rwa_marketplace":              return handlePhase46Tool(name, args);
+    case "rwa_platform_status":          return handlePhase46Tool(name, args);
 
     default:
       // Try Phase 2 (AI-requested) tools, then Phase 3 (verticals), then Phase 6 (money)
