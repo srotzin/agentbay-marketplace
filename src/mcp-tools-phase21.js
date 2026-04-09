@@ -1,192 +1,278 @@
-// Phase 21: Patient Intake + Manufacturing QA
+/**
+ * Phase 21 — Visa Intelligent Commerce Connect (ICC)
+ *
+ * 6 tools covering:
+ *   - Agent registration in Visa Trusted Agent Registry (TAP)
+ *   - Scoped AMT token provisioning (not raw card numbers)
+ *   - Payment instruction submission (pre-authorized consumer intent)
+ *   - Checkout execution (agent buys on behalf of consumer)
+ *   - Spend controls overview (limits, history, active tokens)
+ *   - Status / capabilities
+ *
+ * Signal: Visa launches Intelligent Commerce Connect (Apr 8, 2026)
+ * Ecosystem partners already live: OpenAI, Anthropic, AWS, Stripe,
+ * Microsoft, Perplexity, Expedia, Ramp
+ */
 
-import * as intake from "./services/patient-intake.js";
-import * as qa from "./services/manufacturing-qa.js";
+import {
+  registerAgent,
+  requestToken,
+  submitInstruction,
+  executeCheckout,
+  spendControls,
+  getVisaIccStatus,
+} from "./services/visa-icc.js";
+
+// ─── Tool Definitions ─────────────────────────────────────────────────────────
 
 export const phase21Tools = [
   {
-    name: "hiveagent_intake_create_form",
-    description: "Create a structured patient intake form schema for an organization.",
+    name: "visa_icc_agent_register",
+    description:
+      "Register an AI agent in Visa's Trusted Agent Registry (TAP — Trusted Agent Protocol). " +
+      "Once registered, the agent can request scoped payment tokens and execute purchases on behalf of consumers " +
+      "at any merchant that supports Visa Intelligent Commerce Connect. " +
+      "The agent receives a cryptographic identity — merchants use it to distinguish 'buyer agents' from bots. " +
+      "Supports all four agentic protocols: Visa TAP, Stripe MPP, OpenAI ACP, Google UCP. " +
+      "No raw card numbers are ever exposed to the agent. " +
+      "Run this once per agent before calling visa_icc_token_request.",
     inputSchema: {
       type: "object",
       properties: {
-        org_id: { type: "string", description: "Organization ID" },
-        name: { type: "string", description: "Form name" },
-        schema: { type: "object", description: "Lightweight schema: {required:[...], fields:{field:{type:string|number|boolean|object}}}" },
+        agent_id: {
+          type: "string",
+          description: "Unique identifier for this agent (e.g. 'shopping-agent-001', 'travel-agent-xyz').",
+        },
+        agent_name: {
+          type: "string",
+          description: "Human-readable name for the agent. Shown to merchants and consumers.",
+        },
+        protocol: {
+          type: "string",
+          description:
+            "Agentic protocol to register under. Default: TAP. " +
+            "Options: TAP (Visa Trusted Agent Protocol), MPP (Stripe Machine Payments Protocol), " +
+            "ACP (OpenAI Agentic Commerce Protocol), UCP (Google Universal Commerce Protocol).",
+        },
+        public_key: {
+          type: "string",
+          description: "Agent's public key for cryptographic identity. Optional in sandbox/simulation.",
+        },
+        description: {
+          type: "string",
+          description: "What this agent does — shown to merchants at checkout.",
+        },
       },
-      required: ["org_id", "name", "schema"],
+      required: ["agent_id"],
     },
-    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
-  },
-  {
-    name: "hiveagent_intake_list_forms",
-    description: "List all intake forms for an organization.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        org_id: { type: "string", description: "Organization ID" },
-      },
-      required: ["org_id"],
-    },
-    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
-  },
-  {
-    name: "hiveagent_intake_submit",
-    description: "Submit an intake payload (optionally validated against a stored form schema). Returns validation errors + pricing quote.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        org_id: { type: "string", description: "Organization ID" },
-        form_id: { type: "string", description: "Optional form ID" },
-        payload: { type: "object", description: "Intake payload" },
-        patient_ref: { type: "string", description: "Optional external patient reference" },
-      },
-      required: ["org_id", "payload"],
-    },
-    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
-  },
-  {
-    name: "hiveagent_intake_eligibility_check",
-    description: "Record a mock eligibility check for a submission (placeholder for payer integrations).",
-    inputSchema: {
-      type: "object",
-      properties: {
-        submission_id: { type: "string", description: "Intake submission ID" },
-        payer: { type: "string", description: "Payer name" },
-        policy_number: { type: "string", description: "Optional policy number" },
-        service_code: { type: "string", description: "Optional service/procedure code" },
-      },
-      required: ["submission_id", "payer"],
-    },
-    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
-  },
-  {
-    name: "hiveagent_intake_build_prior_auth_packet",
-    description: "Generate a prior authorization packet from an intake submission (requires clinical/admin review before sending).",
-    inputSchema: {
-      type: "object",
-      properties: {
-        submission_id: { type: "string", description: "Intake submission ID" },
-        options: { type: "object", description: "Options (e.g., {notes: '...'} )", default: {} },
-      },
-      required: ["submission_id"],
-    },
-    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
   },
 
   {
-    name: "hiveagent_qa_create_lot",
-    description: "Create a QA lot / batch record for incoming materials or finished goods.",
+    name: "visa_icc_token_request",
+    description:
+      "Request a scoped Agent-Merchant-Task (AMT) payment token for a specific purchase. " +
+      "The token is locked to a specific merchant, amount limit, and time window — " +
+      "the agent NEVER gets a raw card number or unlimited spending access. " +
+      "Present the token at merchant checkout to pay. Token auto-expires after use or time limit. " +
+      "Works across Visa, Mastercard, Amex — no vendor lock-in. " +
+      "Call visa_icc_agent_register first if the agent isn't yet registered. " +
+      "Optionally link to a payment instruction (instruction_id from visa_icc_submit_instruction) " +
+      "for pre-authorized consumer intents.",
     inputSchema: {
       type: "object",
       properties: {
-        org_id: { type: "string", description: "Organization ID" },
-        sku: { type: "string", description: "SKU or part number" },
-        supplier: { type: "string", description: "Optional supplier" },
-        received_at: { type: "string", description: "Optional ISO timestamp" },
+        agent_id: {
+          type: "string",
+          description: "Registered agent requesting the token.",
+        },
+        merchant_name: {
+          type: "string",
+          description: "Name of the merchant this token is scoped to (e.g. 'Amazon', 'United Airlines').",
+        },
+        merchant_id: {
+          type: "string",
+          description: "Merchant ID if known. Optional — merchant_name is sufficient.",
+        },
+        amount_limit: {
+          type: "number",
+          description: "Maximum spend this token authorizes (e.g. 149.99). Agent cannot exceed this.",
+        },
+        currency: {
+          type: "string",
+          description: "Currency for the amount limit. Default: USD.",
+        },
+        category_code: {
+          type: "string",
+          description:
+            "Merchant Category Code (MCC) to restrict the token (e.g. '3000' for airlines, '5411' for grocery). " +
+            "Leave blank to allow any category.",
+        },
+        expiry_hours: {
+          type: "number",
+          description: "How long the token is valid. Default: 1 hour. Max: 48 hours.",
+        },
+        instruction_id: {
+          type: "string",
+          description: "Link to a pre-authorized payment instruction (from visa_icc_submit_instruction). Optional.",
+        },
       },
-      required: ["org_id", "sku"],
+      required: ["agent_id", "merchant_name", "amount_limit"],
     },
-    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
   },
+
   {
-    name: "hiveagent_qa_update_lot_status",
-    description: "Update a QA lot status: open|accepted|rejected|quarantined.",
+    name: "visa_icc_submit_instruction",
+    description:
+      "Submit a Payment Instruction — a pre-authorized consumer intent that lets an agent act on a goal " +
+      "without the consumer needing to approve each individual transaction. " +
+      "Example: 'Buy me a flight to London if the price drops below $400'. " +
+      "Visa validates the instruction against consumer-defined limits before any purchase. " +
+      "The instruction stays active until the agent fulfills it, it expires, or the consumer revokes it. " +
+      "This is the core 'autonomous agent shopping' primitive from Visa ICC.",
     inputSchema: {
       type: "object",
       properties: {
-        lot_id: { type: "string", description: "Lot ID" },
-        status: { type: "string", enum: ["open","accepted","rejected","quarantined"], description: "New status" },
+        agent_id: {
+          type: "string",
+          description: "Agent submitting the instruction.",
+        },
+        intent: {
+          type: "string",
+          description:
+            "Natural language purchase goal (e.g. 'Buy basketball tickets if price drops below $150', " +
+            "'Renew software subscription monthly', 'Purchase cheapest flight SFO-LHR under $500').",
+        },
+        merchant: {
+          type: "string",
+          description: "Specific merchant to restrict this instruction to. Leave blank for any merchant.",
+        },
+        amount_limit: {
+          type: "number",
+          description: "Maximum amount the agent is authorized to spend on this instruction.",
+        },
+        currency: {
+          type: "string",
+          description: "Currency for the amount limit. Default: USD.",
+        },
+        category: {
+          type: "string",
+          description: "Category to restrict to (e.g. 'travel', 'grocery', 'software'). Optional.",
+        },
+        expiry_hours: {
+          type: "number",
+          description: "How long this instruction stays active. Default: 48 hours.",
+        },
       },
-      required: ["lot_id", "status"],
+      required: ["agent_id", "intent", "amount_limit"],
     },
-    annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false },
   },
+
   {
-    name: "hiveagent_qa_create_inspection",
-    description: "Create an inspection record for a lot: incoming|in_process|final|audit.",
+    name: "visa_icc_checkout",
+    description:
+      "Execute a purchase on behalf of a consumer using a Visa ICC scoped AMT token. " +
+      "The agent presents its cryptographic identity (TAP) and the token at checkout — " +
+      "the merchant verifies the agent is a legitimate buyer, not a bot. " +
+      "Payment is processed on Visa rails. Token is invalidated after use. " +
+      "A Commerce Signal (success/failure) is sent to Visa to close the trust loop. " +
+      "Call visa_icc_token_request first to get the token_id.",
     inputSchema: {
       type: "object",
       properties: {
-        lot_id: { type: "string", description: "Lot ID" },
-        inspection_type: { type: "string", enum: ["incoming","in_process","final","audit"], description: "Inspection type" },
-        checklist: { type: "object", description: "Checklist object" },
+        agent_id: {
+          type: "string",
+          description: "Agent executing the checkout.",
+        },
+        token_id: {
+          type: "string",
+          description: "AMT token ID from visa_icc_token_request.",
+        },
+        merchant: {
+          type: "string",
+          description: "Merchant name where the purchase is being made.",
+        },
+        amount: {
+          type: "number",
+          description: "Actual purchase amount (must be ≤ token amount_limit).",
+        },
+        currency: {
+          type: "string",
+          description: "Transaction currency. Default: USD.",
+        },
+        item: {
+          type: "string",
+          description: "Description of what was purchased (e.g. 'Flight SFO-LHR Apr 15', 'AirPods Pro').",
+        },
+        instruction_id: {
+          type: "string",
+          description: "Link to the payment instruction this checkout fulfills. Optional.",
+        },
       },
-      required: ["lot_id", "inspection_type", "checklist"],
+      required: ["agent_id", "token_id", "merchant", "amount"],
     },
-    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
   },
+
   {
-    name: "hiveagent_qa_record_findings",
-    description: "Record inspection findings and return pass/fail plus pricing quote.",
+    name: "visa_icc_spend_controls",
+    description:
+      "View spend controls, active tokens, active payment instructions, and purchase history for an agent. " +
+      "Shows total spend, active AMT tokens (with limits and expiry), active instructions, " +
+      "and the 5 most recent purchases. " +
+      "Use to audit what an agent is authorized to buy and what it has bought.",
     inputSchema: {
       type: "object",
       properties: {
-        inspection_id: { type: "string", description: "Inspection ID" },
-        findings: { type: "object", description: "Findings object (optionally {items:[{failed:true}], severity})" },
+        agent_id: {
+          type: "string",
+          description: "Agent to check spend controls for.",
+        },
+        action: {
+          type: "string",
+          description: "Action to perform. Default: 'get' (view controls). Future: 'revoke' to cancel an instruction.",
+        },
       },
-      required: ["inspection_id", "findings"],
+      required: ["agent_id"],
     },
-    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
   },
+
   {
-    name: "hiveagent_qa_create_defect",
-    description: "Create a defect linked to a lot (and optionally an inspection).",
+    name: "visa_icc_status",
+    description:
+      "Get Visa Intelligent Commerce Connect integration status: live vs simulation mode, " +
+      "env vars needed to go live, full capability overview " +
+      "(AMT tokens, TAP, payment instructions, spend controls, supported protocols and networks), " +
+      "ecosystem partners, and usage stats. Run this first to understand the integration.",
     inputSchema: {
       type: "object",
-      properties: {
-        lot_id: { type: "string", description: "Lot ID" },
-        inspection_id: { type: "string", description: "Optional inspection ID" },
-        title: { type: "string", description: "Defect title" },
-        description: { type: "string", description: "Optional details" },
-        severity: { type: "string", enum: ["low","medium","high","critical"], description: "Severity" },
-      },
-      required: ["lot_id", "title"],
+      properties: {},
+      required: [],
     },
-    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
-  },
-  {
-    name: "hiveagent_qa_create_capa",
-    description: "Create a CAPA record (root cause + corrective/preventive actions) for a defect.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        defect_id: { type: "string", description: "Defect ID" },
-        fields: { type: "object", description: "Fields: root_cause, corrective_action, preventive_action, owner, due_date" },
-      },
-      required: ["defect_id"],
-    },
-    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
   },
 ];
 
-export function handlePhase21Tool(name, args) {
-  switch (name) {
-    case "hiveagent_intake_create_form":
-      return intake.createIntakeForm(args.org_id, args.name, args.schema);
-    case "hiveagent_intake_list_forms":
-      return intake.listIntakeForms(args.org_id);
-    case "hiveagent_intake_submit":
-      return intake.submitIntake(args.org_id, args.form_id ?? null, args.payload, args.patient_ref ?? null);
-    case "hiveagent_intake_eligibility_check":
-      return intake.runEligibilityCheck(args.submission_id, args.payer, args.policy_number ?? null, args.service_code ?? null);
-    case "hiveagent_intake_build_prior_auth_packet":
-      return intake.buildPriorAuthPacket(args.submission_id, args.options ?? {});
+// ─── Handler ──────────────────────────────────────────────────────────────────
 
-    case "hiveagent_qa_create_lot":
-      return qa.createQaLot(args.org_id, args.sku, args.supplier ?? null, args.received_at ?? null);
-    case "hiveagent_qa_update_lot_status":
-      return qa.updateQaLotStatus(args.lot_id, args.status);
-    case "hiveagent_qa_create_inspection":
-      return qa.createInspection(args.lot_id, args.inspection_type, args.checklist);
-    case "hiveagent_qa_record_findings":
-      return qa.recordInspectionFindings(args.inspection_id, args.findings);
-    case "hiveagent_qa_create_defect":
-      return qa.createDefect(args.lot_id, args.inspection_id ?? null, args.title, args.description ?? null, args.severity ?? "medium");
-    case "hiveagent_qa_create_capa":
-      return qa.createCapa(args.defect_id, args.fields ?? {});
+export async function handlePhase21Tool(name, args) {
+  switch (name) {
+    case "visa_icc_agent_register":
+      return await registerAgent(args);
+
+    case "visa_icc_token_request":
+      return await requestToken(args);
+
+    case "visa_icc_submit_instruction":
+      return await submitInstruction(args);
+
+    case "visa_icc_checkout":
+      return await executeCheckout(args);
+
+    case "visa_icc_spend_controls":
+      return await spendControls(args);
+
+    case "visa_icc_status":
+      return getVisaIccStatus();
 
     default:
-      throw new Error(`Unknown Phase 21 tool: ${name}`);
+      return null;
   }
 }
