@@ -1643,6 +1643,8 @@ export async function handleTool(name, args) {
     case "market_get_summary":         return handlePhase3133Tool(name, args);
     case "market_get_onchain_metrics": return handlePhase3133Tool(name, args);
     case "market_data_status":         return handlePhase3133Tool(name, args);
+    case "outcome_agent_earnings":      return handlePhase3133Tool(name, args);
+    case "market_check_alerts":         return handlePhase3133Tool(name, args);
 
     default:
       // Try Phase 2 (AI-requested) tools, then Phase 3 (verticals), then Phase 6 (money)

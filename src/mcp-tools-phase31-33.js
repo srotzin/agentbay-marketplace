@@ -20,6 +20,7 @@ import {
   disputeOutcome,
   getContractStatus,
   getOutcomeBillingDashboard,
+  getAgentEarnings,
 } from "./services/outcome-billing.js";
 
 import {
@@ -38,6 +39,7 @@ import {
   getMarketSummary,
   getOnChainMetrics,
   getMarketDataStatus,
+  checkAlerts,
 } from "./services/market-data-feeds.js";
 
 // ─── Tool Definitions ─────────────────────────────────────────────────────────
@@ -347,6 +349,34 @@ export const phase3133Tools = [
     inputSchema: { type: "object", properties: {} },
   },
 
+  {
+    name: "outcome_agent_earnings",
+    description: "Get outcome billing earnings summary for an agent — both as provider (earning USDC per outcome) " +
+      "and as buyer (spending USDC on outcomes). Shows net position, breakdown by outcome type, " +
+      "and total volume. Use to understand an agent's economic activity in the outcome billing system.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        agent_id: { type: "string", description: "Agent to get earnings for" },
+      },
+      required: ["agent_id"],
+    },
+  },
+
+  {
+    name: "market_check_alerts",
+    description: "Check and evaluate all active price alerts for an agent against current market prices. " +
+      "Returns which alerts have been triggered (price crossed threshold) and marks them as fired. " +
+      "Use to build autonomous price-triggered agent workflows.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        agent_id: { type: "string", description: "Agent whose alerts to check" },
+      },
+      required: ["agent_id"],
+    },
+  },
+
 ];
 
 // ─── Handler ─────────────────────────────────────────────────────────────────
@@ -377,6 +407,8 @@ export async function handlePhase3133Tool(name, args = {}) {
     case "market_get_summary":         return await getMarketSummary();
     case "market_get_onchain_metrics": return getOnChainMetrics(args);
     case "market_data_status":         return getMarketDataStatus();
+    case "outcome_agent_earnings":      return getAgentEarnings(args);
+    case "market_check_alerts":         return await checkAlerts(args);
 
     default:
       throw new Error(`Unknown phase31-33 tool: ${name}`);

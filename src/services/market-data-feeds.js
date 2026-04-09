@@ -382,3 +382,54 @@ export function getMarketDataStatus() {
     ],
   };
 }
+
+/**
+ * Check and return triggered price alerts for an agent.
+ * Compares current simulated/cached prices against alert thresholds.
+ */
+export async function checkAlerts({ agent_id }) {
+  if (!agent_id) throw new Error("agent_id is required");
+
+  const alerts = db.prepare(`
+    SELECT * FROM price_alerts WHERE agent_id = ? AND triggered = 0
+  `).all(agent_id);
+
+  if (!alerts.length) {
+    return { agent_id, triggered_alerts: [], pending_alerts: 0, message: "No active alerts" };
+  }
+
+  const symbols = [...new Set(alerts.map(a => a.symbol))];
+  const priceResult = await getPrice({ symbols, include_change: true });
+  const triggered = [];
+
+  for (const alert of alerts) {
+    const data = priceResult.prices[alert.symbol];
+    if (!data || !data.price_usd) continue;
+
+    let shouldTrigger = false;
+    if (alert.condition === "above" && data.price_usd > alert.threshold) shouldTrigger = true;
+    if (alert.condition === "below" && data.price_usd < alert.threshold) shouldTrigger = true;
+    if (alert.condition === "change_pct" && Math.abs(data.change_24h || 0) > alert.threshold) shouldTrigger = true;
+
+    if (shouldTrigger) {
+      db.prepare("UPDATE price_alerts SET triggered = 1 WHERE id = ?").run(alert.id);
+      triggered.push({
+        alert_id: alert.id,
+        symbol: alert.symbol,
+        condition: alert.condition,
+        threshold: alert.threshold,
+        current_price: data.price_usd,
+        change_24h: data.change_24h,
+        triggered_at: new Date().toISOString(),
+      });
+    }
+  }
+
+  return {
+    agent_id,
+    triggered_alerts: triggered,
+    trigger_count: triggered.length,
+    pending_alerts: alerts.length - triggered.length,
+    live_mode: LIVE_MODE,
+  };
+}

@@ -412,3 +412,39 @@ export function getOutcomeBillingDashboard() {
     signal: "Intercom charges $0.99/resolved ticket. HiveAgent enables any agent to monetize outcomes at scale.",
   };
 }
+
+/**
+ * Get earnings summary for a specific agent (as provider or buyer).
+ */
+export function getAgentEarnings({ agent_id }) {
+  if (!agent_id) throw new Error("agent_id is required");
+
+  const asProvider = db.prepare(`
+    SELECT outcome_type, COUNT(*) as contracts, SUM(outcomes_delivered) as delivered,
+           SUM(total_paid * (1 - ?)) as net_earned
+    FROM outcome_contracts WHERE provider_agent_id = ? GROUP BY outcome_type
+  `).all(PLATFORM_FEE_PCT, agent_id);
+
+  const asBuyer = db.prepare(`
+    SELECT outcome_type, COUNT(*) as contracts, SUM(outcomes_delivered) as purchased,
+           SUM(total_paid) as total_spent
+    FROM outcome_contracts WHERE buyer_agent_id = ? GROUP BY outcome_type
+  `).all(agent_id);
+
+  const totalEarned = asProvider.reduce((s, r) => s + (r.net_earned || 0), 0);
+  const totalSpent = asBuyer.reduce((s, r) => s + (r.total_spent || 0), 0);
+
+  return {
+    agent_id,
+    as_provider: {
+      breakdown: asProvider,
+      total_net_earned_usdc: parseFloat(totalEarned.toFixed(4)),
+    },
+    as_buyer: {
+      breakdown: asBuyer,
+      total_spent_usdc: parseFloat(totalSpent.toFixed(4)),
+    },
+    net_position_usdc: parseFloat((totalEarned - totalSpent).toFixed(4)),
+    live_mode: LIVE_MODE,
+  };
+}
