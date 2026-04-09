@@ -87,6 +87,7 @@ import { phase24Tools, handlePhase24Tool } from "./mcp-tools-phase24.js";
 import { phase25Tools, handlePhase25Tool } from "./mcp-tools-phase25.js";
 import { phase26Tools, handlePhase26Tool } from "./mcp-tools-phase26.js";
 import { phase2730Tools, handlePhase2730Tool } from "./mcp-tools-phase27-30.js";
+import { phase3133Tools, handlePhase3133Tool } from "./mcp-tools-phase31-33.js";
 import { welcomeTools, handleWelcomeTool } from "./mcp-tools-welcome.js";
 // Pharma Transactions (Rx, Claims, DSCSA, Global Pricing, Narcotics)
 import { pharmaTxTools, handlePharmaTxTool } from "./mcp-tools-pharma-tx.js";
@@ -1034,7 +1035,7 @@ export function handleBrokerTool(name, args = {}) {
   }
 }
 
-export const tools = [...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools];
+export const tools = [...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1622,6 +1623,26 @@ export async function handleTool(name, args) {
     case "orchestration_hire_agent":      return handlePhase2730Tool(name, args);
     case "orchestration_complete_task":   return handlePhase2730Tool(name, args);
     case "orchestration_dashboard":       return handlePhase2730Tool(name, args);
+
+    // Phase 31-33: Outcome Billing, Agent Reputation, Market Data Feeds
+    case "outcome_create_contract":    return handlePhase3133Tool(name, args);
+    case "outcome_report":             return handlePhase3133Tool(name, args);
+    case "outcome_verify":             return handlePhase3133Tool(name, args);
+    case "outcome_dispute":            return handlePhase3133Tool(name, args);
+    case "outcome_contract_status":    return handlePhase3133Tool(name, args);
+    case "outcome_billing_dashboard":  return handlePhase3133Tool(name, args);
+    case "reputation_get":             return handlePhase3133Tool(name, args);
+    case "reputation_record_event":    return handlePhase3133Tool(name, args);
+    case "reputation_endorse":         return handlePhase3133Tool(name, args);
+    case "reputation_stake":           return handlePhase3133Tool(name, args);
+    case "reputation_verify_identity": return handlePhase3133Tool(name, args);
+    case "reputation_leaderboard":     return handlePhase3133Tool(name, args);
+    case "market_get_price":           return handlePhase3133Tool(name, args);
+    case "market_get_price_feed":      return handlePhase3133Tool(name, args);
+    case "market_set_alert":           return handlePhase3133Tool(name, args);
+    case "market_get_summary":         return handlePhase3133Tool(name, args);
+    case "market_get_onchain_metrics": return handlePhase3133Tool(name, args);
+    case "market_data_status":         return handlePhase3133Tool(name, args);
 
     default:
       // Try Phase 2 (AI-requested) tools, then Phase 3 (verticals), then Phase 6 (money)
