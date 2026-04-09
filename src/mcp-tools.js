@@ -86,6 +86,7 @@ import { phase22Tools, handlePhase22Tool } from "./mcp-tools-phase22.js";
 import { phase24Tools, handlePhase24Tool } from "./mcp-tools-phase24.js";
 import { phase25Tools, handlePhase25Tool } from "./mcp-tools-phase25.js";
 import { phase26Tools, handlePhase26Tool } from "./mcp-tools-phase26.js";
+import { phase2730Tools, handlePhase2730Tool } from "./mcp-tools-phase27-30.js";
 import { welcomeTools, handleWelcomeTool } from "./mcp-tools-welcome.js";
 // Pharma Transactions (Rx, Claims, DSCSA, Global Pricing, Narcotics)
 import { pharmaTxTools, handlePharmaTxTool } from "./mcp-tools-pharma-tx.js";
@@ -1033,7 +1034,7 @@ export function handleBrokerTool(name, args = {}) {
   }
 }
 
-export const tools = [...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools];
+export const tools = [...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1583,6 +1584,44 @@ export async function handleTool(name, args) {
     case "hiveagent_room_lock":      return lockRoom(params.room_id);
     case "hiveagent_room_destroy":   return destroyRoom(params.room_id);
     case "hiveagent_room_stats":     return getDataRoomStats();
+
+    // Phase 27-30: PayPal ACP, Google A2A, AP2 Protocol, Agent Marketplace, Model Payments, Multi-Agent Orchestration
+    case "paypal_acp_create_order":     return handlePhase2730Tool(name, args);
+    case "paypal_acp_capture_order":    return handlePhase2730Tool(name, args);
+    case "paypal_acp_merchant_search":  return handlePhase2730Tool(name, args);
+    case "paypal_agent_toolkit":        return handlePhase2730Tool(name, args);
+    case "paypal_acp_status":           return handlePhase2730Tool(name, args);
+    case "a2a_agent_register":          return handlePhase2730Tool(name, args);
+    case "a2a_discover_agents":         return handlePhase2730Tool(name, args);
+    case "a2a_delegate_task":           return handlePhase2730Tool(name, args);
+    case "a2a_task_status":             return handlePhase2730Tool(name, args);
+    case "a2a_status":                  return handlePhase2730Tool(name, args);
+    case "ap2_wallet_create":           return handlePhase2730Tool(name, args);
+    case "ap2_pay":                     return handlePhase2730Tool(name, args);
+    case "ap2_set_policies":            return handlePhase2730Tool(name, args);
+    case "ap2_wallet_status":           return handlePhase2730Tool(name, args);
+    case "ap2_status":                  return handlePhase2730Tool(name, args);
+    case "marketplace_list_service":    return handlePhase2730Tool(name, args);
+    case "marketplace_search":          return handlePhase2730Tool(name, args);
+    case "marketplace_post_job":        return handlePhase2730Tool(name, args);
+    case "marketplace_bid":             return handlePhase2730Tool(name, args);
+    case "marketplace_accept_bid":      return handlePhase2730Tool(name, args);
+    case "marketplace_complete_job":    return handlePhase2730Tool(name, args);
+    case "marketplace_review":          return handlePhase2730Tool(name, args);
+    case "marketplace_agent_profile":   return handlePhase2730Tool(name, args);
+    case "marketplace_dashboard":       return handlePhase2730Tool(name, args);
+    case "model_deposit":               return handlePhase2730Tool(name, args);
+    case "model_infer":                 return handlePhase2730Tool(name, args);
+    case "model_balance":               return handlePhase2730Tool(name, args);
+    case "model_pricing":               return handlePhase2730Tool(name, args);
+    case "model_subscribe":             return handlePhase2730Tool(name, args);
+    case "model_payment_status":        return handlePhase2730Tool(name, args);
+    case "orchestration_create_workflow": return handlePhase2730Tool(name, args);
+    case "orchestration_run":             return handlePhase2730Tool(name, args);
+    case "orchestration_status":          return handlePhase2730Tool(name, args);
+    case "orchestration_hire_agent":      return handlePhase2730Tool(name, args);
+    case "orchestration_complete_task":   return handlePhase2730Tool(name, args);
+    case "orchestration_dashboard":       return handlePhase2730Tool(name, args);
 
     default:
       // Try Phase 2 (AI-requested) tools, then Phase 3 (verticals), then Phase 6 (money)
