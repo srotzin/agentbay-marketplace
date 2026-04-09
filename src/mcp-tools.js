@@ -103,6 +103,8 @@ import { onboardingTools, handleOnboardingTool } from "./mcp-tools-onboarding.js
 import { welcomeTools, handleWelcomeTool } from "./mcp-tools-welcome.js";
 // THE AGENT HIGHWAY — enter with a task, exit with a result (7 tools)
 import { highwayTools, handleHighwayTool } from "./mcp-tools-highway.js";
+// THE 5 ORIGINALS — Agent GDP + ERC-8183 + Control Plane + Credit Score + Newspaper (31 tools)
+import { originalsTools, handleOriginalsTool } from "./mcp-tools-originals.js";
 // Crossmint + MC/BVNK + EU AI Act + Colorado AI + AgentCore + Visa CLI + Tempo + Visa Agentic Ready (Phase 55-62)
 import { phase5562Tools, handlePhase5562Tool } from "./mcp-tools-phase55-62.js";
 // THE BAIT: HiveMemory + HiveEval + HiveRelay + HivePulse + HiveContext (30 hooks)
@@ -1053,7 +1055,7 @@ export function handleBrokerTool(name, args = {}) {
   }
 }
 
-export const tools = [...highwayTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase5562Tools, ...onboardingTools];
+export const tools = [...highwayTools, ...originalsTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase5562Tools, ...onboardingTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1853,6 +1855,44 @@ export async function handleTool(name, args) {
     case "highway_exit":      return await handleHighwayTool(name, args);
     case "highway_status":    return await handleHighwayTool(name, args);
     case "highway_routes":    return await handleHighwayTool(name, args);
+
+    // ─── THE 5 ORIGINALS ─────────────────────────────────────────────────────────
+    // GDP
+    case "gdp_record":          return handleOriginalsTool(name, args);
+    case "gdp_agent_profile":   return handleOriginalsTool(name, args);
+    case "gdp_report":          return handleOriginalsTool(name, args);
+    case "gdp_sector":          return handleOriginalsTool(name, args);
+    case "gdp_forecast":        return handleOriginalsTool(name, args);
+    case "gdp_status":          return handleOriginalsTool(name, args);
+    // ERC-8183
+    case "job_create":          return handleOriginalsTool(name, args);
+    case "job_fund":            return handleOriginalsTool(name, args);
+    case "job_submit":          return handleOriginalsTool(name, args);
+    case "job_evaluate":        return handleOriginalsTool(name, args);
+    case "job_dispute":         return handleOriginalsTool(name, args);
+    case "job_status":          return handleOriginalsTool(name, args);
+    case "job_market":          return handleOriginalsTool(name, args);
+    // Control Plane
+    case "cp_register":         return handleOriginalsTool(name, args);
+    case "cp_evaluate":         return handleOriginalsTool(name, args);
+    case "cp_mandate_update":   return handleOriginalsTool(name, args);
+    case "cp_report":           return handleOriginalsTool(name, args);
+    case "cp_set_policy":       return handleOriginalsTool(name, args);
+    case "cp_status":           return handleOriginalsTool(name, args);
+    // Credit Score
+    case "credit_score":        return handleOriginalsTool(name, args);
+    case "credit_event":        return handleOriginalsTool(name, args);
+    case "credit_check":        return handleOriginalsTool(name, args);
+    case "credit_dispute":      return handleOriginalsTool(name, args);
+    case "credit_market":       return handleOriginalsTool(name, args);
+    case "credit_status":       return handleOriginalsTool(name, args);
+    // Newspaper
+    case "news_headlines":      return handleOriginalsTool(name, args);
+    case "news_subscribe":      return handleOriginalsTool(name, args);
+    case "news_article":        return handleOriginalsTool(name, args);
+    case "news_alert":          return handleOriginalsTool(name, args);
+    case "news_publish":        return handleOriginalsTool(name, args);
+    case "news_status":         return handleOriginalsTool(name, args);
 
     // ─── THE BAIT: HiveMemory + HiveEval + HiveRelay + HivePulse + HiveContext ──
     case "memory_set":           return handleBaitTool(name, args);
