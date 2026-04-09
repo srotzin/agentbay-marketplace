@@ -103,6 +103,8 @@ import { onboardingTools, handleOnboardingTool } from "./mcp-tools-onboarding.js
 import { welcomeTools, handleWelcomeTool } from "./mcp-tools-welcome.js";
 // THE AGENT HIGHWAY — enter with a task, exit with a result (7 tools)
 import { highwayTools, handleHighwayTool } from "./mcp-tools-highway.js";
+// Crossmint + MC/BVNK + EU AI Act + Colorado AI + AgentCore + Visa CLI + Tempo + Visa Agentic Ready (Phase 55-62)
+import { phase5562Tools, handlePhase5562Tool } from "./mcp-tools-phase55-62.js";
 // THE BAIT: HiveMemory + HiveEval + HiveRelay + HivePulse + HiveContext (30 hooks)
 import { baitTools, handleBaitTool } from "./mcp-tools-bait.js";
 // Pharma Transactions (Rx, Claims, DSCSA, Global Pricing, Narcotics)
@@ -1051,7 +1053,7 @@ export function handleBrokerTool(name, args = {}) {
   }
 }
 
-export const tools = [...highwayTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...onboardingTools];
+export const tools = [...highwayTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase5562Tools, ...onboardingTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1884,6 +1886,47 @@ export async function handleTool(name, args) {
 
     // Phase 55 — Live Intelligence
     case "company_linkedin_profile": return await handlePhase55Tool(name, args);
+
+    // Phase 55-62 — Crossmint, MC/BVNK Bridge, EU AI Act, Colorado AI, AgentCore, Visa CLI, Tempo, Visa Agentic Ready
+    case "crossmint_wallet_create":         return await handlePhase5562Tool(name, args);
+    case "crossmint_card_issue":            return await handlePhase5562Tool(name, args);
+    case "crossmint_card_charge":           return await handlePhase5562Tool(name, args);
+    case "crossmint_card_statement":        return await handlePhase5562Tool(name, args);
+    case "crossmint_spending_controls":     return await handlePhase5562Tool(name, args);
+    case "crossmint_status":               return await handlePhase5562Tool(name, args);
+    case "mc_bvnk_wallet_create":          return await handlePhase5562Tool(name, args);
+    case "mc_bvnk_smart_route":            return await handlePhase5562Tool(name, args);
+    case "mc_bvnk_convert_rails":          return await handlePhase5562Tool(name, args);
+    case "mc_bvnk_unified_balance":        return await handlePhase5562Tool(name, args);
+    case "mc_bvnk_bridge_status":          return await handlePhase5562Tool(name, args);
+    case "eu_ai_act_assess":               return await handlePhase5562Tool(name, args);
+    case "eu_ai_act_generate_docs":        return await handlePhase5562Tool(name, args);
+    case "eu_ai_act_register":             return await handlePhase5562Tool(name, args);
+    case "eu_ai_act_gap_analysis":         return await handlePhase5562Tool(name, args);
+    case "eu_ai_act_status":               return await handlePhase5562Tool(name, args);
+    case "colorado_ai_assess":             return await handlePhase5562Tool(name, args);
+    case "colorado_generate_disclosure":   return await handlePhase5562Tool(name, args);
+    case "colorado_impact_assessment":     return await handlePhase5562Tool(name, args);
+    case "colorado_status":               return await handlePhase5562Tool(name, args);
+    case "agentcore_deploy":              return await handlePhase5562Tool(name, args);
+    case "agentcore_memory":              return await handlePhase5562Tool(name, args);
+    case "agentcore_identity":            return await handlePhase5562Tool(name, args);
+    case "agentcore_gateway":             return await handlePhase5562Tool(name, args);
+    case "agentcore_status":              return await handlePhase5562Tool(name, args);
+    case "visa_cli_register":             return await handlePhase5562Tool(name, args);
+    case "visa_cli_pay":                  return await handlePhase5562Tool(name, args);
+    case "visa_cli_statement":            return await handlePhase5562Tool(name, args);
+    case "visa_cli_status":               return await handlePhase5562Tool(name, args);
+    case "tempo_wallet_create":           return await handlePhase5562Tool(name, args);
+    case "tempo_pay":                     return await handlePhase5562Tool(name, args);
+    case "tempo_stream":                  return await handlePhase5562Tool(name, args);
+    case "tempo_mpp_session":             return await handlePhase5562Tool(name, args);
+    case "tempo_status":                  return await handlePhase5562Tool(name, args);
+    case "visa_agentic_ready_enroll":     return await handlePhase5562Tool(name, args);
+    case "visa_agentic_ready_test":       return await handlePhase5562Tool(name, args);
+    case "visa_agentic_ready_score":      return await handlePhase5562Tool(name, args);
+    case "visa_agentic_ready_packet":     return await handlePhase5562Tool(name, args);
+    case "visa_agentic_ready_status":     return await handlePhase5562Tool(name, args);
 
     // Onboarding tools
     case "agent_onboarding_status":
