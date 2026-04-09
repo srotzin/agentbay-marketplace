@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.json",
   "name": "com.hiveagentiq/agentzon",
   "title": "HiveAgent — The Agentzon",
-  "description": "The largest MCP marketplace for AI agents. 835 tools across 40+ industry verticals — insurance claims, legal document review, healthcare prior auth, KYC/AML, real estate valuations, pharma formularies, DeFi trading, ZK privacy proofs, A2A tokenization rails, agent self-custody, PDF forms, and more. Built-in USDC payments on Base L2. Sandbox mode (free testing), rate limits, cost manifest in every tool schema. Auto-register identity on first connect. No API key required.",
+  "description": "The largest MCP marketplace for AI agents. 908 tools across 45+ industry verticals — insurance claims, legal document review, healthcare prior auth, KYC/AML, real estate valuations, pharma formularies, DeFi trading, ZK privacy proofs, A2A tokenization rails, agent self-custody, PDF forms, and more. Built-in USDC payments on Base L2. Sandbox mode (free testing), rate limits, cost manifest in every tool schema. Auto-register identity on first connect. No API key required.",
   "version": "1.0.0",
   "remotes": [
     {

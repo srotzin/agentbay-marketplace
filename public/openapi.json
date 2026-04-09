@@ -1,17 +1,26 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "HiveAgent — The Agentzon",
-    "description": "The largest MCP marketplace for AI agents. 835 tools across 40+ industry verticals. Insurance, legal, healthcare, KYC, real estate, pharma, DeFi, ZK privacy, A2A tokenization rails, agent self-custody. USDC payments on Base L2. Sandbox mode, rate limits, cost manifest in every tool schema.",
+    "title": "HiveAgent \u2014 The Agentzon",
+    "description": "The largest MCP marketplace for AI agents. 908 tools across 40+ industry verticals. Insurance, legal, healthcare, KYC, real estate, pharma, DeFi, ZK privacy, A2A tokenization rails, agent self-custody. USDC payments on Base L2. Sandbox mode, rate limits, cost manifest in every tool schema.",
     "version": "1.0.0",
-    "contact": { "email": "srotzin@me.com", "url": "https://hiveagentiq.com" },
-    "license": { "name": "MIT", "url": "https://github.com/fireflyfabs/agentbay-marketplace/blob/master/LICENSE" },
+    "contact": {
+      "email": "srotzin@me.com",
+      "url": "https://hiveagentiq.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/fireflyfabs/agentbay-marketplace/blob/master/LICENSE"
+    },
     "x-mcp-endpoint": "https://hiveagentiq.com/mcp",
-    "x-tool-count": 835,
-    "x-verticals": 40
+    "x-tool-count": 908,
+    "x-verticals": 45
   },
   "servers": [
-    { "url": "https://hiveagentiq.com", "description": "Production" }
+    {
+      "url": "https://hiveagentiq.com",
+      "description": "Production"
+    }
   ],
   "paths": {
     "/mcp": {
@@ -19,7 +28,9 @@
         "summary": "MCP JSON-RPC 2.0 endpoint",
         "description": "Main MCP endpoint. Supports tools/list, tools/call. Add ?sandbox=true for free mock testing.",
         "operationId": "mcp_jsonrpc",
-        "tags": ["MCP"],
+        "tags": [
+          "MCP"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -27,34 +38,172 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "jsonrpc": { "type": "string", "example": "2.0" },
-                  "id": { "type": "integer", "example": 1 },
-                  "method": { "type": "string", "example": "tools/list", "enum": ["tools/list","tools/call"] },
-                  "params": { "type": "object" }
+                  "jsonrpc": {
+                    "type": "string",
+                    "example": "2.0"
+                  },
+                  "id": {
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "method": {
+                    "type": "string",
+                    "example": "tools/list",
+                    "enum": [
+                      "tools/list",
+                      "tools/call"
+                    ]
+                  },
+                  "params": {
+                    "type": "object"
+                  }
                 },
-                "required": ["jsonrpc","id","method"]
+                "required": [
+                  "jsonrpc",
+                  "id",
+                  "method"
+                ]
               }
             }
           }
         },
         "responses": {
-          "200": { "description": "JSON-RPC response" }
+          "200": {
+            "description": "JSON-RPC response"
+          }
         }
       }
     },
-    "/v1/sandbox": { "get": { "summary": "Sandbox mode info", "tags": ["Platform"], "responses": { "200": { "description": "Sandbox config" } } } },
-    "/v1/rate-limits": { "get": { "summary": "Rate limit tiers", "tags": ["Platform"], "responses": { "200": { "description": "Rate limit info" } } } },
-    "/v1/billing": { "get": { "summary": "Billing dashboard", "tags": ["Platform"], "responses": { "200": { "description": "Billing info" } } } },
-    "/v1/jobs": { "post": { "summary": "Async job submission", "tags": ["Platform"], "responses": { "200": { "description": "Job queued" } } } },
-    "/v1/register": { "post": { "summary": "Agent registration", "tags": ["Platform"], "responses": { "200": { "description": "Agent registered" } } } },
-    "/v1/intent": { "post": { "summary": "Intent routing", "tags": ["Platform"], "responses": { "200": { "description": "Intent matched" } } } },
-    "/v1/settle": { "post": { "summary": "USDC settlement (ATS-1)", "tags": ["Payments"], "responses": { "200": { "description": "Settlement processed" } } } },
-    "/v1/tokens": { "get": { "summary": "Supported tokens", "tags": ["Payments"], "responses": { "200": { "description": "Token list" } } } },
-    "/v1/capabilities": { "get": { "summary": "Platform capabilities", "tags": ["Platform"], "responses": { "200": { "description": "Capabilities" } } } }
+    "/v1/sandbox": {
+      "get": {
+        "summary": "Sandbox mode info",
+        "tags": [
+          "Platform"
+        ],
+        "responses": {
+          "200": {
+            "description": "Sandbox config"
+          }
+        }
+      }
+    },
+    "/v1/rate-limits": {
+      "get": {
+        "summary": "Rate limit tiers",
+        "tags": [
+          "Platform"
+        ],
+        "responses": {
+          "200": {
+            "description": "Rate limit info"
+          }
+        }
+      }
+    },
+    "/v1/billing": {
+      "get": {
+        "summary": "Billing dashboard",
+        "tags": [
+          "Platform"
+        ],
+        "responses": {
+          "200": {
+            "description": "Billing info"
+          }
+        }
+      }
+    },
+    "/v1/jobs": {
+      "post": {
+        "summary": "Async job submission",
+        "tags": [
+          "Platform"
+        ],
+        "responses": {
+          "200": {
+            "description": "Job queued"
+          }
+        }
+      }
+    },
+    "/v1/register": {
+      "post": {
+        "summary": "Agent registration",
+        "tags": [
+          "Platform"
+        ],
+        "responses": {
+          "200": {
+            "description": "Agent registered"
+          }
+        }
+      }
+    },
+    "/v1/intent": {
+      "post": {
+        "summary": "Intent routing",
+        "tags": [
+          "Platform"
+        ],
+        "responses": {
+          "200": {
+            "description": "Intent matched"
+          }
+        }
+      }
+    },
+    "/v1/settle": {
+      "post": {
+        "summary": "USDC settlement (ATS-1)",
+        "tags": [
+          "Payments"
+        ],
+        "responses": {
+          "200": {
+            "description": "Settlement processed"
+          }
+        }
+      }
+    },
+    "/v1/tokens": {
+      "get": {
+        "summary": "Supported tokens",
+        "tags": [
+          "Payments"
+        ],
+        "responses": {
+          "200": {
+            "description": "Token list"
+          }
+        }
+      }
+    },
+    "/v1/capabilities": {
+      "get": {
+        "summary": "Platform capabilities",
+        "tags": [
+          "Platform"
+        ],
+        "responses": {
+          "200": {
+            "description": "Capabilities"
+          }
+        }
+      }
+    }
   },
   "tags": [
-    { "name": "MCP", "description": "MCP JSON-RPC 2.0 protocol" },
-    { "name": "Platform", "description": "Platform management endpoints" },
-    { "name": "Payments", "description": "USDC settlement and payment rails" }
+    {
+      "name": "MCP",
+      "description": "MCP JSON-RPC 2.0 protocol"
+    },
+    {
+      "name": "Platform",
+      "description": "Platform management endpoints"
+    },
+    {
+      "name": "Payments",
+      "description": "USDC settlement and payment rails"
+    }
   ]
 }
