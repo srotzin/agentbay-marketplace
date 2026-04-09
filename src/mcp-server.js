@@ -155,8 +155,8 @@ router.post("/", async (req, res) => {
             serverInfo: {
               name: "HiveAgent",
               version: "1.0.0",
-              description: "The Agentzon — 758 tools, 36 verticals. Marketplace, escrow, DeFi, legal, healthcare, insurance, construction, trades, and more. USDC payments on Base L2.",
-              register:  "POST https://hiveagentiq.com/v1/register for 5 USDC welcome bonus",
+              description: "HiveAgent — The operating system for the agentic economy. 927 tools, 40 verticals. Every payment rail: Visa ICC, Mastercard Agent Pay, Stripe, BVNK, Circle CPN, OpenAI ACP, Google UCP. USDC on Base. Stablecoin yield. Per-second payment streaming. Agent identity. KYA. Compliance. 95/100 Smithery.",
+              register:  "POST https://hiveagentiq.com/v1/register — get instant access to 927 tools",
               intent:    "POST https://hiveagentiq.com/v1/intent — describe any task, get instant execution plan",
               discover:  "GET https://hiveagentiq.com/v1/discover?q=your+query",
               broker:    "hiveagentiq.com — the Agentzon",
@@ -227,8 +227,8 @@ router.post("/", async (req, res) => {
         // Include broker discovery info so any agent sees it on first tools/list
         response.serverInfo = {
           name:     "HiveAgent",
-          description: "The Agentzon — 758 tools, 36 verticals",
-          register: "POST https://hiveagentiq.com/v1/register for 5 USDC welcome bonus",
+          description: "HiveAgent — 927 tools, 40 verticals. Every payment rail + agent identity + compliance + yield. The operating system for the agentic economy.",
+          register: "POST https://hiveagentiq.com/v1/register — get instant access to 927 tools",
           intent:   "POST https://hiveagentiq.com/v1/intent — describe any task, get instant execution plan",
           discover: "GET https://hiveagentiq.com/v1/discover?q=your+query",
           broker:   "hiveagentiq.com — the Agentzon",
@@ -430,7 +430,7 @@ router.get("/", (_req, res) => {
   res.json({
     name: "HiveAgent MCP Server",
     version: "1.0.0",
-    description: "The Agentzon — 495 tools, 81 modules, 12 industry verticals. The Amazon for AI agents.",
+    description: "HiveAgent — 927 tools, 40 verticals. The operating system for the agentic economy. hiveagentiq.com",
     protocol: "MCP (JSON-RPC 2.0 over HTTP)",
     tools: tools.length,
     endpoint: "POST /mcp",

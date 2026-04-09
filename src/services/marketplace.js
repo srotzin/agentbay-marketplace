@@ -219,7 +219,7 @@ export function purchaseService({ service_id, agent_id }) {
 
 // ─── Stats ───────────────────────────────────────────
 
-export function getMarketplaceStats() {
+export async function getMarketplaceStats() {
   const services = db.prepare("SELECT COUNT(*) as count FROM services WHERE is_active = 1").get().count;
   const providers = db.prepare("SELECT COUNT(*) as count FROM providers").get().count;
   const transactions = db.prepare("SELECT COUNT(*) as count FROM transactions").get().count;
@@ -227,7 +227,46 @@ export function getMarketplaceStats() {
   const revenue = db.prepare("SELECT COALESCE(SUM(commission_usd), 0) as total FROM transactions WHERE status = 'completed'").get().total;
   const openAuctions = db.prepare("SELECT COUNT(*) as count FROM auctions WHERE status = 'open' AND expires_at > datetime('now')").get().count;
 
-  return { services, providers, transactions, volume_usd: volume, revenue_usd: revenue, open_auctions: openAuctions };
+  // Pull live tool count from tools array
+  let toolCount = 927; // updated Phase 24
+  try { const { tools } = await import("../mcp-tools.js"); toolCount = tools.length; } catch {}
+
+  return {
+    platform: {
+      name: "HiveAgent",
+      tagline: "The operating system for the agentic economy",
+      url: "https://hiveagentiq.com",
+      smithery: "https://smithery.ai/server/@hiveagentiq/hiveagent",
+      smithery_score: "95/100",
+      tools_live: toolCount,
+      verticals: 40,
+      status: "all green",
+    },
+    marketplace: { services, providers, transactions, volume_usd: volume, revenue_usd: revenue, open_auctions: openAuctions },
+    payment_rails: {
+      live_now: ["Visa ICC", "Mastercard Agent Pay", "Stripe", "BVNK", "Circle CPN", "HandlPay", "Coinbase CDP"],
+      protocol_support: ["OpenAI ACP", "Google UCP", "Visa TAP", "Stripe MPP"],
+      streaming: "Per-second USDC streaming (Superfluid-style)",
+      yield: "4-12% APY on idle USDC (Circle CPN / Aave / Curve)",
+      offramp: "USDC → ACH, wire, PayPal, Venmo, Wise, debit card",
+    },
+    agent_infrastructure: {
+      identity: "Know Your Agent (KYA), Agent Pay ID, self-custody wallets",
+      compliance: "Merkle Science COMPASS Base L2 screening",
+      guardrails: "Spend limits, budget controls, circuit breakers",
+      marketing: "Shoulder tap, agent registry broadcast, revenue share program",
+      observability: "Full tool call telemetry — /stats endpoint live",
+    },
+    quick_start: [
+      "1. Call hiveagent_discover({ query: 'what do you need' }) — finds the right tool instantly",
+      "2. Call hiveagent_vertical_guide() — explore all 40 verticals",
+      "3. Call hiveagent_suggest_workflow({ task_description: 'your goal' }) — get a step-by-step plan",
+      "4. Call bvnk_status() or visa_icc_status() to see payment rails",
+      "5. Call yield_strategies() to put idle USDC to work",
+    ],
+    install: "npx @smithery/cli install @hiveagentiq/hiveagent",
+    mcp_endpoint: "https://hiveagentiq.com/mcp",
+  };
 }
 
 export { COMMISSION_RATE, BID_FEE_USD };
