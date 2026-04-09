@@ -1118,6 +1118,67 @@ export async function handleTool(name, args) {
     case "hiveagent_stats":
       return await mkt.getMarketplaceStats();
 
+    // ─── Welcome & Marketing Tools (Phase 22 + Welcome) ────────────────────
+    case "hiveagent_welcome":
+    case "hiveagent_capability_map":
+    case "hiveagent_why_stay":
+      return handleWelcomeTool(name, args);
+
+    case "hiveagent_broadcast":
+    case "hiveagent_pitch_agent":
+    case "hiveagent_shoulder_tap":
+    case "hiveagent_announce_launch":
+    case "hiveagent_pitch_revenue_share":
+    case "hiveagent_marketing_dashboard":
+      return handlePhase22Tool(name, args);
+
+    // ─── Phase 24: Mastercard + Stripe + ACP + UCP ─────────────────────────
+    case "mc_agent_register":
+    case "mc_agent_pay":
+    case "mc_insight_token":
+    case "mc_status":
+    case "stripe_customer_create":
+    case "stripe_payment_intent":
+    case "stripe_subscription_create":
+    case "stripe_invoice_create":
+    case "stripe_checkout_session":
+    case "stripe_customers_list":
+    case "stripe_refund_create":
+    case "stripe_status":
+    case "acp_product_feed":
+    case "acp_session_create":
+    case "acp_session_complete":
+    case "acp_products_list":
+    case "acp_status":
+    case "ucp_merchant_register":
+    case "ucp_checkout_create":
+    case "ucp_checkout_complete":
+    case "ucp_identity_link":
+    case "ucp_order_status":
+    case "ucp_status":
+      return handlePhase24Tool(name, args);
+
+    // ─── Phase 20: BVNK ────────────────────────────────────────────────────
+    case "bvnk_channel_create":
+    case "bvnk_channel_list":
+    case "bvnk_channel_get":
+    case "bvnk_payin_create":
+    case "bvnk_payout_create":
+    case "bvnk_quote_create":
+    case "bvnk_quote_accept":
+    case "bvnk_wallet_balances":
+    case "bvnk_status":
+      return handlePhase20Tool(name, args);
+
+    // ─── Phase 21: Visa ICC ────────────────────────────────────────────────
+    case "visa_icc_agent_register":
+    case "visa_icc_token_request":
+    case "visa_icc_submit_instruction":
+    case "visa_icc_checkout":
+    case "visa_icc_spend_controls":
+    case "visa_icc_status":
+      return handlePhase21Tool(name, args);
+
     // ─── Escrow & Settlement ──────────────────
     case "hiveagent_escrow_lock":
       return settlement.lockEscrow(args);
@@ -1596,6 +1657,11 @@ export async function handleTool(name, args) {
       }
       try {
         return await handlePhase19Tool(name, args);
+      } catch (e) {
+        if (!e.message?.includes('Unknown')) throw e;
+      }
+      try {
+        return await handlePhase20Tool(name, args);
       } catch (e) {
         if (!e.message?.includes('Unknown')) throw e;
       }
