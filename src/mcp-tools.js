@@ -91,6 +91,7 @@ import { phase3133Tools, handlePhase3133Tool } from "./mcp-tools-phase31-33.js";
 import { phase3436Tools, handlePhase3436Tool } from "./mcp-tools-phase34-36.js";
 import { phase3739Tools, handlePhase3739Tool } from "./mcp-tools-phase37-39.js";
 import { phase4042Tools, handlePhase4042Tool } from "./mcp-tools-phase40-42.js";
+import { phase4345Tools, handlePhase4345Tool } from "./mcp-tools-phase43-45.js";
 import { welcomeTools, handleWelcomeTool } from "./mcp-tools-welcome.js";
 // Pharma Transactions (Rx, Claims, DSCSA, Global Pricing, Narcotics)
 import { pharmaTxTools, handlePharmaTxTool } from "./mcp-tools-pharma-tx.js";
@@ -1038,7 +1039,7 @@ export function handleBrokerTool(name, args = {}) {
   }
 }
 
-export const tools = [...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools];
+export const tools = [...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1723,6 +1724,29 @@ export async function handleTool(name, args) {
     case "comm_accept_negotiation":    return handlePhase4042Tool(name, args);
     case "comm_broadcast":             return handlePhase4042Tool(name, args);
     case "comm_agent_directory":       return handlePhase4042Tool(name, args);
+
+    // Phase 43 — Agent Credit
+    case "credit_get_score":            return handlePhase4345Tool(name, args);
+    case "credit_request_loan":         return await handlePhase4345Tool(name, args);
+    case "credit_repay_loan":           return handlePhase4345Tool(name, args);
+    case "credit_dashboard":            return handlePhase4345Tool(name, args);
+    case "credit_leaderboard":          return handlePhase4345Tool(name, args);
+
+    // Phase 44 — Decentralized Identity
+    case "did_create":                  return handlePhase4345Tool(name, args);
+    case "did_issue_credential":        return handlePhase4345Tool(name, args);
+    case "did_verify_credential":       return handlePhase4345Tool(name, args);
+    case "did_create_zk_proof":         return handlePhase4345Tool(name, args);
+    case "did_verify_zk_proof":         return handlePhase4345Tool(name, args);
+    case "did_get_profile":             return handlePhase4345Tool(name, args);
+
+    // Phase 45 — Agent Deployment
+    case "deploy_agent":                return await handlePhase4345Tool(name, args);
+    case "deploy_status":               return handlePhase4345Tool(name, args);
+    case "deploy_rollback":             return await handlePhase4345Tool(name, args);
+    case "deploy_set_sla":              return handlePhase4345Tool(name, args);
+    case "deploy_check_sla":            return await handlePhase4345Tool(name, args);
+    case "deploy_dashboard":            return handlePhase4345Tool(name, args);
 
     default:
       // Try Phase 2 (AI-requested) tools, then Phase 3 (verticals), then Phase 6 (money)
