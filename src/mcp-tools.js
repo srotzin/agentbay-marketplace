@@ -85,6 +85,7 @@ import { phase21Tools, handlePhase21Tool } from "./mcp-tools-phase21.js";
 import { phase22Tools, handlePhase22Tool } from "./mcp-tools-phase22.js";
 import { phase24Tools, handlePhase24Tool } from "./mcp-tools-phase24.js";
 import { phase25Tools, handlePhase25Tool } from "./mcp-tools-phase25.js";
+import { phase26Tools, handlePhase26Tool } from "./mcp-tools-phase26.js";
 import { welcomeTools, handleWelcomeTool } from "./mcp-tools-welcome.js";
 // Pharma Transactions (Rx, Claims, DSCSA, Global Pricing, Narcotics)
 import { pharmaTxTools, handlePharmaTxTool } from "./mcp-tools-pharma-tx.js";
