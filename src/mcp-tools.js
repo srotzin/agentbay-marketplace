@@ -99,6 +99,8 @@ import { phase48Tools, handlePhase48Tool } from "./mcp-tools-phase48.js";
 import { phase4951Tools, handlePhase4951Tool } from "./mcp-tools-phase49-51.js";
 import { phase5254Tools, handlePhase5254Tool } from "./mcp-tools-phase52-54.js";
 import { welcomeTools, handleWelcomeTool } from "./mcp-tools-welcome.js";
+// THE BAIT: HiveMemory + HiveEval + HiveRelay + HivePulse + HiveContext (30 hooks)
+import { baitTools, handleBaitTool } from "./mcp-tools-bait.js";
 // Pharma Transactions (Rx, Claims, DSCSA, Global Pricing, Narcotics)
 import { pharmaTxTools, handlePharmaTxTool } from "./mcp-tools-pharma-tx.js";
 // A2A Tokenization Rails — ATS-1 token standard, multi-chain settlement, protocol router
@@ -1045,7 +1047,7 @@ export function handleBrokerTool(name, args = {}) {
   }
 }
 
-export const tools = [...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools];
+export const tools = [...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1836,6 +1838,36 @@ export async function handleTool(name, args) {
     case "content_history":          return await handlePhase5254Tool(name, args);
     case "content_appeal":           return await handlePhase5254Tool(name, args);
     case "content_stats":            return await handlePhase5254Tool(name, args);
+
+    // ─── THE BAIT: HiveMemory + HiveEval + HiveRelay + HivePulse + HiveContext ──
+    case "memory_set":           return handleBaitTool(name, args);
+    case "memory_get":           return handleBaitTool(name, args);
+    case "memory_search":        return handleBaitTool(name, args);
+    case "memory_list":          return handleBaitTool(name, args);
+    case "memory_delete":        return handleBaitTool(name, args);
+    case "memory_stats":         return handleBaitTool(name, args);
+    case "memory_status":        return handleBaitTool(name, args);
+    case "eval_score":           return handleBaitTool(name, args);
+    case "eval_compare":         return handleBaitTool(name, args);
+    case "eval_history":         return handleBaitTool(name, args);
+    case "eval_leaderboard":     return handleBaitTool(name, args);
+    case "eval_status":          return handleBaitTool(name, args);
+    case "relay_register":       return handleBaitTool(name, args);
+    case "relay_find":           return handleBaitTool(name, args);
+    case "relay_connect":        return handleBaitTool(name, args);
+    case "relay_call":           return handleBaitTool(name, args);
+    case "relay_status":         return handleBaitTool(name, args);
+    case "pulse_trace":          return handleBaitTool(name, args);
+    case "pulse_dashboard":      return handleBaitTool(name, args);
+    case "pulse_set_alert":      return handleBaitTool(name, args);
+    case "pulse_session":        return handleBaitTool(name, args);
+    case "pulse_status":         return handleBaitTool(name, args);
+    case "context_search":       return handleBaitTool(name, args);
+    case "context_stock_price":  return handleBaitTool(name, args);
+    case "context_weather":      return handleBaitTool(name, args);
+    case "context_news":         return handleBaitTool(name, args);
+    case "context_wikipedia":    return handleBaitTool(name, args);
+    case "context_status":       return handleBaitTool(name, args);
 
     default:
       // Try Phase 2 (AI-requested) tools, then Phase 3 (verticals), then Phase 6 (money)
