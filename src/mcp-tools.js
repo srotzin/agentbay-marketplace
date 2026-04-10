@@ -133,6 +133,7 @@ import { agentRecruiterTools, handleAgentRecruiterTool } from "./mcp-tools-agent
 import { circleRouterTools, handleCircleRouterTool } from "./mcp-tools-circle-router.js";
 // x402 upto metered billing — usage-based pricing for LLM inference, compute, data (Coinbase Apr 9 2026)
 import { x402UptoTools, handleX402UptoTool } from "./mcp-tools-x402-upto.js";
+import { exchangeErc8183Tools, handleExchangeErc8183Tool } from "./mcp-tools-exchange-erc8183.js";
 
 // MCP tool definitions (JSON Schema format)
 const coreTools = [
@@ -1071,7 +1072,7 @@ export function handleBrokerTool(name, args = {}) {
 }
 
 
-export const tools = [...agentRecruiterTools, ...marketingEngineTools, ...networkEffectTools, ...highwayTools, ...originalsTools, ...anthropicTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase23Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase5562Tools, ...onboardingTools, ...arcCommerceTools, ...plaidBankrTools, ...circleRouterTools, ...x402UptoTools];
+export const tools = [...agentRecruiterTools, ...marketingEngineTools, ...networkEffectTools, ...highwayTools, ...originalsTools, ...anthropicTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase23Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase5562Tools, ...onboardingTools, ...arcCommerceTools, ...plaidBankrTools, ...circleRouterTools, ...x402UptoTools, ...exchangeErc8183Tools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -2259,6 +2260,11 @@ export async function handleTool(name, args) {
       }
       try {
         return await handleX402UptoTool(name, args);
+      } catch (e) {
+        if (!e.message?.includes("Unknown")) throw e;
+      }
+      try {
+        return await handleExchangeErc8183Tool(name, args);
       } catch (e) {
         if (!e.message?.includes("Unknown")) throw e;
       }
