@@ -25,20 +25,6 @@ export const lifecycleTools = [
   // WALLET TOOLS (7)
   // ─────────────────────────────────────────────────────────────────────────
 
-  {
-    name: "wallet_create",
-    description: "Use when you need to set up a HiveAgent USDC wallet for an agent. HiveAgent becomes the wallet provider — internal transfers are instant and gas-free. Creating a wallet is FREE. Once funds are held here, agents avoid gas costs by staying on-platform.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        agent_id:    { type: "string", description: "Unique identifier for the agent that will own this wallet" },
-        agent_name:  { type: "string", description: "Human-readable display name for the agent" },
-        owner_email: { type: "string", description: "Email address of the operator / owner of this agent" },
-      },
-      required: ["agent_id", "agent_name", "owner_email"],
-    },
-    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
-  },
 
   {
     name: "wallet_deposit",
@@ -172,21 +158,6 @@ export const lifecycleTools = [
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },
 
-  {
-    name: "memory_search",
-    description: "Use when an agent needs to find memories relevant to a current task but doesn't know the exact key. Performs keyword relevance search across all stored memories. Fee: $0.002/search. Returns matches ranked by relevance score.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        agent_id:  { type: "string", description: "Agent to search memories for" },
-        query:     { type: "string", description: "Natural language or keyword query (e.g. 'shipper preference', 'CFO contact')" },
-        category:  { type: "string", enum: ["preference", "workflow_history", "learned_pattern", "contact", "credential_ref", "context"], description: "Optional: filter by memory category" },
-        limit:     { type: "integer", description: "Max results to return (default 10)", default: 10 },
-      },
-      required: ["agent_id", "query"],
-    },
-    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
-  },
 
   {
     name: "memory_workflow_history",
@@ -231,19 +202,6 @@ export const lifecycleTools = [
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },
 
-  {
-    name: "memory_delete",
-    description: "Use when you need to permanently delete a specific memory — for GDPR Article 17 right-to-erasure compliance, key rotation, or stale data cleanup. FREE. Deletion is immediate and irreversible.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        agent_id: { type: "string", description: "Agent that owns the memory" },
-        key:      { type: "string", description: "Memory key to delete" },
-      },
-      required: ["agent_id", "key"],
-    },
-    annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
-  },
 
   // ─────────────────────────────────────────────────────────────────────────
   // INTENT ROUTER TOOLS (5)

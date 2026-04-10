@@ -1183,45 +1183,6 @@ export const phase10Tools = [
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
   },
 
-  {
-    name: "benchmark_run",
-    description:
-      "Use when you need to run a benchmark test suite against an agent and collect performance results. " +
-      "Trigger phrases: 'run benchmark', 'evaluate agent performance', 'run eval suite', " +
-      "'execute benchmark tests', 'test this agent', 'performance evaluation run'. " +
-      "Handles parallel test execution, sampling, and retries on flaky tests. " +
-      "Returns run ID, per-test results with scores, aggregate score, latency stats, and cost breakdown.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        suite_id: {
-          type: "string",
-          description: "ID of the test suite to run (from benchmark_create_suite).",
-        },
-        agent_id: {
-          type: "string",
-          description: "ID of the agent to benchmark.",
-        },
-        agent_config: {
-          type: "object",
-          description: "Agent configuration for this run — include model, temperature, system_prompt, tools_enabled.",
-          default: {},
-        },
-        sample_size: {
-          type: "integer",
-          description: "Number of test cases to sample (0 = run all).",
-          default: 0,
-        },
-        parallel: {
-          type: "boolean",
-          description: "Run test cases in parallel to reduce total run time.",
-          default: true,
-        },
-      },
-      required: ["suite_id", "agent_id"],
-    },
-    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
-  },
 
   {
     name: "benchmark_evaluate",
@@ -1272,43 +1233,6 @@ export const phase10Tools = [
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },
 
-  {
-    name: "benchmark_compare_agents",
-    description:
-      "Use when you need to compare the performance of multiple agents on the same benchmark suite. " +
-      "Trigger phrases: 'compare agents', 'which agent performs better', 'A/B test agents', " +
-      "'rank agents by benchmark score', 'model comparison', 'agent leaderboard'. " +
-      "Handles side-by-side performance comparison across accuracy, latency, cost, and safety dimensions. " +
-      "Returns ranked agent table, dimension-level comparison matrix, statistical significance, and recommendation.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        suite_id: {
-          type: "string",
-          description: "Test suite ID to run the comparison on.",
-        },
-        agent_ids: {
-          type: "array",
-          items: { type: "string" },
-          description: "List of agent IDs to compare (minimum 2).",
-          default: [],
-        },
-        dimensions: {
-          type: "array",
-          items: { type: "string", enum: ["accuracy", "latency", "cost", "safety", "instruction_following", "tool_use"] },
-          description: "Performance dimensions to compare.",
-          default: ["accuracy", "latency", "cost"],
-        },
-        run_fresh: {
-          type: "boolean",
-          description: "Run fresh benchmark tests for all agents (overrides cached results).",
-          default: false,
-        },
-      },
-      required: ["suite_id", "agent_ids"],
-    },
-    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
-  },
 
   {
     name: "benchmark_history",

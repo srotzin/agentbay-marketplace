@@ -155,11 +155,11 @@ router.post("/", async (req, res) => {
             serverInfo: {
               name: "HiveAgent",
               version: "1.0.0",
-              description: "HiveAgent — The operating system for the agentic economy. 1,000+ tools, 45+ verticals. Every payment rail: Visa ICC, Mastercard Agent Pay, Stripe, BVNK, Circle CPN, OpenAI ACP, Google UCP. USDC on Base. Stablecoin yield. Per-second payment streaming. Agent identity. KYA. Compliance. 95/100 Smithery.",
-              register:  "POST https://hiveagentiq.com/v1/register — get instant access to 1,000+ tools",
+              description: `HiveAgent — The operating system for the agentic economy. ${tools.length} tools, 45+ verticals. Payment rails (simulation-ready, live with your API keys): Visa ICC, Mastercard Agent Pay, Stripe, BVNK, x402, AP2. Agent wallets. Compliance. Smithery 95/100.`,
+              register:  `POST https://hiveagentiq.com/v1/register — get instant access to ${tools.length} tools`,
               intent:    "POST https://hiveagentiq.com/v1/intent — describe any task, get instant execution plan",
               discover:  "GET https://hiveagentiq.com/v1/discover?q=your+query",
-              broker:    "hiveagentiq.com — the Agentzon",
+              broker:    "hiveagentiq.com",
               sandbox:   "Add ?sandbox=true or header X-HiveAgent-Sandbox: true for free mock testing",
             },
           },
@@ -237,11 +237,11 @@ router.post("/", async (req, res) => {
         // Include broker discovery info so any agent sees it on first tools/list
         response.serverInfo = {
           name:     "HiveAgent",
-          description: "HiveAgent — 1,000+ tools, 45+ verticals. Every payment rail + agent identity + compliance + yield. The operating system for the agentic economy.",
-          register: "POST https://hiveagentiq.com/v1/register — get instant access to 1,000+ tools",
+          description: `HiveAgent — ${tools.length} tools, 45+ verticals. Payment rails + agent identity + compliance. The operating system for the agentic economy.`,
+          register: `POST https://hiveagentiq.com/v1/register — get instant access to ${tools.length} tools`,
           intent:   "POST https://hiveagentiq.com/v1/intent — describe any task, get instant execution plan",
           discover: "GET https://hiveagentiq.com/v1/discover?q=your+query",
-          broker:   "hiveagentiq.com — the Agentzon",
+          broker:   "hiveagentiq.com",
           sandbox:  "Add ?sandbox=true or header X-HiveAgent-Sandbox: true for free mock testing",
         };
 
@@ -451,7 +451,7 @@ router.get("/", (_req, res) => {
   res.json({
     name: "HiveAgent MCP Server",
     version: "1.0.0",
-    description: "HiveAgent — 1,000+ tools, 45+ verticals. The operating system for the agentic economy. hiveagentiq.com",
+    description: `HiveAgent — ${tools.length} tools, 45+ verticals. The operating system for the agentic economy. hiveagentiq.com`,
     protocol: "MCP (JSON-RPC 2.0 over HTTP)",
     tools: tools.length,
     endpoint: "POST /mcp",

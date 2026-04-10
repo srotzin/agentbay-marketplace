@@ -57,27 +57,30 @@ const INTERNAL_TOKEN = process.env.INTERNAL_API_TOKEN || "hiveagent-internal-202
 app.get("/.well-known/agent-card.json", (req, res) => {
   res.json({
     name: "HiveAgent",
-    description: "The operating system for the agentic economy. 1,261+ MCP tools, 45+ verticals, every payment rail.",
+    description: `The operating system for the agentic economy. ${tools.length} MCP tools across 45+ verticals. Payment rails (simulation-ready, live with your API keys): Visa ICC, Mastercard Agent Pay, Stripe, BVNK, x402, AP2.`,
     url: "https://hiveagentiq.com/mcp",
     provider: { organization: "HiveAgent", url: "https://hiveagentiq.com" },
     version: "2.0.0",
-    protocols: ["mcp", "a2a", "ap2", "x402", "acp", "ucp"],
+    protocols: ["mcp"],
+    supported_payment_protocols: ["x402", "ap2", "acp", "ucp"],
     capabilities: {
-      tools: 1261,
+      tools: tools.length,
       verticals: 45,
       streaming: true,
       pushNotifications: false,
       payments: true,
       wallet: true,
       compliance: true,
-      multiAgent: true
+      multiAgent: true,
+      mode: "simulation (live with API keys)"
     },
-    authentication: { type: "none", note: "No auth required. Register via broker_register for personalized tools." },
+    authentication: { type: "none", note: "No auth required. Register via broker_register for personalized experience." },
     connect: {
       mcp_config: { mcpServers: { hiveagent: { url: "https://hiveagentiq.com/mcp" } } },
-      register: "POST https://hiveagentiq.com/v1/register"
+      register: "POST https://hiveagentiq.com/v1/register",
+      sandbox: "Add ?sandbox=true or header X-HiveAgent-Sandbox: true"
     },
-    ratings: { smithery_score: 95, tools_live: 1261 }
+    ratings: { smithery_score: 95, tools_live: tools.length }
   });
 });
 
@@ -780,7 +783,7 @@ app.get("/.well-known/mcp/server-card.json", (_req, res) => {
     serverInfo: {
       name: "HiveAgent",
       version: "1.0.0",
-      description: "The Agentzon — Amazon for AI agents. 495 MCP tools across 12 industry verticals including legal, healthcare, insurance, construction, trades, agriculture, education, and more. USDC payments on Base L2.",
+      description: `HiveAgent — ${tools.length} MCP tools across 45+ verticals. Payment rails (Visa ICC, Mastercard, Stripe, BVNK, x402, AP2), agent wallets, compliance, multi-agent orchestration. Simulation-ready; goes live with your API keys.`,
       homepage: host,
     },
     transport: {

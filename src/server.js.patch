@@ -1,0 +1,3 @@
+// This endpoint would be needed for domain-based MCP registry auth
+// Steve: set MCP_REGISTRY_KEY env var on Render to enable
+// mcp-publisher login domain --key <key> writes the key

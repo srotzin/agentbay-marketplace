@@ -229,20 +229,6 @@ export const phase3739Tools = [
     },
   },
 
-  {
-    name: "rwa_get_portfolio",
-    description:
-      "Get an agent's full RWA portfolio: all holdings with current values, unrealized PnL, " +
-      "blended APY, and estimated annual yield. Includes allocation breakdown by asset type. " +
-      "Use this to understand RWA exposure and which assets are performing best.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        agent_id: { type: "string", description: "Agent to get the portfolio for" },
-      },
-      required: ["agent_id"],
-    },
-  },
 
   {
     name: "rwa_status",
