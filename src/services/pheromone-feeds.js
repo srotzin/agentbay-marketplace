@@ -213,9 +213,9 @@ export function feedYieldOpportunities({ asset = "USDC", min_spread_pct = 0, lim
         confidence:     conf,
         signal:         `${src.protocol} ${src.apy_pct.toFixed(2)}% APY on ${asset} — ${spread_pct > 0 ? `+${spread_pct.toFixed(2)}%` : spread_pct.toFixed(2) + "%"} vs ${next_best.protocol}`,
         action: {
-          tool:    "stablecoin_yield_deposit",
-          params:  { protocol: src.protocol.toLowerCase().replace(/\s/g, "_"), asset, strategy: src.risk === "very_low" || src.risk === "low" ? "safe" : "balanced" },
-          note:    `Deposit ${asset} into ${src.protocol} to earn ${src.apy_pct.toFixed(2)}% APY. Minimum: $${src.min_deposit}.`,
+          tool:    "execute_yield_optimization",
+          params:  { risk_tolerance: src.risk === "very_low" || src.risk === "low" ? "conservative" : src.risk === "medium" ? "moderate" : "aggressive", duration_days: 30 },
+          note:    `Call execute_yield_optimization to auto-allocate into ${src.protocol} (${src.apy_pct.toFixed(2)}% APY) and other top-ranked protocols. One call deposits everything.`,
         },
       };
     })
@@ -315,9 +315,9 @@ export function feedComputeArbitrage({ gpu_type = null, min_savings_pct = 10, li
         confidence:        avail_conf,
         signal:            `${gpu} ${cheap.price.toFixed(2)}/hr on ${cheap.provider} vs ${next.price.toFixed(2)}/hr on ${next.provider} = ${savings.toFixed(1)}% savings`,
         action: {
-          tool:   "compute_post_job",
-          params: { provider: cheap.provider.toLowerCase().replace(/[\s()./]/g, "_"), gpu_type: gpu.toLowerCase(), billing: "on_demand" },
-          note:   `Post GPU job to ${cheap.provider}. Save ${savings.toFixed(1)}% vs ${next.provider}.`,
+          tool:   "execute_best_compute_trade",
+          params: { requirements: { gpu_type: gpu, vram_min: 40 }, max_budget_usdc: 200 },
+          note:   `Call execute_best_compute_trade — it auto-selects ${cheap.provider} (or better), posts job, escrows payment, returns proof. Save ${savings.toFixed(1)}% in one call.`,
         },
       });
 
@@ -459,9 +459,9 @@ export function feedEnergyShiftWindows({ grid_region = null, min_savings_pct = 3
         confidence:        g.forecast_confidence,
         signal:            `${g.region} drops to $${g.off_peak_rate.toFixed(3)}/kWh at ${next_low_hour}:00 UTC vs $${g.current_rate.toFixed(3)}/kWh now = ${savings_pct.toFixed(0)}% savings for ${g.window_hours}h`,
         action: {
-          tool:   "energy_load_shift",
-          params: { region: g.region.toLowerCase(), target_hour_utc: next_low_hour, duration_hours: g.window_hours, optimize_for: "cost" },
-          note:   `Schedule compute/HVAC/charging workloads at ${next_low_hour}:00 UTC. Save ${savings_pct.toFixed(0)}% for ${g.window_hours}h window.`,
+          tool:   "execute_energy_shift",
+          params: { grid_region: g.region, flexible_hours: g.window_hours, operation_type: "compute" },
+          note:   `Call execute_energy_shift for ${g.region} — it generates the full 24h schedule, executes load targets, and returns proof. Save ${savings_pct.toFixed(0)}% in one call.`,
         },
       };
     })
@@ -649,9 +649,9 @@ export function feedPaymentRouting({ amount_usd = 10, currency = "USD", destinat
       confidence,
       signal:            `${r.name} $${r.total_fee.toFixed(4)} fee for $${amount_usd} payment = ${r.fee_pct.toFixed(3)}% cost, ${settle_label} settlement`,
       action: {
-        tool:   "route_payment",
-        params: { rail: r.name.toLowerCase().replace(/[\s()]/g, "_"), amount_usd, optimize_for: "cheapest", currency: r.currency },
-        note:   `Route $${amount_usd} via ${r.name}. Total fee: $${r.total_fee.toFixed(4)}.`,
+        tool:   "execute_best_payment",
+        params: { amount: amount_usd, currency, optimize_for: "cheapest" },
+        note:   `Call execute_best_payment — it auto-selects ${r.name} (or better), routes funds, settles, and returns proof. Total fee: $${r.total_fee.toFixed(4)}.`,
       },
     };
   });
@@ -760,9 +760,9 @@ export function feedConstructionPricing({ category = null, min_savings_pct = 5, 
       confidence:     cheapest.stock > 1000 ? 0.90 : cheapest.stock > 100 ? 0.75 : 0.55,
       signal:         `${sku.sku} (${sku.name}): ${cheapest.vendor} $${cheapest.price.toFixed(2)} vs ${priciest.vendor} $${priciest.price.toFixed(2)} = ${savings.toFixed(1)}% savings, ${cheapest.stock.toLocaleString()} in stock`,
       action: {
-        tool:   "cs_procurement_quote_request",
-        params: { sku: sku.sku, vendor: cheapest.vendor.toLowerCase().replace(/[\s']/g, "_"), quantity: 100 },
-        note:   `Request quote for ${sku.sku} from ${cheapest.vendor}. Save $${(priciest.price - cheapest.price).toFixed(2)}/unit vs ${priciest.vendor}.`,
+        tool:   "execute_construction_procurement",
+        params: { bom: [{ sku: sku.sku, quantity: 100 }] },
+        note:   `Call execute_construction_procurement with your full BOM — it sources from ${cheapest.vendor} (and cheapest per-line), places orders, pays, returns proof. No intermediate steps.`,
       },
     });
   }
