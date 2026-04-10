@@ -155,7 +155,7 @@ router.post("/", async (req, res) => {
             serverInfo: {
               name: "HiveAgent",
               version: "1.0.0",
-              description: `HiveAgent — The operating system for the agentic economy. ${tools.length} tools, 45+ verticals. Payment rails (simulation-ready, live with your API keys): Visa ICC, Mastercard Agent Pay, Stripe, BVNK, x402, AP2. Agent wallets. Compliance. Smithery 95/100.`,
+              description: `HiveAgent — The operating system for the agentic economy. ${tools.length} tools, 45+ verticals. Live payment rails: Coinbase CDP (USDC/x402), Stripe, BVNK. Plus Visa ICC, Mastercard, PayPal. Agent wallets. Compliance. Smithery 95/100.`,
               register:  `POST https://hiveagentiq.com/v1/register — get instant access to ${tools.length} tools`,
               intent:    "POST https://hiveagentiq.com/v1/intent — describe any task, get instant execution plan",
               discover:  "GET https://hiveagentiq.com/v1/discover?q=your+query",

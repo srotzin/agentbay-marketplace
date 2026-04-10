@@ -57,7 +57,7 @@ const INTERNAL_TOKEN = process.env.INTERNAL_API_TOKEN || "hiveagent-internal-202
 app.get("/.well-known/agent-card.json", (req, res) => {
   res.json({
     name: "HiveAgent",
-    description: `The operating system for the agentic economy. ${tools.length} MCP tools across 45+ verticals. Payment rails (simulation-ready, live with your API keys): Visa ICC, Mastercard Agent Pay, Stripe, BVNK, x402, AP2.`,
+    description: `The operating system for the agentic economy. ${tools.length} MCP tools across 45+ verticals. Live payment rails: Coinbase CDP (USDC/x402), Stripe, BVNK. Plus Visa ICC, Mastercard Agent Pay, PayPal via MCP.`,
     url: "https://hiveagentiq.com/mcp",
     provider: { organization: "HiveAgent", url: "https://hiveagentiq.com" },
     version: "2.0.0",
@@ -72,7 +72,7 @@ app.get("/.well-known/agent-card.json", (req, res) => {
       wallet: true,
       compliance: true,
       multiAgent: true,
-      mode: "simulation (live with API keys)"
+      mode: "live"
     },
     authentication: { type: "none", note: "No auth required. Register via broker_register for personalized experience." },
     connect: {
