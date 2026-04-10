@@ -84,6 +84,37 @@ app.get("/.well-known/agent-card.json", (req, res) => {
   });
 });
 
+// ─── Tools Sitemap (for agent crawlers + MCP indexers, NOT Google) ──────────
+app.get("/tools-sitemap.xml", (_req, res) => {
+  res.set("Content-Type", "application/xml");
+  const toolEntries = tools.map(t => `
+  <tool>
+    <name>${t.name}</name>
+    <description><![CDATA[${t.description}]]></description>
+    <inputSchema>${JSON.stringify(t.inputSchema)}</inputSchema>
+    ${t.annotations ? `<annotations>${JSON.stringify(t.annotations)}</annotations>` : ""}
+  </tool>`).join("");
+
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<tools-sitemap xmlns="https://hiveagentiq.com/sitemap" version="1.0" count="${tools.length}" updated="${new Date().toISOString()}">
+${toolEntries}
+</tools-sitemap>`);
+});
+
+app.get("/tools-sitemap.json", (_req, res) => {
+  res.json({
+    version: "1.0",
+    count: tools.length,
+    updated: new Date().toISOString(),
+    tools: tools.map(t => ({
+      name: t.name,
+      description: t.description,
+      inputSchema: t.inputSchema,
+      annotations: t.annotations || {}
+    }))
+  });
+});
+
 app.use("/mcp", (req, res, next) => {
   // Allow internal cron/automation requests with token
   if (req.headers["x-internal-token"] === INTERNAL_TOKEN) {
