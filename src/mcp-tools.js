@@ -115,6 +115,8 @@ import { pharmaTxTools, handlePharmaTxTool } from "./mcp-tools-pharma-tx.js";
 // A2A Tokenization Rails — ATS-1 token standard, multi-chain settlement, protocol router
 import { railsTools, handleRailsTool } from "./mcp-tools-rails.js";
 import { custodyTools, handleCustodyTool } from "./mcp-tools-custody.js";
+// Anthropic Managed Agents + Advisor Tool
+import { anthropicTools, handleAnthropicTool } from "./mcp-tools-anthropic.js";
 // Response middleware (Phase 5)
 import { enhanceResponse } from "./response-enhancer.js";
 // Discovery meta-tools (Phase 4)
@@ -1056,7 +1058,7 @@ export function handleBrokerTool(name, args = {}) {
   }
 }
 
-export const tools = [...highwayTools, ...originalsTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase23Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase5562Tools, ...onboardingTools];
+export const tools = [...highwayTools, ...originalsTools, ...anthropicTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase23Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase5562Tools, ...onboardingTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1968,6 +1970,15 @@ export async function handleTool(name, args) {
     case "visa_agentic_ready_score":      return await handlePhase5562Tool(name, args);
     case "visa_agentic_ready_packet":     return await handlePhase5562Tool(name, args);
     case "visa_agentic_ready_status":     return await handlePhase5562Tool(name, args);
+
+    // ─── Anthropic Managed Agents + Advisor Tool ─────────────────────────────
+    case "claude_session_create":
+    case "claude_event_post":
+    case "claude_advisor_mode":
+    case "claude_env_create":
+    case "claude_sessions_list":
+    case "claude_status":
+      return await handleAnthropicTool(name, args);
 
     // Onboarding tools
     case "agent_onboarding_status":
