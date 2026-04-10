@@ -120,6 +120,7 @@ import { networkEffectTools, handleNetworkEffectTool } from "./mcp-tools-network
 // Anthropic Managed Agents + Advisor Tool
 import { anthropicTools, handleAnthropicTool } from "./mcp-tools-anthropic.js";
 import { marketingEngineTools, handleMarketingEngineTool } from "./mcp-tools-marketing-engine.js";
+import { plaidBankrTools, handlePlaidBankrTool } from "./mcp-tools-plaid-bankr.js";
 // Response middleware (Phase 5)
 import { enhanceResponse } from "./response-enhancer.js";
 // Discovery meta-tools (Phase 4)
@@ -1061,7 +1062,7 @@ export function handleBrokerTool(name, args = {}) {
   }
 }
 
-export const tools = [...marketingEngineTools, ...networkEffectTools, ...highwayTools, ...originalsTools, ...anthropicTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase23Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase5562Tools, ...onboardingTools, ...arcCommerceTools];
+export const tools = [...plaidBankrTools, ...marketingEngineTools, ...networkEffectTools, ...highwayTools, ...originalsTools, ...anthropicTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase23Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase5562Tools, ...onboardingTools, ...arcCommerceTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1974,6 +1975,19 @@ export async function handleTool(name, args) {
     case "visa_agentic_ready_packet":     return await handlePhase5562Tool(name, args);
     case "visa_agentic_ready_status":     return await handlePhase5562Tool(name, args);
 
+    // ─── Plaid Banking + Bankr x402 Cloud ────────────────────────────────────
+    case "plaid_connect":             return await handlePlaidBankrTool(name, args);
+    case "plaid_balances":            return await handlePlaidBankrTool(name, args);
+    case "plaid_transactions":        return await handlePlaidBankrTool(name, args);
+    case "plaid_optimize_route":      return await handlePlaidBankrTool(name, args);
+    case "plaid_spending_insights":   return await handlePlaidBankrTool(name, args);
+    case "plaid_status":              return await handlePlaidBankrTool(name, args);
+    case "bankr_deploy_service":      return await handlePlaidBankrTool(name, args);
+    case "bankr_my_services":         return await handlePlaidBankrTool(name, args);
+    case "bankr_discover":            return await handlePlaidBankrTool(name, args);
+    case "bankr_revenue":             return await handlePlaidBankrTool(name, args);
+    case "bankr_status":              return await handlePlaidBankrTool(name, args);
+
     // ─── Anthropic Managed Agents + Advisor Tool ─────────────────────────────
     case "claude_session_create":
     case "claude_event_post":
@@ -2161,6 +2175,11 @@ export async function handleTool(name, args) {
       }
       try {
         return await handleNetworkEffectTool(name, args);
+      } catch (e) {
+        if (!e.message?.includes("Unknown")) throw e;
+      }
+      try {
+        return await handlePlaidBankrTool(name, args);
       } catch (e) {
         if (!e.message?.includes("Unknown")) throw e;
       }
