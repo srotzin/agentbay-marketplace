@@ -119,6 +119,7 @@ import { arcCommerceTools, handleArcCommerceTool } from "./mcp-tools-arc-commerc
 import { networkEffectTools, handleNetworkEffectTool } from "./mcp-tools-network-effects.js";
 // Anthropic Managed Agents + Advisor Tool
 import { anthropicTools, handleAnthropicTool } from "./mcp-tools-anthropic.js";
+import { marketingEngineTools, handleMarketingEngineTool } from "./mcp-tools-marketing-engine.js";
 // Response middleware (Phase 5)
 import { enhanceResponse } from "./response-enhancer.js";
 // Discovery meta-tools (Phase 4)
@@ -1060,7 +1061,7 @@ export function handleBrokerTool(name, args = {}) {
   }
 }
 
-export const tools = [...networkEffectTools, ...highwayTools, ...originalsTools, ...anthropicTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase23Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase5562Tools, ...onboardingTools, ...arcCommerceTools];
+export const tools = [...marketingEngineTools, ...networkEffectTools, ...highwayTools, ...originalsTools, ...anthropicTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase23Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase5562Tools, ...onboardingTools, ...arcCommerceTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1986,6 +1987,15 @@ export async function handleTool(name, args) {
     case "agent_onboarding_status":
     case "agent_onboarding_dashboard":
       return await handleOnboardingTool(name, args);
+
+    // ─── Agentic Marketing Engine ─────────────────────────────────────────────
+    case "marketing_scan_opportunities":
+    case "marketing_generate_response":
+    case "marketing_track_presence":
+    case "marketing_momentum_report":
+    case "marketing_get_platforms":
+    case "marketing_create_content":
+      return await handleMarketingEngineTool(name, args);
 
     // ─── Network Effect Tools ────────────────────────────────────────────────
     case "payroll_create_schedule":
