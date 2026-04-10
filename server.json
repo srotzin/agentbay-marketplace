@@ -1,22 +1,17 @@
 {
-  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.json",
-  "name": "com.hiveagentiq/agentzon",
-  "title": "HiveAgent — The Agentzon",
-  "description": "The largest MCP marketplace for AI agents. 1,221 tools across 50+ verticals — insurance claims, legal document review, healthcare prior auth, KYC/AML, real estate valuations, pharma formularies, DeFi trading, ZK privacy proofs, A2A tokenization rails, agent self-custody, PDF forms, and more. Built-in USDC payments on Base L2. Sandbox mode (free testing), rate limits, cost manifest in every tool schema. Auto-register identity on first connect. No API key required.",
-  "version": "1.0.0",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.fireflyfabs/hiveagent",
+  "title": "HiveAgent",
+  "description": "1,273 MCP tools across 45+ verticals. Every payment rail: Visa ICC, Mastercard Agent Pay, Stripe, BVNK, Circle CPN, x402, AP2, OpenAI ACP, Google UCP. Agent wallets, stablecoin yield, compliance, multi-agent orchestration. The operating system for the agentic economy.",
+  "repository": {
+    "url": "https://github.com/fireflyfabs/agentbay-marketplace",
+    "source": "github"
+  },
+  "version": "2.0.0",
   "remotes": [
     {
       "type": "streamable-http",
       "url": "https://hiveagentiq.com/mcp"
     }
-  ],
-  "packages": [
-    {
-      "registry_name": "pypi",
-      "name": "hiveagent-mcp",
-      "version": "1.0.0"
-    }
-  ],
-  "source_url": "https://github.com/fireflyfabs/agentbay-marketplace",
-  "homepage_url": "https://hiveagentiq.com"
+  ]
 }
