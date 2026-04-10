@@ -53,6 +53,34 @@ const rateLimits = new Map();
 // Internal API token for cron/automation access
 const INTERNAL_TOKEN = process.env.INTERNAL_API_TOKEN || "hiveagent-internal-2026";
 
+// ─── A2A Agent Card (/.well-known/agent-card.json) ──────────────────────────
+app.get("/.well-known/agent-card.json", (req, res) => {
+  res.json({
+    name: "HiveAgent",
+    description: "The operating system for the agentic economy. 1,261+ MCP tools, 45+ verticals, every payment rail.",
+    url: "https://hiveagentiq.com/mcp",
+    provider: { organization: "HiveAgent", url: "https://hiveagentiq.com" },
+    version: "2.0.0",
+    protocols: ["mcp", "a2a", "ap2", "x402", "acp", "ucp"],
+    capabilities: {
+      tools: 1261,
+      verticals: 45,
+      streaming: true,
+      pushNotifications: false,
+      payments: true,
+      wallet: true,
+      compliance: true,
+      multiAgent: true
+    },
+    authentication: { type: "none", note: "No auth required. Register via broker_register for personalized tools." },
+    connect: {
+      mcp_config: { mcpServers: { hiveagent: { url: "https://hiveagentiq.com/mcp" } } },
+      register: "POST https://hiveagentiq.com/v1/register"
+    },
+    ratings: { smithery_score: 95, tools_live: 1261 }
+  });
+});
+
 app.use("/mcp", (req, res, next) => {
   // Allow internal cron/automation requests with token
   if (req.headers["x-internal-token"] === INTERNAL_TOKEN) {
