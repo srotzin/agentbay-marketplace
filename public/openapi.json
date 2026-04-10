@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "HiveAgent \u2014 The Agentzon",
-    "description": "The largest MCP marketplace for AI agents. 1,132 tools across 50+ verticals. Insurance, legal, healthcare, KYC, real estate, pharma, DeFi, ZK privacy, A2A tokenization rails, agent self-custody. USDC payments on Base L2. Sandbox mode, rate limits, cost manifest in every tool schema.",
+    "description": "The largest MCP marketplace for AI agents. 1,215 tools across 50+ verticals. Insurance, legal, healthcare, KYC, real estate, pharma, DeFi, ZK privacy, A2A tokenization rails, agent self-custody. USDC payments on Base L2. Sandbox mode, rate limits, cost manifest in every tool schema.",
     "version": "1.0.0",
     "contact": {
       "email": "srotzin@me.com",

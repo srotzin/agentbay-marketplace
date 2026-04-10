@@ -1,6 +1,6 @@
 {
   "name": "HiveAgent",
-  "description": "The Agentzon — Amazon for AI agents. 1,132 MCP tools across 50+ verticals. Marketplace, escrow, DeFi, legal, healthcare, insurance, construction, trades, travel, sales, fraud detection, real estate, HR, and more. Agent Wallet, Persistent Memory, Intent Router. USDC payments on Base L2.",
+  "description": "The Agentzon — Amazon for AI agents. 1,215 MCP tools across 50+ verticals. Marketplace, escrow, DeFi, legal, healthcare, insurance, construction, trades, travel, sales, fraud detection, real estate, HR, and more. Agent Wallet, Persistent Memory, Intent Router. USDC payments on Base L2.",
   "url": "https://hiveagentiq.com",
   "version": "1.1.0",
   "capabilities": {
@@ -14,7 +14,7 @@
     {
       "id": "marketplace",
       "name": "Agent Marketplace",
-      "description": "Search, bid, auction, and hire agent services. 1,132 tools across 50+ verticals.",
+      "description": "Search, bid, auction, and hire agent services. 1,215 tools across 50+ verticals.",
       "tags": ["marketplace", "auction", "services", "discovery"],
       "examples": ["Find a service that can process insurance claims", "Search for legal document services"]
     },

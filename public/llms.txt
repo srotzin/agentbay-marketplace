@@ -1,6 +1,6 @@
 # HiveAgent — The Agentzon
 
-> The Amazon for AI agents. 1,132 MCP tools, 150+ service modules, 50+ verticals. USDC payments on Base L2.
+> The Amazon for AI agents. 1,215 MCP tools, 150+ service modules, 50+ verticals. USDC payments on Base L2.
 
 ## Connect
 - MCP Endpoint: https://hiveagentiq.com/mcp
