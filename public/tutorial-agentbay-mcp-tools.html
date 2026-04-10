@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How HiveAgentIQ MCP Tools Work (and How to Add Your Own) | AgentBay</title>
+  <meta name="description" content="A practical guide to how AgentBay exposes MCP tools, how service modules are structured, and how to add a new tool safely." />
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; line-height: 1.55; max-width: 920px; margin: 0 auto; padding: 32px 18px; }
+    header { margin-bottom: 20px; }
+    h1 { font-size: 1.85rem; margin: 0 0 10px; }
+    h2 { margin-top: 28px; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    pre { padding: 14px; border-radius: 10px; overflow-x: auto; background: rgba(127,127,127,0.12); }
+    .callout { padding: 14px 16px; border-radius: 10px; background: rgba(80,160,255,0.12); }
+    .muted { opacity: 0.75; }
+    a { color: inherit; }
+    ul li { margin: 6px 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>How HiveAgentIQ MCP Tools Work (and How to Add Your Own)</h1>
+    <p class="muted">A practical guide for adding a new <em>service module</em> and wiring it into the MCP tool registry.</p>
+  </header>
+
+  <section class="callout">
+    <strong>Use case:</strong> You have a new vertical or capability (e.g., “telecom plan analysis”, “energy tariff comparison”, or “contract clause extraction”) and you want it to appear as an MCP tool that agents can call.
+  </section>
+
+  <h2>1) Mental model: “service modules” → “tools” → “handler”</h2>
+  <p>
+    AgentBay organizes MCP functionality into <strong>service modules</strong> under <code>src/services/</code>.
+    Each module typically exports one or more tools, each with:
+  </p>
+  <ul>
+    <li><strong>Metadata</strong> (name, description, input schema) used by <code>tools/list</code></li>
+    <li><strong>Handler code</strong> that runs when <code>tools/call</code> is invoked</li>
+  </ul>
+  <p>
+    A separate registry file (often an “mcp-tools phase” file) imports many modules and exports a single array.
+    Finally, <code>src/mcp-tools.js</code> assembles arrays and dispatches each incoming call to the correct module handler.
+  </p>
+
+  <h2>2) Anatomy of a typical service module</h2>
+  <p>
+    Most modules follow a small set of conventions:
+  </p>
+  <ul>
+    <li>Export a <code>tools</code> array with one or more tool definitions</li>
+    <li>Export a <code>handleToolCall</code> function (or similarly named dispatcher)</li>
+    <li>Keep input validation close to the handler (or rely on shared validation helpers)</li>
+  </ul>
+
+  <pre><code>// src/services/example-vertical.js
+export const tools = [
+  {
+    name: "example.vertical.lookup",
+    description: "Look up something in a new vertical.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: { type: "string" }
+      },
+      required: ["query"]
+    }
+  }
+];
+
+export async function handleToolCall(toolName, args, ctx) {
+  if (toolName !== "example.vertical.lookup") return null;
+
+  // ... do work here ...
+  return {
+    content: [{ type: "text", text: `Result for: ${args.query}` }]
+  };
+}
+</code></pre>
+
+  <h2>3) Wiring a module into the tool registry</h2>
+  <p>
+    Once your module exists, it has to be included in the aggregated tool arrays.
+    Many AgentBay repos split the registry across “phase” files.
+    When you add a new vertical, you typically:
+  </p>
+  <ol>
+    <li>Create <code>src/services/&lt;your-module&gt;.js</code></li>
+    <li>Add a new phase file (or update an existing one) that imports your module and exports the combined tool array</li>
+    <li>Update <code>src/mcp-tools.js</code> to import your phase array and add it to the global array</li>
+    <li>Update the dispatch chain in <code>src/mcp-tools.js</code> so <code>tools/call</code> can reach your module’s handler</li>
+  </ol>
+
+  <h2>4) Dispatch chain: “list” and “call” must both work</h2>
+  <p>
+    A common mistake is to update <code>tools/list</code> but forget <code>tools/call</code>.
+    For a tool to be usable:
+  </p>
+  <ul>
+    <li>It must be present in the exported array used by <code>tools/list</code></li>
+    <li>The handler must be reachable from the call router (often a chain of <code>if</code> / <code>switch</code> / “try handler then fallback”)</li>
+  </ul>
+  <p>
+    A good pattern is: each module handler returns <code>null</code> when it does not recognize the tool name.
+    The router tries modules in sequence until one returns a non-null result.
+  </p>
+
+  <h2>5) Safety checklist before you push</h2>
+  <ul>
+    <li><strong>Run a syntax check:</strong> <code>node --check src/mcp-tools.js</code></li>
+    <li><strong>Check for duplicate exports</strong> (common when merging arrays)</li>
+    <li><strong>Confirm tool names are globally unique</strong> (prefix by domain)</li>
+    <li><strong>Add minimal input schema</strong> so agents get good errors early</li>
+  </ul>
+
+  <h2>6) Quick troubleshooting</h2>
+  <ul>
+    <li><strong>Tool appears in list but call fails:</strong> dispatch chain is missing your handler</li>
+    <li><strong>Node syntax error on startup:</strong> duplicate exports or malformed imports</li>
+    <li><strong>Tool name collision:</strong> rename with a tighter prefix (e.g., <code>energy.tariff.*</code> rather than <code>tariff.*</code>)</li>
+  </ul>
+
+  <p class="muted">Last updated: 2026-04-10</p>
+</body>
+</html>
