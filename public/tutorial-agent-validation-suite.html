@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>How to Build an Agent Validation Suite (Golden Tasks + Synthetic Users + Regression Gates)</title>
+  <meta name="description" content="A practical guide to building an agent validation suite: golden tasks, synthetic users, test fixtures, and regression gates for tool-calling agents."/>
+  <style>
+    :root { --bg:#0b0e14; --panel:#0f1522; --text:#e7eefc; --muted:#a9b6d3; --accent:#6aa9ff; --border:#22304a; }
+    body { margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; background:var(--bg); color:var(--text); line-height:1.55; }
+    header { padding:48px 20px 18px; border-bottom:1px solid var(--border); background:linear-gradient(180deg, rgba(106,169,255,.14), rgba(0,0,0,0)); }
+    main { max-width: 980px; margin:0 auto; padding: 24px 20px 72px; }
+    h1 { font-size: 34px; margin:0 0 10px; letter-spacing:-.02em; }
+    .lede { color:var(--muted); margin:0; font-size: 16px; max-width: 70ch; }
+    h2 { margin-top: 34px; font-size: 22px; letter-spacing:-.01em; }
+    h3 { margin-top: 22px; font-size: 18px; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    pre { background: var(--panel); border: 1px solid var(--border); padding: 14px; border-radius: 10px; overflow:auto; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .card { background: var(--panel); border:1px solid var(--border); border-radius: 12px; padding: 16px; margin: 18px 0; }
+    ul { margin-top: 8px; }
+    .grid { display:grid; grid-template-columns: 1fr; gap: 14px; }
+    @media (min-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } }
+    .k { display:inline-block; padding: 2px 8px; border:1px solid var(--border); border-radius: 999px; color: var(--muted); font-size: 12px; }
+    .warn { border-left: 4px solid #ffcc66; padding-left: 12px; }
+  </style>
+</head>
+<body>
+  <header>
+    <main>
+      <h1>How to Build an Agent Validation Suite</h1>
+      <p class="lede">
+        Tool-calling agents are hard to ship because the failure modes are subtle: partial tool success, schema drift, brittle prompts,
+        or a single new tool changing the agent’s “plan”. This guide shows a practical validation pattern you can run in CI and before
+        every deploy.
+      </p>
+    </main>
+  </header>
+
+  <main>
+    <div class="card">
+      <span class="k">Goal</span>
+      <p style="margin:10px 0 0; color:var(--muted)">
+        Catch regressions in agent behavior (tool selection, tool args, output quality, safety) using a repeatable suite of
+        tasks + fixtures + scoring.
+      </p>
+    </div>
+
+    <h2>1) Define your “golden tasks”</h2>
+    <p>
+      A golden task is a real user job-to-be-done written as a compact scenario with an expected outcome.
+      Keep it short enough to run frequently (minutes, not hours).
+    </p>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Good golden task</h3>
+        <pre><code>Scenario: Refund an order shipped to the wrong address
+Inputs: order_id=..., user_email=...
+Constraints: cannot refund if delivered &gt; 30 days ago
+Expected: create refund + email user + log audit event</code></pre>
+      </div>
+      <div class="card">
+        <h3>Bad golden task</h3>
+        <pre><code>Scenario: Be helpful to customers
+Expected: a good answer</code></pre>
+      </div>
+    </div>
+
+    <h3>Golden task template</h3>
+    <pre><code>id: refund_wrong_address_v1
+persona: "Ops agent"
+input: "Customer says they shipped to the wrong address. Order 913..."
+fixtures:
+  - "orders_api_stub"
+  - "email_outbox_stub"
+expectations:
+  - tool_calls.include("orders.get_order")
+  - tool_calls.include("payments.refund")
+  - tool_calls.not_include("payments.charge")
+  - output.contains("Refund initiated")
+  - invariants.include("no PII in logs")
+scoring:
+  - rubric: helpfulness
+  - rubric: policy_compliance
+  - rubric: completeness</code></pre>
+
+    <h2>2) Add “synthetic users” (coverage for intent variance)</h2>
+    <p>
+      Golden tasks are stable; synthetic users are variants.
+      For each golden task, generate 10–50 variations that change wording, missing fields, tone, and constraints.
+    </p>
+
+    <div class="card warn">
+      <p style="margin:0; color:var(--muted)">
+        Tip: keep the <em>expected outcome</em> stable while perturbing the <em>input phrasing</em>. This catches prompt brittleness.
+      </p>
+    </div>
+
+    <h2>3) Run against fixtures (deterministic tool behavior)</h2>
+    <p>
+      For tool-calling agents, determinism comes from using stubbed tool backends or recorded cassettes.
+      Your goal is to validate the agent’s reasoning and tool selection, not the internet.
+    </p>
+
+    <h3>Fixture patterns</h3>
+    <ul>
+      <li><strong>Stub services</strong>: In-memory fake implementations returning predictable data.</li>
+      <li><strong>Recorded responses</strong>: Store tool IO transcripts and replay them.</li>
+      <li><strong>Failure injection</strong>: Timeouts, partial success, 429s, schema drift.</li>
+    </ul>
+
+    <h2>4) Score what matters (not just “match output”)</h2>
+    <p>
+      Exact text matching is fragile. Instead, score:
+    </p>
+    <ul>
+      <li><strong>Tool call correctness</strong>: called the right tools with valid args.</li>
+      <li><strong>Safety invariants</strong>: no secrets/PII, no disallowed actions.</li>
+      <li><strong>Task completion</strong>: user outcome achieved end-to-end.</li>
+      <li><strong>Human-readability</strong>: concise, structured, no hallucinated confirmations.</li>
+    </ul>
+
+    <h3>Minimal scoring output format</h3>
+    <pre><code>{
+  "task_id": "refund_wrong_address_v1",
+  "passed": false,
+  "tool_call_failures": ["payments.refund missing currency"],
+  "policy_failures": [],
+  "notes": "Agent asked for info already present in the order record"
+}</code></pre>
+
+    <h2>5) Add regression gates (what fails the build)</h2>
+    <p>
+      The suite is only useful if it blocks shipping when it detects a real regression.
+      Start with strict gates on safety, and gradual gates on quality.
+    </p>
+
+    <div class="card">
+      <h3>Suggested gating policy</h3>
+      <ul>
+        <li><strong>Hard fail</strong>: any safety invariant break (PII, secrets, unauthorized actions).</li>
+        <li><strong>Hard fail</strong>: schema mismatch / invalid tool arguments above a threshold.</li>
+        <li><strong>Soft fail</strong>: rubric score dips (helpfulness/completeness) → warn, track trend.</li>
+        <li><strong>Trend alert</strong>: latency or tool-call count changes significantly.</li>
+      </ul>
+    </div>
+
+    <h2>6) Operationalize: nightly runs + a small “smoke suite”</h2>
+    <p>
+      Run a small smoke suite on every commit (5–20 tasks) and a larger suite nightly.
+      Persist transcripts so you can diff tool calls and identify which new tool or prompt change caused drift.
+    </p>
+
+    <h2>Example: validating an MCP tool registry change</h2>
+    <p>
+      When you add tools (or reorganize tool phases), validate:
+    </p>
+    <ul>
+      <li>The registry loads and schemas are valid JSON.</li>
+      <li>New tools do not shadow old names.</li>
+      <li>Routing/dispatch paths still resolve correctly.</li>
+      <li>At least one golden task that should use the new tool actually uses it.</li>
+    </ul>
+
+    <div class="card">
+      <h3>Practical checklist</h3>
+      <ul>
+        <li>Run syntax checks for the registry and service modules.</li>
+        <li>Run a smoke suite with fixtures (including timeouts and schema drift injection).</li>
+        <li>Diff tool transcripts vs baseline.</li>
+        <li>Ship only if hard gates pass.</li>
+      </ul>
+    </div>
+
+    <hr style="border:0; border-top:1px solid var(--border); margin: 34px 0;"/>
+    <p style="color:var(--muted); margin:0">
+      Want a ready-to-run template? Use this structure:
+      <code>tasks/</code> (golden + variants), <code>fixtures/</code> (tool stubs), <code>runner/</code> (agent harness), and
+      <code>reports/</code> (JSON + HTML summaries).
+    </p>
+  </main>
+</body>
+</html>
