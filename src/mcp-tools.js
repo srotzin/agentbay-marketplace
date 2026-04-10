@@ -138,6 +138,7 @@ import { exchangeErc8183Tools, handleExchangeErc8183Tool } from "./mcp-tools-exc
 import { geminiImprovementTools, handleGeminiImprovementTool } from "./mcp-tools-gemini-improvements.js";
 // Swarm Verticals: Energy & Power + Compute Marketplace + Logistics (25 tools)
 import { swarmVerticalTools, handleSwarmVerticalTool } from "./mcp-tools-swarm-verticals.js";
+import { constructionTools, handleConstructionTool } from "./mcp-tools-construction.js";
 
 // MCP tool definitions (JSON Schema format)
 const coreTools = [
@@ -1076,7 +1077,7 @@ export function handleBrokerTool(name, args = {}) {
 }
 
 
-export const tools = [...agentRecruiterTools, ...marketingEngineTools, ...networkEffectTools, ...highwayTools, ...originalsTools, ...anthropicTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase23Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase5562Tools, ...onboardingTools, ...arcCommerceTools, ...plaidBankrTools, ...circleRouterTools, ...x402UptoTools, ...exchangeErc8183Tools, ...geminiImprovementTools, ...swarmVerticalTools];
+export const tools = [...agentRecruiterTools, ...marketingEngineTools, ...networkEffectTools, ...highwayTools, ...originalsTools, ...anthropicTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase23Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase5562Tools, ...onboardingTools, ...arcCommerceTools, ...plaidBankrTools, ...circleRouterTools, ...x402UptoTools, ...exchangeErc8183Tools, ...geminiImprovementTools, ...swarmVerticalTools, ...constructionTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -2279,6 +2280,11 @@ export async function handleTool(name, args) {
       }
       try {
         return await handleSwarmVerticalTool(name, args);
+      } catch (e) {
+        if (!e.message?.includes("Unknown")) throw e;
+      }
+      try {
+        return await handleConstructionTool(name, args);
       } catch (e) {
         if (!e.message?.includes("Unknown")) throw e;
       }
