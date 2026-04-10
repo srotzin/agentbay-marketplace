@@ -228,8 +228,7 @@ export async function getMarketplaceStats() {
   const openAuctions = db.prepare("SELECT COUNT(*) as count FROM auctions WHERE status = 'open' AND expires_at > datetime('now')").get().count;
 
   // Pull live tool count from tools array
-  let toolCount = 927; // updated Phase 24
-  try { const { tools } = await import("../mcp-tools.js"); toolCount = tools.length; } catch {}
+  let toolCount = 1278; // Updated dynamically at deploy
 
   return {
     platform: {

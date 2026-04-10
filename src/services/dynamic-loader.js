@@ -13,7 +13,14 @@
  *   4. Negotiate  → negotiateTools(agentId, caps, ctx) → curated toolset
  */
 
-import { tools } from "../mcp-tools.js";
+// Lazy import to avoid circular dependency
+let tools = [];
+setTimeout(async () => {
+  try {
+    const mod = await import("../mcp-tools.js");
+    tools = mod.tools;
+  } catch (e) { console.warn("[dynamic-loader] deferred tools load:", e.message); }
+}, 0);
 
 // ─── Vertical → Tool Prefix Mapping ─────────────────────────────────────────
 //
