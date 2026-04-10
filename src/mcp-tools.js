@@ -88,6 +88,7 @@ import { phase24Tools, handlePhase24Tool } from "./mcp-tools-phase24.js";
 import { phase25Tools, handlePhase25Tool } from "./mcp-tools-phase25.js";
 import { phase26Tools, handlePhase26Tool } from "./mcp-tools-phase26.js";
 import { phase2730Tools, handlePhase2730Tool } from "./mcp-tools-phase27-30.js";
+import { phase27EsgTools, handlePhase27EsgTool } from "./mcp-tools-phase27-esg.js";
 import { phase3133Tools, handlePhase3133Tool } from "./mcp-tools-phase31-33.js";
 import { phase3436Tools, handlePhase3436Tool } from "./mcp-tools-phase34-36.js";
 import { phase3739Tools, handlePhase3739Tool } from "./mcp-tools-phase37-39.js";
@@ -1062,7 +1063,6 @@ export function handleBrokerTool(name, args = {}) {
   }
 }
 
-export const tools = [...plaidBankrTools, ...marketingEngineTools, ...networkEffectTools, ...highwayTools, ...originalsTools, ...anthropicTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase23Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase5562Tools, ...onboardingTools, ...arcCommerceTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -1634,6 +1634,14 @@ export async function handleTool(name, args) {
     case "marketplace_post_job":        return handlePhase2730Tool(name, args);
     case "marketplace_bid":             return handlePhase2730Tool(name, args);
     case "marketplace_accept_bid":      return handlePhase2730Tool(name, args);
+    case "carbon_estimate_emissions":      return handlePhase27EsgTool(name, args);
+    case "carbon_build_inventory":         return handlePhase27EsgTool(name, args);
+    case "carbon_generate_disclosure":     return handlePhase27EsgTool(name, args);
+    case "carbon_get_default_factors":     return handlePhase27EsgTool(name, args);
+    case "esg_score_supplier":             return handlePhase27EsgTool(name, args);
+    case "esg_prioritize_suppliers":       return handlePhase27EsgTool(name, args);
+    case "esg_generate_questionnaire":     return handlePhase27EsgTool(name, args);
+    case "esg_get_default_weights":        return handlePhase27EsgTool(name, args);
     case "marketplace_complete_job":    return handlePhase2730Tool(name, args);
     case "marketplace_review":          return handlePhase2730Tool(name, args);
     case "marketplace_agent_profile":   return handlePhase2730Tool(name, args);
