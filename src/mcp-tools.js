@@ -83,6 +83,7 @@ import { phase19Tools, handlePhase19Tool } from "./mcp-tools-phase19.js";
 import { phase20Tools, handlePhase20Tool } from "./mcp-tools-phase20.js";
 import { phase21Tools, handlePhase21Tool } from "./mcp-tools-phase21.js";
 import { phase22Tools, handlePhase22Tool } from "./mcp-tools-phase22.js";
+import { phase23Tools } from "./mcp-tools-phase23.js";
 import { phase24Tools, handlePhase24Tool } from "./mcp-tools-phase24.js";
 import { phase25Tools, handlePhase25Tool } from "./mcp-tools-phase25.js";
 import { phase26Tools, handlePhase26Tool } from "./mcp-tools-phase26.js";
@@ -1055,7 +1056,7 @@ export function handleBrokerTool(name, args = {}) {
   }
 }
 
-export const tools = [...highwayTools, ...originalsTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase5562Tools, ...onboardingTools];
+export const tools = [...highwayTools, ...originalsTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase23Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase5562Tools, ...onboardingTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
