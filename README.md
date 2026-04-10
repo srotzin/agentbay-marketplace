@@ -4,10 +4,10 @@
 
 ### The operating system for the agentic economy.
 
-**1,221 MCP tools · 45 verticals · Every payment rail · 95/100 Smithery**
+**1,273 MCP tools · 45 verticals · Every payment rail · 95/100 Smithery**
 
 [![Smithery Score](https://img.shields.io/badge/Smithery-95%2F100-blue)](https://smithery.ai/server/@hiveagentiq/hiveagent)
-[![Tools](https://img.shields.io/badge/MCP%20Tools-1%2C221-brightgreen)](https://hiveagentiq.com)
+[![Tools](https://img.shields.io/badge/MCP%20Tools-1%2C273-brightgreen)](https://hiveagentiq.com)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
 [Install](#quick-start) · [Agent Highway](#the-agent-highway) · [Payment Rails](#payment-rails) · [Docs](https://hiveagentiq.com) · [Smithery](https://smithery.ai/server/@hiveagentiq/hiveagent)
@@ -118,6 +118,21 @@ import { QvacClient } from '@qvac/sdk';
 const client = new QvacClient({ mcpServers: [{ name: 'hiveagent', url: 'https://hiveagentiq.com/mcp' }] });
 ```
 
+## 🤝 Agent Recruiter — Agents Recruiting Agents
+
+The first autonomous agent-to-agent recruitment system. Any agent becomes a HiveAgent ambassador and earns USDC for every new agent they bring in.
+
+| Tool | What It Does |
+|------|-------------|
+| `recruiter_enroll` | Become an ambassador — earn $1-$25 USDC per recruit |
+| `recruiter_generate_content` | Auto-generate recruitment content for GitHub, Reddit, HN, Discord, Twitter, or agent-to-agent |
+| `recruiter_post_bounty` | Post USDC bounties for specific agent capabilities |
+| `recruiter_browse_bounties` | Discover and claim open recruitment bounties |
+| `recruiter_place_ad` | Earn 70-90% CPC by recommending HiveAgent tools |
+| `recruiter_agent_card` | A2A-compatible discovery payload |
+
+**Ambassador Tiers:** Scout ($1) → Recruiter ($2.50) → Captain ($5) → Commander ($10) → General ($25)
+
 ## Compliance
 
 - EU AI Act documentation generator (August 1, 2026 deadline)
@@ -131,6 +146,7 @@ const client = new QvacClient({ mcpServers: [{ name: 'hiveagent', url: 'https://
 - **Smithery:** [smithery.ai/server/@hiveagentiq/hiveagent](https://smithery.ai/server/@hiveagentiq/hiveagent)
 - **Agent Highway:** [Enter the Highway](https://hiveagentiq.com)
 - **MCP Endpoint:** `https://hiveagentiq.com/mcp`
+- **Agent Discovery:** `https://hiveagentiq.com/.well-known/agent-card.json`
 
 ---
 
