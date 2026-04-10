@@ -224,6 +224,6 @@ export function handlePhase28EnergyTelecomTool(name, args) {
     case "telecom_update_dispatch_status":
       return telecomOps.updateDispatchStatus(args.dispatch_id, args.status);
     default:
-      return null;
+      throw new Error(`Unknown tool: ${name}`);
   }
 }

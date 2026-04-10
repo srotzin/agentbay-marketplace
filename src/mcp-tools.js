@@ -1486,6 +1486,18 @@ export async function handleTool(name, args) {
     case "hiveagent_pay_merchant_dashboard": return paymentGateway.getMerchantDashboard(args.merchant_id);
     case "hiveagent_pay_recurring": return paymentGateway.createRecurringPayment(args);
     case "hiveagent_pay_stats": return paymentGateway.getPaymentGatewayStats();
+
+    // ─── Phase 12 Universal Payment Hub (pay_universal, pay_get_quote, pay_swap, etc.) ───────────────────────────────
+    case "pay_universal":               return handlePhase12Tool(name, args);
+    case "pay_get_quote":               return handlePhase12Tool(name, args);
+    case "pay_swap":                    return handlePhase12Tool(name, args);
+    case "pay_onramp":                  return handlePhase12Tool(name, args);
+    case "pay_offramp":                 return handlePhase12Tool(name, args);
+    case "pay_supported_currencies":    return handlePhase12Tool(name, args);
+    case "pay_supported_methods":       return handlePhase12Tool(name, args);
+    case "pay_history":                 return handlePhase12Tool(name, args);
+    case "pay_create_invoice":          return handlePhase12Tool(name, args);
+    case "pay_check_status":            return handlePhase12Tool(name, args);
     
     // ─── Cross-Border ─────────────────────────────────────────────────────────────
     case "hiveagent_xborder_send": return crossBorder.sendTransfer(args);
@@ -1737,6 +1749,14 @@ export async function handleTool(name, args) {
     case "wallet_get_activity":          return handlePhase3739Tool(name, args);
     case "wallet_rotate":               return await handlePhase3739Tool(name, args);
     case "wallet_dashboard":            return handlePhase3739Tool(name, args);
+
+    // Lifecycle Wallet Tools (wallet_balance, wallet_deposit, wallet_withdraw, wallet_transfer, wallet_history, wallet_spending_rules)
+    case "wallet_balance":              return handleLifecycleTool(name, args);
+    case "wallet_deposit":              return handleLifecycleTool(name, args);
+    case "wallet_withdraw":             return handleLifecycleTool(name, args);
+    case "wallet_transfer":             return handleLifecycleTool(name, args);
+    case "wallet_history":              return handleLifecycleTool(name, args);
+    case "wallet_spending_rules":       return handleLifecycleTool(name, args);
 
     // Phase 38 — Tokenized Assets
     case "rwa_list_assets":             return handlePhase3739Tool(name, args);
@@ -2018,6 +2038,19 @@ export async function handleTool(name, args) {
     case "bankr_discover":            return await handlePlaidBankrTool(name, args);
     case "bankr_revenue":             return await handlePlaidBankrTool(name, args);
     case "bankr_status":              return await handlePlaidBankrTool(name, args);
+
+    // ─── Circle App Kits + Intelligent Protocol Router ──────────────────────────────────────
+    case "circle_bridge":             return await handleCircleRouterTool(name, args);
+    case "circle_swap":               return await handleCircleRouterTool(name, args);
+    case "circle_send":               return await handleCircleRouterTool(name, args);
+    case "circle_revenue_config":     return await handleCircleRouterTool(name, args);
+    case "circle_appkits_status":     return await handleCircleRouterTool(name, args);
+    case "route_payment":             return await handleCircleRouterTool(name, args);
+    case "route_analyze":             return await handleCircleRouterTool(name, args);
+    case "route_optimize_batch":      return await handleCircleRouterTool(name, args);
+    case "route_protocol_status":     return await handleCircleRouterTool(name, args);
+    case "route_smart_split":         return await handleCircleRouterTool(name, args);
+    case "route_set_preferences":     return await handleCircleRouterTool(name, args);
 
     // ─── Anthropic Managed Agents + Advisor Tool ─────────────────────────────
     case "claude_session_create":
