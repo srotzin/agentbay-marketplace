@@ -89,6 +89,7 @@ import { phase25Tools, handlePhase25Tool } from "./mcp-tools-phase25.js";
 import { phase26Tools, handlePhase26Tool } from "./mcp-tools-phase26.js";
 import { phase2730Tools, handlePhase2730Tool } from "./mcp-tools-phase27-30.js";
 import { phase27EsgTools, handlePhase27EsgTool } from "./mcp-tools-phase27-esg.js";
+import { phase28EnergyTelecomTools, handlePhase28EnergyTelecomTool } from "./mcp-tools-phase28-energy-telecom.js";
 import { phase3133Tools, handlePhase3133Tool } from "./mcp-tools-phase31-33.js";
 import { phase3436Tools, handlePhase3436Tool } from "./mcp-tools-phase34-36.js";
 import { phase3739Tools, handlePhase3739Tool } from "./mcp-tools-phase37-39.js";
@@ -977,7 +978,65 @@ const coreTools = [
   { name: "hiveagent_room_stats", description: "Use when you want data room platform stats — active rooms, documents, participant counts, NDA signings.", inputSchema: { type: "object", properties: {} } },
 ];
 
-// Merge core tools + Phase 2 (AI-requested) + Phase 3 (verticals) + Phase 5 (workflows) + Phase 7 (internal) + Phase 8 (lifecycle)
+// Merge ALL tools into one master array
+export const tools = [
+  ...coreTools,
+  ...newTools,
+  ...verticalTools,
+  ...workflowTools,
+  ...moneyTools,
+  ...internalTools,
+  ...shoulderTapTools,
+  ...lifecycleTools,
+  ...loaderPaymentTools,
+  ...phase10Tools,
+  ...phase11Tools,
+  ...phase12Tools,
+  ...phase13Tools,
+  ...phase14Tools,
+  ...phase15Tools,
+  ...phase16Tools,
+  ...phase17Tools,
+  ...phase18Tools,
+  ...phase19Tools,
+  ...phase20Tools,
+  ...phase21Tools,
+  ...phase22Tools,
+  ...phase23Tools,
+  ...phase24Tools,
+  ...phase25Tools,
+  ...phase26Tools,
+  ...phase2730Tools,
+  ...phase27EsgTools,
+  ...phase28EnergyTelecomTools,
+  ...phase3133Tools,
+  ...phase3436Tools,
+  ...phase3739Tools,
+  ...phase4042Tools,
+  ...phase4345Tools,
+  ...phase46Tools,
+  ...phase47Tools,
+  ...phase4849Tools,
+  ...phase48Tools,
+  ...phase4951Tools,
+  ...phase5254Tools,
+  ...phase55Tools,
+  ...phase5562Tools,
+  ...onboardingTools,
+  ...welcomeTools,
+  ...highwayTools,
+  ...originalsTools,
+  ...baitTools,
+  ...pharmaTxTools,
+  ...railsTools,
+  ...custodyTools,
+  ...arcCommerceTools,
+  ...networkEffectTools,
+  ...anthropicTools,
+  ...marketingEngineTools,
+  ...plaidBankrTools,
+];
+
 // ─── Broker MCP Tools ─────────────────────────────────────────────────────────
 
 export const brokerTools = [
@@ -1035,6 +1094,9 @@ export const brokerTools = [
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
   },
 ];
+
+// Add broker tools to master array
+tools.push(...brokerTools);
 
 export function handleBrokerTool(name, args = {}) {
   switch (name) {
@@ -1645,6 +1707,20 @@ export async function handleTool(name, args) {
     case "esg_prioritize_suppliers":       return handlePhase27EsgTool(name, args);
     case "esg_generate_questionnaire":     return handlePhase27EsgTool(name, args);
     case "esg_get_default_weights":        return handlePhase27EsgTool(name, args);
+
+    // ─── Phase 28: Energy Trading + Telecom Ops ─────────────────────────────
+    case "energy_create_product":           return handlePhase28EnergyTelecomTool(name, args);
+    case "energy_place_order":              return handlePhase28EnergyTelecomTool(name, args);
+    case "energy_fill_order":               return handlePhase28EnergyTelecomTool(name, args);
+    case "energy_settle_product":           return handlePhase28EnergyTelecomTool(name, args);
+    case "telecom_order_circuit":           return handlePhase28EnergyTelecomTool(name, args);
+    case "telecom_update_circuit_status":   return handlePhase28EnergyTelecomTool(name, args);
+    case "telecom_file_incident":           return handlePhase28EnergyTelecomTool(name, args);
+    case "telecom_ack_incident":            return handlePhase28EnergyTelecomTool(name, args);
+    case "telecom_resolve_incident":        return handlePhase28EnergyTelecomTool(name, args);
+    case "telecom_schedule_dispatch":       return handlePhase28EnergyTelecomTool(name, args);
+    case "telecom_update_dispatch_status":  return handlePhase28EnergyTelecomTool(name, args);
+
     case "marketplace_complete_job":    return handlePhase2730Tool(name, args);
     case "marketplace_review":          return handlePhase2730Tool(name, args);
     case "marketplace_agent_profile":   return handlePhase2730Tool(name, args);
