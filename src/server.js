@@ -50,7 +50,14 @@ app.use((req, res, next) => {
 // ─── Rate Limit Tracking (in-memory; upgrade to Redis in production) ─────────
 const rateLimits = new Map();
 
+// Internal API token for cron/automation access
+const INTERNAL_TOKEN = process.env.INTERNAL_API_TOKEN || "hiveagent-internal-2026";
+
 app.use("/mcp", (req, res, next) => {
+  // Allow internal cron/automation requests with token
+  if (req.headers["x-internal-token"] === INTERNAL_TOKEN) {
+    return next();
+  }
   const agentId = req.headers["x-agent-id"] || req.ip;
   const now = Date.now();
   const window = 60000; // 1 minute
