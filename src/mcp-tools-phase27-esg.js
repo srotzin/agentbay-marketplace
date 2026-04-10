@@ -148,6 +148,6 @@ export async function handlePhase27EsgTool(name, args) {
       return esgGetDefaultWeights();
 
     default:
-      return null;
+      throw new Error(`Unknown tool: ${name}`);
   }
 }

@@ -45,6 +45,6 @@ export async function handleWelcomeTool(name, args) {
     case "hiveagent_welcome": return agentWelcome(args);
     case "hiveagent_capability_map": return getCapabilityMap(args);
     case "hiveagent_why_stay": return whyStay(args);
-    default: return null;
+    default: throw new Error(`Unknown tool: ${name}`);
   }
 }

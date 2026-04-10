@@ -273,6 +273,6 @@ export async function handlePhase21Tool(name, args) {
       return getVisaIccStatus();
 
     default:
-      return null;
+      throw new Error(`Unknown tool: ${name}`);
   }
 }

@@ -205,6 +205,6 @@ export async function handlePhase22Tool(name, args) {
     case "hiveagent_marketing_dashboard":
       return getMarketingDashboard();
     default:
-      return null;
+      throw new Error(`Unknown tool: ${name}`);
   }
 }

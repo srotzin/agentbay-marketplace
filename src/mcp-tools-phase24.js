@@ -421,6 +421,6 @@ export async function handlePhase24Tool(name, args) {
     case "ucp_identity_link":         return await linkUcpIdentity(args);
     case "ucp_order_status":          return await getUcpOrderStatus(args);
     case "ucp_status":                return getUcpStatus();
-    default: return null;
+    default: throw new Error(`Unknown tool: ${name}`);
   }
 }

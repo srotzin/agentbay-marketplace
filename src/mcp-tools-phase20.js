@@ -332,6 +332,6 @@ export async function handlePhase20Tool(name, args) {
       return getBvnkStatus();
 
     default:
-      return null; // not handled by this phase
+      throw new Error(`Unknown tool: ${name}`);
   }
 }

@@ -207,6 +207,6 @@ export async function handlePhase26Tool(name, args) {
     case "arc_balance":           return getArcBalance(args);
     case "arc_cctp_bridge":       return arcCctpBridge(args);
     case "arc_status":            return getArcStatus();
-    default: return null;
+    default: throw new Error(`Unknown tool: ${name}`);
   }
 }
