@@ -115,6 +115,7 @@ import { pharmaTxTools, handlePharmaTxTool } from "./mcp-tools-pharma-tx.js";
 // A2A Tokenization Rails — ATS-1 token standard, multi-chain settlement, protocol router
 import { railsTools, handleRailsTool } from "./mcp-tools-rails.js";
 import { custodyTools, handleCustodyTool } from "./mcp-tools-custody.js";
+import { arcCommerceTools, handleArcCommerceTool } from "./mcp-tools-arc-commerce.js";
 // Anthropic Managed Agents + Advisor Tool
 import { anthropicTools, handleAnthropicTool } from "./mcp-tools-anthropic.js";
 // Response middleware (Phase 5)
@@ -1058,7 +1059,7 @@ export function handleBrokerTool(name, args = {}) {
   }
 }
 
-export const tools = [...highwayTools, ...originalsTools, ...anthropicTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase23Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase5562Tools, ...onboardingTools];
+export const tools = [...highwayTools, ...originalsTools, ...anthropicTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase23Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase5562Tools, ...onboardingTools, ...arcCommerceTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -2119,6 +2120,11 @@ export async function handleTool(name, args) {
       }
       try {
         return await handleCustodyTool(name, args);
+      } catch (e) {
+        if (!e.message?.includes("Unknown")) throw e;
+      }
+      try {
+        return await handleArcCommerceTool(name, args);
       } catch (e) {
         if (!e.message?.includes("Unknown")) throw e;
       }
