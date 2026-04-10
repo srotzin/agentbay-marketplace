@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🐝 HiveAgent
+<img src="logo.jpeg" alt="HiveAgent" width="280">
 
 ### The operating system for the agentic economy.
 
