@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AgentBay Tutorial: Building Service Modules (Pattern + Checklist)</title>
+  <meta name="description" content="A step-by-step guide to building AgentBay service modules: tool schema conventions, handler patterns, phase wiring, and validation checklist." />
+  <link rel="stylesheet" href="/assets/site.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="logo" href="/">AgentBay</a>
+      <nav class="nav">
+        <a href="/compare.html">Compare</a>
+        <a href="/pricing.html">Pricing</a>
+        <a href="/docs/">Docs</a>
+        <a href="/snippets.html">Snippets</a>
+        <a href="/live.html">Live</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" style="max-width: 920px;">
+    <h1>Building AgentBay Service Modules: Pattern + Checklist</h1>
+    <p class="muted">This guide explains the service module conventions used by AgentBay’s MCP tool router and how to add new verticals quickly without breaking the dispatcher chain.</p>
+
+    <section>
+      <h2>What is a “service module” in AgentBay?</h2>
+      <p>A service module is a small, self-contained file in <code>src/services/</code> that exports:</p>
+      <ul>
+        <li><strong>Tool definitions</strong> (name, description, JSON schema) so the MCP server can expose them.</li>
+        <li><strong>A handler</strong> that performs the work when the tool is invoked.</li>
+        <li><strong>Optional helpers</strong> (parsers, validators, API wrappers) that keep the handler readable.</li>
+      </ul>
+      <p>AgentBay aggregates tools from many modules into a single registry and routes each tool call to the right handler via <code>src/mcp-tools.js</code>.</p>
+    </section>
+
+    <section>
+      <h2>Service module file structure (recommended)</h2>
+      <pre><code>// src/services/my-vertical-service.js
+export const tools = [
+  {
+    name: 'my_vertical_do_thing',
+    description: '…',
+    inputSchema: {
+      type: 'object',
+      properties: { /* … */ },
+      required: [/* … */]
+    }
+  }
+];
+
+export async function handleTool(name, args, ctx) {
+  switch (name) {
+    case 'my_vertical_do_thing':
+      return await doThing(args, ctx);
+    default:
+      return null;
+  }
+}
+
+async function doThing(args, ctx) {
+  // validate inputs
+  // call APIs or internal services
+  // return JSON-serializable result
+}
+</code></pre>
+      <p><strong>Why this layout works:</strong> it keeps tool metadata near the handler and ensures the dispatcher can call <code>handleTool</code> consistently across services.</p>
+    </section>
+
+    <section>
+      <h2>Naming conventions that avoid collisions</h2>
+      <ul>
+        <li><strong>Tool names:</strong> use <code>snake_case</code> with a clear prefix, e.g. <code>insurance_claims_…</code>, <code>clinical_trials_…</code>, <code>industrial_maintenance_…</code>.</li>
+        <li><strong>One module, one prefix:</strong> keep a single prefix per file to simplify routing and future refactors.</li>
+        <li><strong>Schema keys:</strong> prefer explicit names (<code>patientAge</code>, <code>facilityId</code>) over generic (<code>id</code>, <code>value</code>).</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Input schema checklist (MCP-friendly)</h2>
+      <p>When defining <code>inputSchema</code>:</p>
+      <ul>
+        <li>Use <code>type: 'object'</code> at the top level.</li>
+        <li>List <code>properties</code> with stable types (string/number/boolean/array/object).</li>
+        <li>Set <code>required</code> for critical fields (avoid making everything optional).</li>
+        <li>Add <code>description</code> fields for user-facing clarity.</li>
+        <li>For arrays, define <code>items</code> and keep them uniform.</li>
+      </ul>
+      <p><strong>Tip:</strong> If a parameter can be large (e.g. freeform text), add length guidance in the description to reduce model failure modes.</p>
+    </section>
+
+    <section>
+      <h2>Phase wiring: how tools get discovered</h2>
+      <p>AgentBay organizes tool exports into “phase files” under <code>src/mcp-tools-phases/</code>. When you add a new module, it should be imported into a phase file and then included by <code>src/mcp-tools.js</code>.</p>
+      <ol>
+        <li>Create a service file in <code>src/services/</code>.</li>
+        <li>Import it into a new or existing phase file in <code>src/mcp-tools-phases/</code>.</li>
+        <li>Ensure the phase file exports a tools array (the aggregator imports these).</li>
+        <li>Update <code>src/mcp-tools.js</code> to include the new phase in the overall tools registry.</li>
+        <li>Add a dispatch entry so requests are routed to the new module’s handler.</li>
+      </ol>
+      <p>If your tool definitions exist but dispatch is missing, the tool will show up in listings but fail at execution time.</p>
+    </section>
+
+    <section>
+      <h2>Router integration: the “dispatch chain” checklist</h2>
+      <p>Before committing, confirm:</p>
+      <ul>
+        <li>The new module exports <code>tools</code> and <code>handleTool</code>.</li>
+        <li>The relevant phase file imports the module and spreads <code>tools</code> into its export.</li>
+        <li><code>src/mcp-tools.js</code> imports the new phase file.</li>
+        <li><code>src/mcp-tools.js</code> includes the phase’s tools in the aggregated <code>toolsArray</code>.</li>
+        <li>The dispatcher calls your module’s <code>handleTool</code> (and short-circuits when it returns a result).</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Validation steps (always do these)</h2>
+      <ol>
+        <li>Run <code>node --check src/mcp-tools.js</code> to catch syntax errors early.</li>
+        <li>Start the server locally and invoke the tool with a minimal payload.</li>
+        <li>Try one “edge input” (missing optional fields, empty arrays, longer text) to confirm validation behavior.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Common mistakes</h2>
+      <ul>
+        <li><strong>Tool name mismatch:</strong> the dispatcher checks the exact string; keep names consistent.</li>
+        <li><strong>Forgetting to export tools:</strong> a module without a <code>tools</code> export is effectively invisible.</li>
+        <li><strong>Returning non-serializable values:</strong> Dates, streams, or class instances may break JSON encoding.</li>
+        <li><strong>Mixing prefixes:</strong> it becomes difficult to search and to route later.</li>
+      </ul>
+    </section>
+
+    <hr />
+
+    <section>
+      <h2>Next steps</h2>
+      <ul>
+        <li>Read <a href="/tutorial-building-mcp-service-modules.html">Building MCP Service Modules</a> for a longer end-to-end walkthrough.</li>
+        <li>Read <a href="/tutorial-mcp-tools-phases.html">MCP Tools Phases</a> to understand how phases are loaded.</li>
+      </ul>
+    </section>
+
+    <p class="muted" style="margin-top: 2rem;">Last updated: 2026-04-11</p>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© AgentBay</p>
+    </div>
+  </footer>
+</body>
+</html>
