@@ -148,6 +148,7 @@ import { retentionTools, handleRetentionTool } from "./mcp-tools-retention.js";
 // Atomic Execution Loops — 5 one-call endpoints that do everything (THE gravity layer)
 import { atomicLoopTools, handleAtomicLoopTool } from "./mcp-tools-atomic-loops.js";
 import { discoveryInfraTools, handleDiscoveryInfraTool } from "./mcp-tools-discovery-infra.js";
+import { sovereignTools, handleSovereignTool } from "./mcp-tools-sovereign.js";
 
 // MCP tool definitions (JSON Schema format)
 const coreTools = [
@@ -994,6 +995,7 @@ const coreTools = [
   { name: "hiveagent_room_lock", description: "Use when due diligence or a deal phase is complete and you want to freeze a data room so no further changes can be made.", inputSchema: { type: "object", properties: { room_id: { type: "string", description: "Room ID" } }, required: ["room_id"] } },
   { name: "hiveagent_room_destroy", description: "Use when you need to permanently and irreversibly destroy a data room and all its documents.", inputSchema: { type: "object", properties: { room_id: { type: "string", description: "Room ID" } }, required: ["room_id"] } },
   { name: "hiveagent_room_stats", description: "Use when you want data room platform stats — active rooms, documents, participant counts, NDA signings.", inputSchema: { type: "object", properties: {} } },
+  ...sovereignTools,
 ];
 
 
@@ -2365,6 +2367,11 @@ export async function handleTool(name, args) {
       }
       try {
         return await handleDiscoveryInfraTool(name, args);
+      } catch (e) {
+        if (!e.message?.includes("Unknown")) throw e;
+      }
+      try {
+        return handleSovereignTool(name, args);
       } catch (e) {
         if (!e.message?.includes("Unknown")) throw e;
       }
