@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Local MCP Tools Development: Add a New Service Module End-to-End</title>
+  <meta name="description" content="A practical guide to adding a new vertical service module and wiring it into the MCP tools router, with local checks and a safe git workflow." />
+  <style>
+    :root { --bg:#0b1020; --fg:#eaf0ff; --muted:#b8c2e6; --card:#121a33; --accent:#7aa2ff; --code:#0a0f22; --border:#233055; }
+    body{ margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:linear-gradient(180deg,var(--bg),#070a14); color:var(--fg); }
+    .wrap{ max-width: 980px; margin: 0 auto; padding: 40px 20px; }
+    header{ margin-bottom: 26px; }
+    h1{ font-size: 34px; line-height: 1.15; margin: 0 0 10px; }
+    p.lede{ color:var(--muted); font-size: 18px; margin: 0; }
+    .card{ background: rgba(18,26,51,.9); border:1px solid var(--border); border-radius: 14px; padding: 18px 18px; margin: 14px 0; }
+    h2{ margin: 18px 0 8px; font-size: 22px; }
+    h3{ margin: 16px 0 8px; font-size: 18px; color: #dbe6ff; }
+    a{ color: var(--accent); text-decoration: none; }
+    a:hover{ text-decoration: underline; }
+    code, pre{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    pre{ background: var(--code); border:1px solid var(--border); border-radius: 12px; padding: 14px; overflow:auto; }
+    .grid{ display:grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 900px){ .grid{ grid-template-columns: 1fr 1fr; } }
+    .tag{ display:inline-block; padding: 3px 10px; border:1px solid var(--border); border-radius: 999px; color: var(--muted); font-size: 12px; }
+    ul{ margin: 8px 0 0 20px; color: var(--muted); }
+    .ok{ color:#b7ffce; }
+    .warn{ color:#ffe6a6; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="tag">Tutorial</div>
+      <h1>Local MCP Tools Development: Add a New Service Module End-to-End</h1>
+      <p class="lede">A step-by-step workflow for adding a new vertical module under <code>src/services/</code>, wiring it into the MCP router, and validating locally before pushing.</p>
+    </header>
+
+    <div class="card">
+      <h2>What you will build</h2>
+      <p style="color:var(--muted); margin:0;">You will add a new service module (a vertical) with several MCP tools, then wire it into the router so the tools appear in <code>tools/list</code>.</p>
+      <ul>
+        <li>Create a new module file in <code>src/services/</code></li>
+        <li>Add it to a new <code>src/mcp-tools-phaseXX.js</code> aggregation file</li>
+        <li>Register the tools in <code>src/mcp-tools.js</code> (imports, tools array, dispatch chain)</li>
+        <li>Run a fast syntax check: <code>node --check src/mcp-tools.js</code></li>
+      </ul>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2>1) Pick a vertical and design tool boundaries</h2>
+        <p style="color:var(--muted); margin:0;">Good vertical modules share a pattern: a small set of CRUD-like tools plus 1–2 "workflow" tools that do something opinionated.</p>
+        <h3>Example tool set</h3>
+        <pre><code>// mcp name suggestions
+vertical_list_resources
+vertical_get_resource
+vertical_create_resource
+vertical_update_resource
+vertical_delete_resource
+vertical_run_workflow</code></pre>
+      </div>
+      <div class="card">
+        <h2>2) Add the service module</h2>
+        <p style="color:var(--muted); margin:0;">Create a new file in <code>src/services/</code>. Follow existing modules for naming, JSON schema shapes, and error handling.</p>
+        <h3>Minimal skeleton</h3>
+        <pre><code>// src/services/my-vertical-tools.js
+export const myVerticalTools = [
+  {
+    name: "my_vertical_ping",
+    description: "Sanity check tool for the vertical",
+    inputSchema: { type: "object", properties: {}, additionalProperties: false },
+    async handler() {
+      return { ok: true };
+    }
+  }
+];
+</code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>3) Wire into a new phase file</h2>
+      <p style="color:var(--muted); margin:0;">The project groups tools into phase files. Create a new phase file that imports your module and exports a combined array.</p>
+      <pre><code>// src/mcp-tools-phaseXX.js
+import { myVerticalTools } from "./services/my-vertical-tools.js";
+
+export const toolsPhaseXX = [
+  ...myVerticalTools,
+];
+</code></pre>
+      <p style="color:var(--muted); margin:10px 0 0;">The phase filename can be any unused number. Keeping phases small helps reduce merge conflicts.</p>
+    </div>
+
+    <div class="card">
+      <h2>4) Register tools + dispatch in <code>src/mcp-tools.js</code></h2>
+      <p style="color:var(--muted); margin:0;">Most bugs happen here: forgetting the import, forgetting to add tools to the exported list, or missing the handler case.</p>
+      <h3>Checklist</h3>
+      <ul>
+        <li><span class="ok">Import</span> the new phase file export</li>
+        <li><span class="ok">Append</span> the phase to the tools array</li>
+        <li><span class="ok">Add</span> dispatch cases so <code>tool.name</code> routes to <code>tool.handler</code></li>
+      </ul>
+      <h3>Dispatch pattern</h3>
+      <pre><code>// pseudo-structure
+if (tool.name === "my_vertical_ping") {
+  return await tool.handler(args);
+}
+</code></pre>
+    </div>
+
+    <div class="card">
+      <h2>5) Local verification</h2>
+      <p style="color:var(--muted); margin:0;">Before committing, do a cheap syntax pass and optionally run a quick node script that imports the new phase and prints tool names.</p>
+      <pre><code># fast syntax check
+node --check src/mcp-tools.js
+
+# optional: ensure no duplicate tool names
+node -e 'import("./src/mcp-tools.js").then(m=>{const names=m.tools.map(t=>t.name); console.log(names.length, new Set(names).size);})'
+</code></pre>
+    </div>
+
+    <div class="card">
+      <h2>6) Safe git workflow (avoids push rejection)</h2>
+      <p style="color:var(--muted); margin:0;">If other automation is landing commits, pushing without rebasing can fail.</p>
+      <pre><code>git add -A
+git commit -m "Add new vertical"
+git pull origin master --rebase
+git push origin master</code></pre>
+      <p style="color:var(--muted); margin:10px 0 0;">If the rebase hits conflicts: resolve, <code>git add</code>, then <code>git rebase --continue</code>.</p>
+    </div>
+
+    <div class="card">
+      <h2>Common gotchas</h2>
+      <ul>
+        <li>Duplicate tool names (two modules exporting the same <code>name</code>)</li>
+        <li>Input schemas allowing unexpected properties (set <code>additionalProperties: false</code> where appropriate)</li>
+        <li>Handler returning non-JSON-safe values (return plain objects/arrays/strings)</li>
+        <li>Forgetting to add the module into the phase file and the phase into <code>mcp-tools.js</code></li>
+      </ul>
+    </div>
+
+    <footer style="color:var(--muted); margin-top: 26px; font-size: 13px;">
+      <p style="margin:0;">If you want a template vertical, search existing modules under <code>src/services/</code> and copy the smallest one as a starting point.</p>
+    </footer>
+  </div>
+</body>
+</html>
