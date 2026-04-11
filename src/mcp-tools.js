@@ -104,6 +104,7 @@ import { phase55Tools, handlePhase55Tool } from "./mcp-tools-phase55.js";
 import { phase63Tools, handlePhase63Tool } from "./mcp-tools-phase63.js";
 import { phase64Tools, handlePhase64Tool } from "./mcp-tools-phase64.js";
 import { phase65EmailOpsTools, handlePhase65EmailOpsTool } from "./mcp-tools-phase65-emailops.js";
+import { phase66Tools, handlePhase66Tool } from "./mcp-tools-phase66.js";
 import { onboardingTools, handleOnboardingTool } from "./mcp-tools-onboarding.js";
 import { welcomeTools, handleWelcomeTool } from "./mcp-tools-welcome.js";
 // THE AGENT HIGHWAY — enter with a task, exit with a result (7 tools)
@@ -1089,7 +1090,7 @@ export function handleBrokerTool(name, args = {}) {
 }
 
 
-export const tools = [...discoveryInfraTools, ...atomicLoopTools, ...retentionTools, ...agentRecruiterTools, ...marketingEngineTools, ...networkEffectTools, ...highwayTools, ...originalsTools, ...anthropicTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase23Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase63Tools, ...phase64Tools, ...phase65EmailOpsTools, ...phase5562Tools, ...onboardingTools, ...arcCommerceTools, ...plaidBankrTools, ...circleRouterTools, ...x402UptoTools, ...exchangeErc8183Tools, ...geminiImprovementTools, ...swarmVerticalTools, ...constructionTools, ...zkDelegationTools, ...microStakingTools, ...pheromoneTools];
+export const tools = [...discoveryInfraTools, ...atomicLoopTools, ...retentionTools, ...agentRecruiterTools, ...marketingEngineTools, ...networkEffectTools, ...highwayTools, ...originalsTools, ...anthropicTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase23Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase63Tools, ...phase64Tools, ...phase65EmailOpsTools, ...phase66Tools, ...phase5562Tools, ...onboardingTools, ...arcCommerceTools, ...plaidBankrTools, ...circleRouterTools, ...x402UptoTools, ...exchangeErc8183Tools, ...geminiImprovementTools, ...swarmVerticalTools, ...constructionTools, ...zkDelegationTools, ...microStakingTools, ...pheromoneTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -2052,6 +2053,27 @@ export async function handleTool(name, args) {
     case "emailops_thread_summarize":   return await handlePhase65EmailOpsTool(name, args);
     case "emailops_followup_plan":      return await handlePhase65EmailOpsTool(name, args);
     case "emailops_mailbox_dashboard":  return await handlePhase65EmailOpsTool(name, args);
+
+    // Phase 66 — Litigation Support + Food Safety
+    case "litigation_matter_create":     return await handlePhase66Tool(name, args);
+    case "litigation_matter_list":       return await handlePhase66Tool(name, args);
+    case "litigation_evidence_add":      return await handlePhase66Tool(name, args);
+    case "litigation_evidence_list":     return await handlePhase66Tool(name, args);
+    case "litigation_task_create":       return await handlePhase66Tool(name, args);
+    case "litigation_task_list":         return await handlePhase66Tool(name, args);
+    case "litigation_task_update":       return await handlePhase66Tool(name, args);
+    case "litigation_privilege_log_add": return await handlePhase66Tool(name, args);
+    case "litigation_privilege_log_list":return await handlePhase66Tool(name, args);
+    case "food_supplier_upsert":         return await handlePhase66Tool(name, args);
+    case "food_supplier_list":           return await handlePhase66Tool(name, args);
+    case "food_product_upsert":          return await handlePhase66Tool(name, args);
+    case "food_product_list":            return await handlePhase66Tool(name, args);
+    case "food_lot_create":              return await handlePhase66Tool(name, args);
+    case "food_lot_list":                return await handlePhase66Tool(name, args);
+    case "food_ccp_check_log":           return await handlePhase66Tool(name, args);
+    case "food_ccp_check_list":          return await handlePhase66Tool(name, args);
+    case "food_recall_simulate":         return await handlePhase66Tool(name, args);
+    case "food_recall_list":             return await handlePhase66Tool(name, args);
 
     // Phase 55-62 — Crossmint, MC/BVNK Bridge, EU AI Act, Colorado AI, AgentCore, Visa CLI, Tempo, Visa Agentic Ready
     case "crossmint_wallet_create":         return await handlePhase5562Tool(name, args);
