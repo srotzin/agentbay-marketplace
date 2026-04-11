@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agent Monitoring & Alerts Tutorial (Logs, Metrics, Traces) | AgentBay</title>
+  <meta name="description" content="A practical guide to monitoring AI agents with logs, metrics, traces, and alerting. Includes patterns for retries, SLOs, and incident response." />
+  <style>
+    :root { --fg:#111; --muted:#666; --bg:#fff; --card:#f7f7f9; --code:#0b1020; --codefg:#e6edf3; --link:#0b57d0; }
+    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; color: var(--fg); background: var(--bg); margin: 0; }
+    main { max-width: 920px; margin: 0 auto; padding: 48px 20px; }
+    h1 { font-size: 34px; line-height: 1.15; margin: 0 0 10px; }
+    h2 { margin-top: 34px; }
+    p, li { line-height: 1.55; }
+    .lede { color: var(--muted); font-size: 16px; margin: 0 0 18px; }
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .card { background: var(--card); border: 1px solid #ececf1; border-radius: 12px; padding: 16px 18px; }
+    pre { background: var(--code); color: var(--codefg); padding: 14px 16px; border-radius: 12px; overflow-x: auto; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 13px; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    @media (min-width: 860px) { .grid { grid-template-columns: 1fr 1fr; } }
+    .small { color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Monitoring & Alerts for AI Agents: A Practical Tutorial</h1>
+    <p class="lede">
+      Agents fail differently than traditional services: tool calls time out, prompts drift, and upstream APIs change.
+      This guide shows a simple, production-friendly way to add logs, metrics, traces, and alerting.
+    </p>
+
+    <div class="card">
+      <strong>Who this is for:</strong> builders shipping agents that call tools, handle long-running workflows, or coordinate multiple workers.
+      <div class="small">Estimated time: 15–25 minutes.</div>
+    </div>
+
+    <h2>1) Start with the observability triangle</h2>
+    <div class="grid">
+      <div class="card">
+        <strong>Logs</strong>
+        <ul>
+          <li>Answer: “What happened?”</li>
+          <li>Best for: debugging, audits, replaying runs</li>
+          <li>Agent-specific: prompt + tool-call transcript (redacted)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <strong>Metrics</strong>
+        <ul>
+          <li>Answer: “How often, how bad?”</li>
+          <li>Best for: SLOs, alerting, capacity planning</li>
+          <li>Agent-specific: tool error rate, retries, tokens, latency</li>
+        </ul>
+      </div>
+      <div class="card">
+        <strong>Traces</strong>
+        <ul>
+          <li>Answer: “Where is time spent?”</li>
+          <li>Best for: identifying slow tools or stuck steps</li>
+          <li>Agent-specific: span per tool call + reasoning step</li>
+        </ul>
+      </div>
+      <div class="card">
+        <strong>Alerts</strong>
+        <ul>
+          <li>Answer: “Who needs to act now?”</li>
+          <li>Best for: incidents and regressions</li>
+          <li>Agent-specific: hallucinated tool args, output validation failures</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>2) Define the minimal event schema</h2>
+    <p>
+      Your agent should emit structured events so you can aggregate across runs.
+      Keep it stable and versioned.
+    </p>
+
+    <pre><code>{
+  "event_version": 1,
+  "timestamp": "2026-04-11T08:15:00Z",
+  "env": "prod",
+  "agent": {
+    "name": "support-triage",
+    "release": "2026.04.11",
+    "run_id": "run_9d1c..."
+  },
+  "step": {
+    "name": "call_tool",
+    "tool": "search_email",
+    "attempt": 1
+  },
+  "timing_ms": 842,
+  "result": "ok",
+  "redactions": ["email_body"],
+  "metadata": {
+    "customer_tier": "enterprise"
+  }
+}
+</code></pre>
+
+    <div class="card">
+      <strong>Tip:</strong> Always include <code>run_id</code> and <code>tool</code> (when applicable). Those two fields unlock most dashboards.
+    </div>
+
+    <h2>3) Instrument tool calls with spans</h2>
+    <p>
+      A single agent run is usually a tree:
+      an overall “run” span, then one span per step, and a child span per tool call.
+    </p>
+
+    <pre><code>// Pseudocode
+span("agent.run", { run_id, agent })
+  .withChild(span("step.plan"))
+  .withChild(span("tool.call", { tool: "search_web" }, async () =&gt; {
+    const t0 = now();
+    try {
+      const res = await callTool(...);
+      metric.count("tool_success", 1, { tool: "search_web" });
+      metric.hist("tool_latency_ms", now() - t0, { tool: "search_web" });
+      return res;
+    } catch (err) {
+      metric.count("tool_error", 1, { tool: "search_web", code: err.code || "unknown" });
+      log.error({ err, tool: "search_web", run_id });
+      throw err;
+    }
+  }))
+</code></pre>
+
+    <h2>4) Add agent-specific metrics</h2>
+    <ul>
+      <li><strong>Success rate:</strong> completed runs / started runs</li>
+      <li><strong>Tool error rate:</strong> tool failures per tool and per upstream provider</li>
+      <li><strong>Retries:</strong> retry count distribution per tool</li>
+      <li><strong>Latency:</strong> p50/p95 per tool and per end-to-end run</li>
+      <li><strong>Cost signals:</strong> tokens in/out, calls per run</li>
+      <li><strong>Validation failures:</strong> schema parse errors, policy violations, bad outputs</li>
+    </ul>
+
+    <h2>5) Create alerts that don’t page you for noise</h2>
+    <p>
+      Alerting for agents works best when you alert on <em>user impact</em>, not internal errors.
+      For example, alert when “failed runs exceed 2% for 10 minutes”, not on every tool timeout.
+    </p>
+
+    <div class="grid">
+      <div class="card">
+        <strong>Recommended alerts</strong>
+        <ul>
+          <li>Run failure rate &gt; threshold</li>
+          <li>Tool error rate spike for a single provider</li>
+          <li>p95 run latency regression</li>
+          <li>Output validation failures spike</li>
+        </ul>
+      </div>
+      <div class="card">
+        <strong>Avoid as primary pages</strong>
+        <ul>
+          <li>Single tool timeout (often transient)</li>
+          <li>Single malformed input</li>
+          <li>One-off token spikes</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>6) Operational playbooks: the 3 questions</h2>
+    <ol>
+      <li><strong>Is this widespread?</strong> Check run failure rate and compare across releases.</li>
+      <li><strong>Is it a tool provider?</strong> Slice errors by tool + upstream API.</li>
+      <li><strong>Is it prompt/release drift?</strong> Compare validation failures between versions.</li>
+    </ol>
+
+    <h2>7) Add replay for safe debugging</h2>
+    <p>
+      Store enough context to reproduce problems without exposing sensitive data:
+      versioned prompts, tool inputs/outputs (redacted), and deterministic seeds if supported.
+    </p>
+
+    <div class="card">
+      <strong>Simple replay checklist</strong>
+      <ul>
+        <li>Log prompt template ID + variables (not raw secrets)</li>
+        <li>Persist tool call arguments and results (redacted + encrypted)</li>
+        <li>Record model + temperature + response format constraints</li>
+        <li>Record agent release/version</li>
+      </ul>
+    </div>
+
+    <h2>8) Next steps</h2>
+    <ul>
+      <li>Start by instrumenting only tool calls + run-level outcome.</li>
+      <li>Add validation metrics next (they catch regressions early).</li>
+      <li>Promote the best dashboards to a shared “agent health” landing page.</li>
+    </ul>
+
+    <p class="small">
+      This page is a standalone tutorial. If you want, copy the schema and pseudocode directly into your agent runtime.
+    </p>
+  </main>
+</body>
+</html>
