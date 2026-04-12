@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How to Add a New MCP Service Module in AgentBay (Pattern + Checklist)</title>
+  <meta name="description" content="A practical guide to adding a new service module in src/services, wiring it into a new mcp-tools phase file, and registering tools in src/mcp-tools.js." />
+  <style>
+    :root { --bg:#0b1220; --card:#0f1a33; --text:#e7eefc; --muted:#a9b7d0; --accent:#7aa2ff; --border:#213257; }
+    body { margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; background:var(--bg); color:var(--text); line-height:1.6; }
+    header { padding: 48px 16px 20px; max-width: 980px; margin: 0 auto; }
+    h1 { font-size: 34px; line-height:1.15; margin:0 0 10px; }
+    p.lede { margin:0; color:var(--muted); max-width: 75ch; }
+    main { max-width: 980px; margin: 0 auto; padding: 0 16px 64px; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius: 14px; padding: 18px; margin: 18px 0; }
+    h2 { margin: 0 0 8px; font-size: 20px; }
+    h3 { margin: 18px 0 8px; font-size: 16px; color: var(--accent); }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    pre { overflow:auto; background:#0a1328; border:1px solid var(--border); padding: 14px; border-radius: 12px; }
+    a { color: var(--accent); }
+    ul { margin: 8px 0 0 20px; }
+    .tag { display:inline-block; font-size: 12px; color: var(--muted); border:1px solid var(--border); padding: 2px 8px; border-radius: 999px; margin-left: 8px; }
+    .checklist li { margin: 6px 0; }
+    footer { max-width:980px; margin: 0 auto; padding: 0 16px 56px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>How to Add a New MCP Service Module in AgentBay <span class="tag">practical wiring guide</span></h1>
+    <p class="lede">
+      This tutorial shows the common pattern used in <code>src/services/</code>, how to expose tools in a new <code>src/mcp-tools-*.js</code> phase file,
+      and how to register them in <code>src/mcp-tools.js</code> so they appear in MCP <code>tools/list</code>.
+    </p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>1) The architecture: service module → phase tools file → MCP registry</h2>
+      <p>
+        In AgentBay, a “service module” is typically a pure JS module exporting a set of async functions that do the work.
+        A “phase tools file” converts those functions into MCP tool definitions (name, description, JSON schema), and maps tool calls to handlers.
+        Finally, <code>src/mcp-tools.js</code> aggregates all phases into one tool list and a single dispatch function.
+      </p>
+      <pre><code>src/services/&lt;your-vertical&gt;.js
+src/mcp-tools-&lt;your-vertical&gt;.js
+src/mcp-tools.js
+</code></pre>
+    </section>
+
+    <section class="card">
+      <h2>2) Create the service module (<code>src/services/&lt;vertical&gt;.js</code>)</h2>
+      <p>
+        Follow the existing pattern: a small set of capability-focused functions, input validation, and deterministic outputs.
+        Keep network calls optional (or mocked) unless the repo already has the required client.
+      </p>
+
+      <h3>Minimal example (template)</h3>
+      <pre><code>// src/services/example-vertical.js
+
+export async function example_healthcheck() {
+  return {
+    ok: true,
+    service: 'example-vertical',
+    checked_at: new Date().toISOString()
+  };
+}
+
+export async function example_format_request({ title, notes }) {
+  if (!title || typeof title !== 'string') {
+    throw new Error('title must be a non-empty string');
+  }
+
+  return {
+    title: title.trim(),
+    notes: (notes || '').toString().trim(),
+    hint: 'Pass this object into your downstream workflow.'
+  };
+}
+</code></pre>
+
+      <p>
+        Tip: Keep your exported function names aligned with your eventual MCP tool names.
+        That makes the dispatch switch/case in the phase tools file straightforward.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>3) Create a phase tools file (<code>src/mcp-tools-&lt;vertical&gt;.js</code>)</h2>
+      <p>
+        The phase file defines two exports:
+      </p>
+      <ul>
+        <li><code>&lt;vertical&gt;Tools</code>: an array of MCP tool definitions</li>
+        <li><code>handle&lt;Vertical&gt;Tool</code>: a dispatcher for tool calls</li>
+      </ul>
+
+      <h3>Minimal example (template)</h3>
+      <pre><code>// src/mcp-tools-example-vertical.js
+
+import {
+  example_healthcheck,
+  example_format_request
+} from './services/example-vertical.js';
+
+export const exampleVerticalTools = [
+  {
+    name: 'example_healthcheck',
+    description: 'Sanity-check the example vertical service module.',
+    inputSchema: {
+      type: 'object',
+      properties: {},
+      required: []
+    }
+  },
+  {
+    name: 'example_format_request',
+    description: 'Normalize a title/notes payload for downstream workflows.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', description: 'Short human-readable title.' },
+        notes: { type: 'string', description: 'Optional extra context.' }
+      },
+      required: ['title']
+    }
+  }
+];
+
+export async function handleExampleVerticalTool(name, args) {
+  switch (name) {
+    case 'example_healthcheck':
+      return await example_healthcheck();
+
+    case 'example_format_request':
+      return await example_format_request(args);
+
+    default:
+      throw new Error(`Unknown example-vertical tool: ${name}`);
+  }
+}
+</code></pre>
+
+      <p>
+        Tip: keep tool names globally unique and consistent (use a prefix like <code>example_</code> or <code>&lt;domain&gt;_</code>).
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>4) Register tools in <code>src/mcp-tools.js</code></h2>
+      <p>
+        Update the MCP registry file so the tool list includes your new phase and calls are routed to your handler.
+        In most AgentBay setups, this involves:
+      </p>
+      <ol>
+        <li>Importing <code>&lt;vertical&gt;Tools</code> and <code>handle&lt;Vertical&gt;Tool</code></li>
+        <li>Appending to the global <code>toolsArray</code></li>
+        <li>Extending the dispatch chain so your handler is invoked for your tool names</li>
+      </ol>
+
+      <h3>Checklist snippet</h3>
+      <pre><code>// 1) imports
+import { exampleVerticalTools, handleExampleVerticalTool } from './mcp-tools-example-vertical.js';
+
+// 2) tools array
+const toolsArray = [
+  // ... existing tools
+  ...exampleVerticalTools,
+];
+
+// 3) dispatch
+if (name.startsWith('example_')) {
+  return await handleExampleVerticalTool(name, args);
+}
+</code></pre>
+    </section>
+
+    <section class="card">
+      <h2>5) Validate before committing</h2>
+      <ul class="checklist">
+        <li>Run <code>node --check src/mcp-tools.js</code> to catch syntax errors.</li>
+        <li>Start the server (if your workflow includes it) and call <code>tools/list</code> to confirm tools appear.</li>
+        <li>Make sure input schemas are strict enough to avoid ambiguous arguments.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>6) Common pitfalls</h2>
+      <ul>
+        <li><strong>Handler not wired:</strong> tools appear in <code>tools/list</code> but calls fail because dispatch never reaches your handler.</li>
+        <li><strong>Name collisions:</strong> two phases export the same tool name; prefix aggressively.</li>
+        <li><strong>Schema drift:</strong> update <code>inputSchema</code> whenever you change function arguments.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>7) Next steps</h2>
+      <p>
+        Once you have a basic module wired, add higher-level capabilities:
+      </p>
+      <ul>
+        <li>Batch endpoints (process multiple items in one call)</li>
+        <li>Deterministic validation and normalization functions</li>
+        <li>Small “planner” helpers that output structured action plans (not just text)</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>
+      This page is intentionally self-contained and written to match the AgentBay repo layout.
+      If the project structure changes, update the file paths and import examples accordingly.
+    </p>
+  </footer>
+</body>
+</html>
