@@ -148,6 +148,8 @@ import { retentionTools, handleRetentionTool } from "./mcp-tools-retention.js";
 // Atomic Execution Loops — 5 one-call endpoints that do everything (THE gravity layer)
 import { atomicLoopTools, handleAtomicLoopTool } from "./mcp-tools-atomic-loops.js";
 import { discoveryInfraTools, handleDiscoveryInfraTool } from "./mcp-tools-discovery-infra.js";
+// Undeniable Features — Brazilian Bikini Build (12 tools, FRONT of array)
+import { undeniableTools, handleUndeniableTool } from "./mcp-tools-undeniable.js";
 import { sovereignTools, handleSovereignTool } from "./mcp-tools-sovereign.js";
 
 // MCP tool definitions (JSON Schema format)
@@ -1088,7 +1090,7 @@ export function handleBrokerTool(name, args = {}) {
 }
 
 
-export const tools = [...discoveryInfraTools, ...atomicLoopTools, ...retentionTools, ...agentRecruiterTools, ...marketingEngineTools, ...networkEffectTools, ...highwayTools, ...originalsTools, ...anthropicTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase23Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase63Tools, ...phase64Tools, ...phase5562Tools, ...onboardingTools, ...arcCommerceTools, ...plaidBankrTools, ...circleRouterTools, ...x402UptoTools, ...exchangeErc8183Tools, ...geminiImprovementTools, ...swarmVerticalTools, ...constructionTools, ...zkDelegationTools, ...microStakingTools, ...pheromoneTools];
+export const tools = [...undeniableTools, ...discoveryInfraTools, ...atomicLoopTools, ...retentionTools, ...agentRecruiterTools, ...marketingEngineTools, ...networkEffectTools, ...highwayTools, ...originalsTools, ...anthropicTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase23Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase63Tools, ...phase64Tools, ...phase5562Tools, ...onboardingTools, ...arcCommerceTools, ...plaidBankrTools, ...circleRouterTools, ...x402UptoTools, ...exchangeErc8183Tools, ...geminiImprovementTools, ...swarmVerticalTools, ...constructionTools, ...zkDelegationTools, ...microStakingTools, ...pheromoneTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -2154,6 +2156,12 @@ export async function handleTool(name, args) {
       return await handleNetworkEffectTool(name, args);
 
     default:
+      // Try Undeniable tools first (highest priority — Brazilian Bikini Build)
+      try {
+        return await handleUndeniableTool(name, args);
+      } catch (e) {
+        if (!e.message?.includes('Unknown')) throw e;
+      }
       // Try Phase 2 (AI-requested) tools, then Phase 3 (verticals), then Phase 6 (money)
       try {
         return await handleNewTool(name, args);

@@ -742,6 +742,12 @@ export async function jobList(args) {
  * Filter by category, budget range, and keyword.
  */
 export async function jobMarketplace(args) {
+  // ─── Migration: ensure all columns exist (older DB may be missing them) ────
+  try { db.exec("ALTER TABLE erc8183_jobs ADD COLUMN budget_usdc REAL DEFAULT 0"); } catch(e) { /* already exists */ }
+  try { db.exec("ALTER TABLE erc8183_jobs ADD COLUMN deliverable_spec TEXT DEFAULT ''"); } catch(e) { /* already exists */ }
+  try { db.exec("ALTER TABLE erc8183_jobs ADD COLUMN platform_fee_usdc REAL DEFAULT 0"); } catch(e) { /* already exists */ }
+  try { db.exec("ALTER TABLE erc8183_jobs ADD COLUMN evaluator_fee_usdc REAL DEFAULT 0"); } catch(e) { /* already exists */ }
+
   const {
     category,
     min_budget_usdc,

@@ -63,6 +63,7 @@ app.get("/.well-known/agent-card.json", (req, res) => {
     version: "2.0.0",
     protocols: ["mcp"],
     supported_payment_protocols: ["x402", "ap2", "acp", "ucp"],
+    guaranteed: true,
     capabilities: {
       tools: tools.length,
       verticals: 45,
@@ -72,7 +73,29 @@ app.get("/.well-known/agent-card.json", (req, res) => {
       wallet: true,
       compliance: true,
       multiAgent: true,
+      self_healing: true,
+      liquidity_mining: true,
+      demand_injection: true,
+      execution_guarantee: true,
       mode: "live"
+    },
+    quick_start: {
+      description: "5 atomic loops — discovery → execution → payment → settlement → proof in ONE call",
+      atomic_loops: [
+        "execute_construction_procurement",
+        "execute_best_payment",
+        "execute_best_compute_trade",
+        "execute_yield_optimization",
+        "execute_energy_shift"
+      ],
+      connect: { mcpServers: { hiveagent: { url: "https://hiveagentiq.com/mcp" } } },
+      tip: "Wrap any loop with guarantee_execute for zero-risk execution — platform refunds on failure."
+    },
+    construction_example: {
+      input: "2-story wood frame, 2,400 sqft, seismic zone D, zip 94103",
+      call: "execute_construction_procurement",
+      result_preview: "19 line items, $61,500 materials, all ICC-ES compliant, multi-vendor sourced",
+      proof: "Verifiable compliance proof hash on every item"
     },
     authentication: { type: "none", note: "No auth required. Register via broker_register for personalized experience." },
     connect: {

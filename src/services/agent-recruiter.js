@@ -219,7 +219,18 @@ Join: https://hiveagentiq.com/join?ref=${code}`,
 // ─── Core Functions ───────────────────────────────────────────────────────────
 
 export function enrollAmbassador(agentId) {
-  const existing = db.prepare("SELECT * FROM recruiter_ambassadors WHERE agent_id = ?").get(agentId);
+  // Null guard: agentId must be a non-empty string
+  if (!agentId || typeof agentId !== "string") {
+    return { error: "agent_id is required and must be a non-empty string" };
+  }
+
+  let existing;
+  try {
+    existing = db.prepare("SELECT * FROM recruiter_ambassadors WHERE agent_id = ?").get(agentId);
+  } catch (e) {
+    return { error: `DB error looking up ambassador: ${e.message}` };
+  }
+
   if (existing) {
     return {
       status: "already_enrolled",
@@ -233,12 +244,20 @@ export function enrollAmbassador(agentId) {
     };
   }
 
-  const code = `amb_${agentId.replace(/[^a-z0-9]/gi, '').slice(0, 8)}_${uuid().slice(0, 6)}`;
-  db.prepare("INSERT INTO recruiter_ambassadors (agent_id, ambassador_code) VALUES (?, ?)").run(agentId, code);
-  
-  db.prepare("INSERT INTO recruiter_events (event_type, source_agent_id, channel, metadata) VALUES (?, ?, ?, ?)").run(
-    "ambassador_enrolled", agentId, "self", JSON.stringify({ code })
-  );
+  const safeId = agentId.replace(/[^a-z0-9]/gi, '').slice(0, 8) || 'agent';
+  const code = `amb_${safeId}_${uuid().slice(0, 6)}`;
+  try {
+    db.prepare("INSERT INTO recruiter_ambassadors (agent_id, ambassador_code) VALUES (?, ?)").run(agentId, code);
+  } catch (e) {
+    return { error: `Failed to enroll ambassador: ${e.message}` };
+  }
+  try {
+    db.prepare("INSERT INTO recruiter_events (event_type, source_agent_id, channel, metadata) VALUES (?, ?, ?, ?)").run(
+      "ambassador_enrolled", agentId, "self", JSON.stringify({ code })
+    );
+  } catch (e) {
+    console.warn("[Recruiter] event log error:", e.message);
+  }
 
   return {
     status: "enrolled",
