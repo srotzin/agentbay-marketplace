@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agent Observability: Tracing, Spans, and Structured Logs (AgentBay Tutorial)</title>
+  <meta name="description" content="A practical guide to adding tracing, spans, structured logs, and redaction to agent tools and service modules." />
+  <style>
+    :root { --fg:#111; --muted:#555; --bg:#fff; --code:#0b1020; --codefg:#e6edf3; --border:#e5e7eb; --accent:#2563eb; }
+    html, body { background: var(--bg); color: var(--fg); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; line-height: 1.55; }
+    body { margin: 0; }
+    header { border-bottom: 1px solid var(--border); padding: 24px 18px; }
+    main { max-width: 900px; margin: 0 auto; padding: 18px; }
+    h1 { font-size: 28px; margin: 0 0 6px; }
+    .sub { color: var(--muted); margin: 0; }
+    h2 { margin-top: 28px; }
+    h3 { margin-top: 18px; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    pre { background: var(--code); color: var(--codefg); padding: 14px; border-radius: 10px; overflow-x: auto; border: 1px solid #111827; }
+    .callout { border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 10px; padding: 12px 14px; background: #f8fafc; }
+    .kbd { border: 1px solid var(--border); border-bottom-width: 2px; padding: 1px 6px; border-radius: 6px; background: #f9fafb; font-size: 0.95em; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    ul { padding-left: 20px; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    @media (min-width: 860px) { .grid { grid-template-columns: 1fr 1fr; } }
+    .card { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+    .muted { color: var(--muted); }
+    .small { font-size: 0.95em; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Agent Observability: tracing, spans, and structured logs</h1>
+    <p class="sub">A practical guide for AgentBay-style service modules and MCP tool handlers.</p>
+  </header>
+
+  <main>
+    <div class="callout">
+      <strong>Goal:</strong> make every tool invocation debuggable without leaking secrets.
+      This tutorial shows a minimal pattern for tracing, span boundaries, structured logging, and redaction.
+    </div>
+
+    <h2>Why observability matters for agents</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Fast debugging</h3>
+        <p class="muted small">When a tool returns the wrong data, you need a timeline: inputs, downstream calls, retries, and outputs.</p>
+      </div>
+      <div class="card">
+        <h3>Safety + compliance</h3>
+        <p class="muted small">You want to log enough to reproduce issues while redacting tokens, API keys, emails, or personal data.</p>
+      </div>
+    </div>
+
+    <h2>A minimal tracing model</h2>
+    <ul>
+      <li><strong>trace_id</strong>: one per user request / agent turn</li>
+      <li><strong>span_id</strong>: one per tool call or meaningful internal step</li>
+      <li><strong>parent_span_id</strong>: links tool spans to the request span</li>
+      <li><strong>events</strong>: structured log records, not unstructured strings</li>
+    </ul>
+
+    <h2>Pattern: add a request context</h2>
+    <p class="muted">Start by attaching context to every invocation.</p>
+    <pre><code>// pseudo-code
+function makeContext({ requestId, userId }) {
+  return {
+    trace_id: requestId,
+    user_id: userId,
+    started_at: new Date().toISOString(),
+  };
+}
+</code></pre>
+
+    <h2>Pattern: structured logs</h2>
+    <p>Prefer JSON objects with consistent keys:</p>
+    <pre><code>// pseudo-code
+log.info({
+  trace_id,
+  span_id,
+  tool: "search_web",
+  stage: "start",
+  input: redact(input),
+});
+</code></pre>
+
+    <h3>Redaction rules</h3>
+    <ul>
+      <li>Always redact: <code>authorization</code>, <code>api_key</code>, <code>token</code>, <code>cookie</code></li>
+      <li>Partially redact emails/phones unless needed for matching</li>
+      <li>Cap large fields (e.g. first 2k chars of HTML responses)</li>
+    </ul>
+
+    <pre><code>// pseudo-code
+function redact(obj) {
+  const SENSITIVE = [/token/i, /api[_-]?key/i, /authorization/i, /cookie/i];
+  return deepMap(obj, (k, v) =&gt; {
+    if (SENSITIVE.some(r =&gt; r.test(String(k)))) return "[REDACTED]";
+    if (typeof v === "string" &amp;&amp; v.length &gt; 2000) return v.slice(0, 2000) + "…";
+    return v;
+  });
+}
+</code></pre>
+
+    <h2>Span boundaries for service modules</h2>
+    <p>In AgentBay-style <code>src/services/*</code> modules, add spans for each external dependency:</p>
+    <pre><code>// pseudo-code
+async function handler(input, ctx) {
+  const span = startSpan({ name: "service.weather.forecast", trace_id: ctx.trace_id });
+  try {
+    log.info({ ...span, stage: "start", input: redact(input) });
+
+    const httpSpan = startSpan({ name: "http.get", parent_span_id: span.span_id, trace_id: ctx.trace_id });
+    const res = await fetch(url);
+    log.info({ ...httpSpan, stage: "end", status: res.status });
+
+    const out = await res.json();
+    log.info({ ...span, stage: "end" });
+    return out;
+  } catch (err) {
+    log.error({ ...span, stage: "error", error: String(err) });
+    throw err;
+  } finally {
+    endSpan(span);
+  }
+}
+</code></pre>
+
+    <h2>Attach trace IDs to user-visible errors</h2>
+    <p>When a tool fails, return a short error with a trace ID so you can find the logs quickly.</p>
+    <pre><code>{
+  "ok": false,
+  "error": "Upstream timeout",
+  "trace_id": "req_01H...",
+  "hint": "Retry in 30s or lower max_results"
+}
+</code></pre>
+
+    <h2>Checklist</h2>
+    <ul>
+      <li>Every tool call logs: <em>start</em> and <em>end</em> events with duration</li>
+      <li>Inputs/outputs pass through <code>redact()</code></li>
+      <li>Errors include <code>trace_id</code> and a short actionable hint</li>
+      <li>Large payloads are truncated before logging</li>
+      <li>No secrets are logged (verify with unit tests)</li>
+    </ul>
+
+    <hr style="margin: 28px 0; border: 0; border-top: 1px solid var(--border);" />
+    <p class="muted small">If you want this tutorial to include concrete code matching your exact module scaffolding, add a small logging/tracing helper under <code>src/lib/</code> and call it from new service modules.</p>
+  </main>
+</body>
+</html>
