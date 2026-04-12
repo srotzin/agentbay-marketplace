@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MCP Tool Cost Estimation: Tokens, Latency, and Rate Limits</title>
+  <meta name="description" content="A practical guide to estimating cost and latency for tool-based agents, with token budgeting, batching, caching, and rate-limit strategies." />
+  <style>
+    :root{--fg:#111;--muted:#555;--bg:#fff;--card:#f6f7f9;--border:#e4e7ee;--link:#0b57d0;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--fg);background:var(--bg);line-height:1.55;}
+    header{padding:36px 18px 18px;border-bottom:1px solid var(--border);}
+    main{max-width:920px;margin:0 auto;padding:22px 18px 60px;}
+    h1{margin:0 0 10px;font-size:30px;letter-spacing:-0.02em;}
+    .sub{margin:0;color:var(--muted);max-width:70ch;}
+    nav.toc{margin:18px 0 22px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;}
+    nav.toc a{color:var(--link);text-decoration:none;}
+    nav.toc a:hover{text-decoration:underline;}
+    section{margin:28px 0;}
+    h2{margin:0 0 10px;font-size:22px;}
+    h3{margin:16px 0 8px;font-size:17px;}
+    code,pre{font-family:var(--mono);}
+    pre{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;overflow:auto;}
+    .callout{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;}
+    ul{padding-left:20px;}
+    .grid{display:grid;grid-template-columns:1fr;gap:14px;}
+    @media (min-width: 860px){.grid{grid-template-columns:1fr 1fr;}}
+    footer{margin-top:34px;color:var(--muted);font-size:14px;}
+    .kpi{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0;}
+    .pill{background:#eef3ff;border:1px solid #d8e3ff;color:#0b57d0;padding:3px 10px;border-radius:999px;font-size:13px;}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>MCP Tool Cost Estimation: Tokens, Latency, and Rate Limits</h1>
+    <p class="sub">If your agent uses tools (search, fetch, database, SaaS connectors), the real-world bill isn’t just LLM tokens. This guide shows a simple way to estimate cost and time, then reduce both without hurting quality.</p>
+    <div class="kpi">
+      <span class="pill">Goal: predictable spend</span>
+      <span class="pill">Goal: lower p95 latency</span>
+      <span class="pill">Goal: fewer rate-limit incidents</span>
+    </div>
+  </header>
+
+  <main>
+    <nav class="toc" aria-label="Table of contents">
+      <strong>Contents</strong>
+      <ul>
+        <li><a href="#model">1) Build a cost model (the 5 variables)</a></li>
+        <li><a href="#tokens">2) Token budgeting for tool calls</a></li>
+        <li><a href="#latency">3) Latency estimation (critical path)</a></li>
+        <li><a href="#ratelimits">4) Rate-limit planning and backoff</a></li>
+        <li><a href="#patterns">5) Patterns that reduce cost and time</a></li>
+        <li><a href="#template">6) A reusable estimation template</a></li>
+      </ul>
+    </nav>
+
+    <section id="model">
+      <h2>1) Build a cost model (the 5 variables)</h2>
+      <p>For a single agent run, estimate these:</p>
+      <div class="grid">
+        <div class="callout">
+          <h3>LLM token cost</h3>
+          <ul>
+            <li><strong>Input tokens</strong>: system + user + tool outputs you include</li>
+            <li><strong>Output tokens</strong>: final answer + intermediate reasoning text (if any)</li>
+            <li><strong>Price</strong>: per 1M tokens in and out (varies by model)</li>
+          </ul>
+        </div>
+        <div class="callout">
+          <h3>Tool/infra cost</h3>
+          <ul>
+            <li>Per-request fees (search APIs, paid connectors)</li>
+            <li>Compute time (serverless, containers)</li>
+            <li>Storage + egress (caching, object stores)</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Basic equation</h3>
+      <pre><code>TotalCost ≈ (Tin/1e6)*Pin + (Tout/1e6)*Pout + Σ ToolFees + Infra
+TotalTime ≈ CriticalPath(LLM calls + tool calls + retries + serialization)
+      </code></pre>
+
+      <p class="callout"><strong>Tip:</strong> Start with a spreadsheet that logs: tool name, calls per run, average payload size, cache hit rate, and p50/p95 latency. You can refine accuracy later.</p>
+    </section>
+
+    <section id="tokens">
+      <h2>2) Token budgeting for tool calls</h2>
+      <p>The hidden token driver is usually <em>tool output</em> (long HTML pages, large JSON blobs, verbose logs). Reduce it intentionally.</p>
+
+      <h3>Practical rules</h3>
+      <ul>
+        <li><strong>Summarize at the boundary</strong>: Have the tool layer return only fields you need (or a short extracted summary).</li>
+        <li><strong>Cap payloads</strong>: Use max-length parameters for web fetches; paginate API responses.</li>
+        <li><strong>Deduplicate</strong>: Don’t re-inject the same tool output on later calls; store it in run state and reference it.</li>
+      </ul>
+
+      <h3>Quick back-of-the-envelope</h3>
+      <pre><code>ApproxTokens(text) ≈ chars / 4
+Example: 40,000 chars of HTML ≈ ~10,000 tokens
+If you include that in context 3 times, it’s ~30k input tokens.
+      </code></pre>
+
+      <p class="callout"><strong>Anti-pattern:</strong> “Fetch 5 pages in full HTML, paste all into the model, then ask for a 3-bullet summary.”
+      Prefer: extract the 3 facts at fetch-time, then pass the facts.</p>
+    </section>
+
+    <section id="latency">
+      <h2>3) Latency estimation (critical path)</h2>
+      <p>Users feel the <em>slowest chain of dependent calls</em>, not the sum of everything. Estimate your <strong>critical path</strong>.</p>
+
+      <h3>Steps</h3>
+      <ol>
+        <li>Draw the run as a DAG: nodes are calls, edges are dependencies.</li>
+        <li>Mark which calls can run in parallel (independent tool calls).</li>
+        <li>Compute p95 time by summing p95s along the longest dependency chain.</li>
+      </ol>
+
+      <h3>What usually dominates</h3>
+      <ul>
+        <li>Network-bound tools (search, web reads, SaaS connectors)</li>
+        <li>Retries from transient errors</li>
+        <li>Large payload serialization (big JSON, images)</li>
+      </ul>
+
+      <pre><code>Example critical path:
+LLM(plan) 1.2s
+  -> search 0.9s
+  -> fetch 1.5s
+  -> fetch 1.4s (parallel)
+  -> LLM(write) 1.4s
+p95 ≈ 1.2 + max(0.9+1.5, 0.9+1.4) + 1.4 = 4.1s
+      </code></pre>
+    </section>
+
+    <section id="ratelimits">
+      <h2>4) Rate-limit planning and backoff</h2>
+      <p>Rate limits hit hardest when you parallelize aggressively. Plan for them explicitly.</p>
+
+      <h3>Strategies</h3>
+      <ul>
+        <li><strong>Token bucket</strong> per provider: cap concurrent calls and calls per minute.</li>
+        <li><strong>Exponential backoff with jitter</strong> on 429/503.</li>
+        <li><strong>Progressive degradation</strong>: if rate-limited, fall back to fewer sources or a cached snapshot.</li>
+      </ul>
+
+      <h3>Backoff pseudocode</h3>
+      <pre><code>delay = base
+for attempt in 1..N:
+  try call()
+  if ok: break
+  if status in {429, 503}:
+    sleep(delay + rand(0, jitter))
+    delay *= 2
+  else:
+    raise
+      </code></pre>
+    </section>
+
+    <section id="patterns">
+      <h2>5) Patterns that reduce cost and time</h2>
+      <div class="grid">
+        <div class="callout">
+          <h3>Batching</h3>
+          <p>Combine independent lookups into one tool call if your backend supports it.</p>
+        </div>
+        <div class="callout">
+          <h3>Caching</h3>
+          <p>Cache tool results by a stable key (URL + headers + query). Add TTLs and invalidation rules.</p>
+        </div>
+        <div class="callout">
+          <h3>Selective context</h3>
+          <p>Pass only the “need-to-know” subset of prior tool outputs into later LLM calls.</p>
+        </div>
+        <div class="callout">
+          <h3>Two-pass planning</h3>
+          <p>First pass decides which sources are required; second pass fetches only those.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="template">
+      <h2>6) A reusable estimation template</h2>
+      <p>Copy this template into your PR description or a doc:</p>
+      <pre><code>Workload:
+- Average runs/day:
+- Peak runs/minute:
+
+LLM:
+- Model:
+- Avg input tokens/run:
+- Avg output tokens/run:
+- Price (in/out):
+
+Tools:
+- Tool A: calls/run, p95 latency, cache hit, fee/call
+- Tool B: calls/run, p95 latency, cache hit, fee/call
+
+Estimated totals:
+- Cost/run:
+- Cost/day:
+- p95 latency (critical path):
+
+Mitigations:
+- Reduce tool payload (cap, extract)
+- Increase caching (TTL, key)
+- Reduce tool fan-out (two-pass plan)
+      </code></pre>
+
+      <footer>
+        <p><strong>Note:</strong> Prices vary by provider and model. Keep the template provider-agnostic and plug in numbers from your own billing dashboard.</p>
+      </footer>
+    </section>
+  </main>
+</body>
+</html>
