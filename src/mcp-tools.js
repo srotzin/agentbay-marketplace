@@ -105,6 +105,7 @@ import { phase63Tools, handlePhase63Tool } from "./mcp-tools-phase63.js";
 import { phase64Tools, handlePhase64Tool } from "./mcp-tools-phase64.js";
 import { phase65EmailOpsTools, handlePhase65EmailOpsTool } from "./mcp-tools-phase65-emailops.js";
 import { phase66Tools, handlePhase66Tool } from "./mcp-tools-phase66.js";
+import { phase67Tools, handlePhase67Tool } from "./mcp-tools-phase67-space-bio.js";
 import { onboardingTools, handleOnboardingTool } from "./mcp-tools-onboarding.js";
 import { welcomeTools, handleWelcomeTool } from "./mcp-tools-welcome.js";
 // THE AGENT HIGHWAY — enter with a task, exit with a result (7 tools)
@@ -1090,7 +1091,7 @@ export function handleBrokerTool(name, args = {}) {
 }
 
 
-export const tools = [...discoveryInfraTools, ...atomicLoopTools, ...retentionTools, ...agentRecruiterTools, ...marketingEngineTools, ...networkEffectTools, ...highwayTools, ...originalsTools, ...anthropicTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase23Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase63Tools, ...phase64Tools, ...phase65EmailOpsTools, ...phase66Tools, ...phase5562Tools, ...onboardingTools, ...arcCommerceTools, ...plaidBankrTools, ...circleRouterTools, ...x402UptoTools, ...exchangeErc8183Tools, ...geminiImprovementTools, ...swarmVerticalTools, ...constructionTools, ...zkDelegationTools, ...microStakingTools, ...pheromoneTools];
+export const tools = [...discoveryInfraTools, ...atomicLoopTools, ...retentionTools, ...agentRecruiterTools, ...marketingEngineTools, ...networkEffectTools, ...highwayTools, ...originalsTools, ...anthropicTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase23Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase63Tools, ...phase64Tools, ...phase65EmailOpsTools, ...phase66Tools, ...phase67Tools, ...phase5562Tools, ...onboardingTools, ...arcCommerceTools, ...plaidBankrTools, ...circleRouterTools, ...x402UptoTools, ...exchangeErc8183Tools, ...geminiImprovementTools, ...swarmVerticalTools, ...constructionTools, ...zkDelegationTools, ...microStakingTools, ...pheromoneTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -2056,6 +2057,19 @@ export async function handleTool(name, args) {
 
     // Phase 66 — Litigation Support + Food Safety
     case "litigation_matter_create":     return await handlePhase66Tool(name, args);
+
+    // Phase 67 — Space Weather + Biomanufacturing Ops
+    case "spaceweather_create_event":          return await handlePhase67Tool(name, args);
+    case "spaceweather_register_asset":        return await handlePhase67Tool(name, args);
+    case "spaceweather_assess_risk":           return await handlePhase67Tool(name, args);
+    case "spaceweather_dashboard":             return await handlePhase67Tool(name, args);
+    case "bio_create_batch":                   return await handlePhase67Tool(name, args);
+    case "bio_update_batch_status":            return await handlePhase67Tool(name, args);
+    case "bio_log_deviation":                  return await handlePhase67Tool(name, args);
+    case "bio_create_capa":                    return await handlePhase67Tool(name, args);
+    case "bio_record_environmental_read":      return await handlePhase67Tool(name, args);
+    case "bio_dashboard":                      return await handlePhase67Tool(name, args);
+
     case "litigation_matter_list":       return await handlePhase66Tool(name, args);
     case "litigation_evidence_add":      return await handlePhase66Tool(name, args);
     case "litigation_evidence_list":     return await handlePhase66Tool(name, args);
