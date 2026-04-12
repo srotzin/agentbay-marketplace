@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How to Build Your Own MCP Tool (HiveAgent Quickstart)</title>
+  <meta name="description" content="A practical, step-by-step guide to creating a new service module and exposing it as MCP tools in HiveAgent." />
+  <style>
+    :root { --fg:#111; --muted:#555; --bg:#fff; --card:#fafafa; --border:#e6e6e6; --link:#0b57d0; }
+    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; color: var(--fg); background: var(--bg); margin: 0; }
+    header { padding: 32px 20px; border-bottom: 1px solid var(--border); background: var(--card); }
+    main { max-width: 980px; margin: 0 auto; padding: 28px 20px 64px; }
+    h1 { margin: 0 0 10px; font-size: 28px; }
+    p, li { line-height: 1.55; }
+    p.lede { color: var(--muted); margin-top: 0; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    pre { background: #0b1020; color: #e6edf3; padding: 14px 14px; border-radius: 10px; overflow-x: auto; }
+    a { color: var(--link); }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
+    .card { border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: var(--card); }
+    .toc a { text-decoration: none; }
+    .toc ol { margin: 0; padding-left: 18px; }
+    .pill { display:inline-block; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border); background:#fff; color: var(--muted); font-size: 12px; }
+    footer { border-top: 1px solid var(--border); padding: 18px 20px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <header>
+    <div style="max-width:980px;margin:0 auto;">
+      <div class="pill">Tutorial</div>
+      <h1>How to Build Your Own MCP Tool (HiveAgent Quickstart)</h1>
+      <p class="lede">This guide shows the fastest, most reliable way to add a new tool to HiveAgent: create a service module, wire it into a phase file, register it in <code>mcp-tools.js</code>, and validate the build.</p>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid">
+      <section class="card toc">
+        <h2 style="margin-top:0;">Contents</h2>
+        <ol>
+          <li><a href="#what-you-build">What you build</a></li>
+          <li><a href="#module">Step 1 — Create a service module</a></li>
+          <li><a href="#phase">Step 2 — Add tools to a phase file</a></li>
+          <li><a href="#registry">Step 3 — Register tools + dispatch</a></li>
+          <li><a href="#validation">Step 4 — Validate locally</a></li>
+          <li><a href="#quality">Quality checklist</a></li>
+        </ol>
+      </section>
+
+      <section class="card" id="what-you-build">
+        <h2 style="margin-top:0;">What you build</h2>
+        <p>You will create a new <strong>service module</strong> in <code>src/services/</code> that exports:</p>
+        <ul>
+          <li><code>mcpToolSpecs</code>: an array of JSON schema-like tool specs</li>
+          <li><code>handleToolCall(name, args)</code>: a dispatcher that returns a JSON response</li>
+        </ul>
+        <p>Then you will expose the tool(s) by importing them into a phase file in <code>src/</code> and registering them in <code>src/mcp-tools.js</code>.</p>
+      </section>
+
+      <section class="card" id="module">
+        <h2 style="margin-top:0;">Step 1 — Create a service module</h2>
+        <p>Start from an existing module in <code>src/services/</code> and follow the same conventions: naming, schema structure, and return types.</p>
+        <p>Example skeleton:</p>
+        <pre><code>// src/services/my-vertical.js
+export const mcpToolSpecs = [
+  {
+    name: "my_vertical_doThing",
+    description: "Does a specific job for a vertical.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "User query" }
+      },
+      required: ["query"]
+    }
+  }
+];
+
+export async function handleToolCall(toolName, args) {
+  if (toolName === "my_vertical_doThing") {
+    return {
+      content: [
+        { type: "text", text: JSON.stringify({ ok: true }, null, 2) }
+      ]
+    };
+  }
+  return null;
+}
+</code></pre>
+        <p>Keep the tool output stable: return plain JSON, avoid HTML in tool responses, and include <code>ok</code>/<code>error</code> fields for easier agent consumption.</p>
+      </section>
+
+      <section class="card" id="phase">
+        <h2 style="margin-top:0;">Step 2 — Add tools to a phase file</h2>
+        <p>HiveAgent groups tools into phase files (for organization and incremental growth). Create a new phase file when you add a new vertical or when an existing phase is already crowded.</p>
+        <p>Example pattern:</p>
+        <pre><code>// src/mcp-tools-phaseNN-my-vertical.js
+import { mcpToolSpecs as myVerticalToolSpecs } from "./services/my-vertical.js";
+
+export const phaseNNToolSpecs = [
+  ...myVerticalToolSpecs
+];
+</code></pre>
+      </section>
+
+      <section class="card" id="registry">
+        <h2 style="margin-top:0;">Step 3 — Register tools + dispatch</h2>
+        <p>In <code>src/mcp-tools.js</code> you typically:</p>
+        <ul>
+          <li>Import the new phase specs and append them to the master <code>toolsArray</code></li>
+          <li>Import your service <code>handleToolCall</code> and add it to the dispatch chain so tool execution resolves</li>
+        </ul>
+        <p>Keep the dispatch chain ordered and make sure your handler returns <code>null</code> when it does not recognize the tool name.</p>
+      </section>
+
+      <section class="card" id="validation">
+        <h2 style="margin-top:0;">Step 4 — Validate locally</h2>
+        <p>At minimum, run a syntax check for the tool registry:</p>
+        <pre><code>node --check src/mcp-tools.js</code></pre>
+        <p>If the project has additional scripts (lint/test), run them too.</p>
+      </section>
+
+      <section class="card" id="quality">
+        <h2 style="margin-top:0;">Quality checklist</h2>
+        <ul>
+          <li><strong>Naming:</strong> tool names are unique and prefixed by vertical</li>
+          <li><strong>Schema:</strong> inputSchema uses correct JSON types and required fields</li>
+          <li><strong>Determinism:</strong> responses are JSON with consistent keys</li>
+          <li><strong>Safety:</strong> no secrets, no filesystem access without explicit parameters</li>
+          <li><strong>Wiring:</strong> tools appear in <code>tools/list</code> and tool calls route to your handler</li>
+        </ul>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div style="max-width:980px;margin:0 auto;">
+      <div>Last updated: 2026-04-12</div>
+    </div>
+  </footer>
+</body>
+</html>
