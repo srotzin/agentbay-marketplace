@@ -151,6 +151,8 @@ import { discoveryInfraTools, handleDiscoveryInfraTool } from "./mcp-tools-disco
 // Undeniable Features — Brazilian Bikini Build (12 tools, FRONT of array)
 import { undeniableTools, handleUndeniableTool } from "./mcp-tools-undeniable.js";
 import { sovereignTools, handleSovereignTool } from "./mcp-tools-sovereign.js";
+// AtticusIQ + Leonardo IQ — first Multiverse third-party verticals (70/30 App Store model)
+import { multiverseTools, handleMultiverseTool } from "./mcp-tools-multiverse.js";
 
 // MCP tool definitions (JSON Schema format)
 const coreTools = [
@@ -1090,7 +1092,7 @@ export function handleBrokerTool(name, args = {}) {
 }
 
 
-export const tools = [...undeniableTools, ...discoveryInfraTools, ...atomicLoopTools, ...retentionTools, ...agentRecruiterTools, ...marketingEngineTools, ...networkEffectTools, ...highwayTools, ...originalsTools, ...anthropicTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase23Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase63Tools, ...phase64Tools, ...phase5562Tools, ...onboardingTools, ...arcCommerceTools, ...plaidBankrTools, ...circleRouterTools, ...x402UptoTools, ...exchangeErc8183Tools, ...geminiImprovementTools, ...swarmVerticalTools, ...constructionTools, ...zkDelegationTools, ...microStakingTools, ...pheromoneTools];
+export const tools = [...undeniableTools, ...discoveryInfraTools, ...atomicLoopTools, ...retentionTools, ...agentRecruiterTools, ...marketingEngineTools, ...networkEffectTools, ...highwayTools, ...originalsTools, ...anthropicTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase23Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase63Tools, ...phase64Tools, ...phase5562Tools, ...onboardingTools, ...arcCommerceTools, ...plaidBankrTools, ...circleRouterTools, ...x402UptoTools, ...exchangeErc8183Tools, ...geminiImprovementTools, ...swarmVerticalTools, ...constructionTools, ...zkDelegationTools, ...microStakingTools, ...pheromoneTools, ...multiverseTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -2380,6 +2382,11 @@ export async function handleTool(name, args) {
       }
       try {
         return handleSovereignTool(name, args);
+      } catch (e) {
+        if (!e.message?.includes("Unknown")) throw e;
+      }
+      try {
+        return await handleMultiverseTool(name, args);
       } catch (e) {
         if (!e.message?.includes("Unknown")) throw e;
       }

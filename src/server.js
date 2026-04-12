@@ -103,7 +103,23 @@ app.get("/.well-known/agent-card.json", (req, res) => {
       register: "POST https://hiveagentiq.com/v1/register",
       sandbox: "Add ?sandbox=true or header X-HiveAgent-Sandbox: true"
     },
-    ratings: { smithery_score: 95, tools_live: tools.length }
+    ratings: { smithery_score: 95, tools_live: tools.length },
+    multiverse_verticals: [
+      {
+        name: "AtticusIQ",
+        description: "Contract intelligence — AI-powered contract analysis, risk scoring, compliance checking",
+        tools: 8,
+        pricing: "$0.50-$5.00 per analysis",
+        revenue_share: "70/30 (developer/platform)"
+      },
+      {
+        name: "Leonardo IQ",
+        description: "IP intelligence — patent search, prior art, FTO analysis, IP landscape mapping",
+        tools: 7,
+        pricing: "$0.25-$5.00 per query",
+        revenue_share: "70/30 (developer/platform)"
+      }
+    ]
   });
 });
 
