@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AgentBay Tutorial: Restaurant Operations Agent (Par, Scheduling, Menu Engineering)</title>
+  <meta name="description" content="How to build a practical restaurant operations agent: par level planning, shift coverage, and menu engineering using AgentBay MCP tools." />
+  <link rel="stylesheet" href="/assets/site.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="logo" href="/">AgentBay</a>
+      <nav class="nav">
+        <a href="/compare.html">Compare</a>
+        <a href="/pricing.html">Pricing</a>
+        <a href="/docs/">Docs</a>
+        <a href="/snippets.html">Snippets</a>
+        <a href="/live.html">Live</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" style="max-width: 920px;">
+    <h1>Restaurant Operations Agent: Par Planning, Scheduling, and Menu Engineering</h1>
+    <p class="muted">This tutorial shows how to assemble a lightweight “restaurant ops agent” that helps managers order smarter, staff better, and improve margins using AgentBay MCP tools.</p>
+
+    <section>
+      <h2>What this agent does (and who it helps)</h2>
+      <ul>
+        <li><strong>Owners / GMs:</strong> margin visibility, labor + food cost guardrails, weekly action list.</li>
+        <li><strong>Kitchen managers:</strong> par levels and suggested purchase quantities based on expected demand.</li>
+        <li><strong>FOH managers:</strong> shift coverage suggestions based on reservations and service standards.</li>
+      </ul>
+      <p>It is designed to work even when data is “messy”: partial inventory counts, simple sales export, and a rough staffing template.</p>
+    </section>
+
+    <section>
+      <h2>Inputs you need (minimum viable dataset)</h2>
+      <p>You can start with a spreadsheet export or a JSON payload with:</p>
+      <ul>
+        <li><strong>Menu items</strong>: name, category, price, cost, prep time (optional).</li>
+        <li><strong>Recent sales</strong>: item, quantity sold, day-of-week/time bucket if available.</li>
+        <li><strong>Inventory snapshot</strong>: on-hand amounts for key SKUs.</li>
+        <li><strong>Lead times</strong>: vendor lead time and case pack sizes (optional).</li>
+        <li><strong>Demand drivers</strong>: reservations, events, and planned promotions.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Recommended MCP tools</h2>
+      <p>If you recently added the hospitality module, you can call tools like:</p>
+      <ul>
+        <li><code>restaurant_ops_compute_par_levels</code> — propose par levels given demand + lead time.</li>
+        <li><code>restaurant_ops_generate_shift_plan</code> — suggest staffing by role and shift windows.</li>
+        <li><code>restaurant_ops_menu_engineering_matrix</code> — classify menu items (stars/plowhorses/puzzles/dogs).</li>
+      </ul>
+      <p class="muted">Exact tool names depend on your AgentBay build; use your tool listing to confirm what’s available.</p>
+    </section>
+
+    <section>
+      <h2>Workflow 1: Par levels and purchasing suggestions</h2>
+      <ol>
+        <li>Estimate next-period demand using recent sales + reservations/events.</li>
+        <li>Compute par levels per SKU with vendor lead times.</li>
+        <li>Translate par gaps into suggested order quantities (and round to case packs).</li>
+      </ol>
+      <pre><code>// pseudo-flow
+// 1) summarize demand
+// 2) restaurant_ops_compute_par_levels({ items, salesHistory, leadTimes, bufferPct })
+// 3) convert output into an order sheet for vendors
+</code></pre>
+      <p><strong>Pro tip:</strong> add a “confidence” score per SKU (data coverage, volatility) to help humans decide when to override.</p>
+    </section>
+
+    <section>
+      <h2>Workflow 2: Shift coverage planning</h2>
+      <p>Shift planning is where simple heuristics beat “perfect optimization.” A good default:</p>
+      <ul>
+        <li>Translate covers into workload (tables/hour, tickets/hour).</li>
+        <li>Apply service standards (e.g., 1 server per 20 covers, 1 cook per 35 tickets).</li>
+        <li>Add fixed roles (host, expo) and minimum staffing floors.</li>
+      </ul>
+      <pre><code>// pseudo-flow
+// restaurant_ops_generate_shift_plan({
+//   forecastCoversByHour,
+//   roles: ['server','bartender','cook','dish','host'],
+//   serviceStandards,
+//   minStaffing
+// })
+</code></pre>
+      <p>If you already have a template schedule, you can ask the agent to propose adjustments instead of generating from scratch.</p>
+    </section>
+
+    <section>
+      <h2>Workflow 3: Menu engineering (margin + popularity)</h2>
+      <p>A classic “menu engineering matrix” uses two dimensions:</p>
+      <ul>
+        <li><strong>Contribution margin</strong> (price − cost).</li>
+        <li><strong>Popularity</strong> (units sold relative to peers).</li>
+      </ul>
+      <p>With that, you can classify items:</p>
+      <ul>
+        <li><strong>Stars:</strong> high margin, high popularity — protect and feature.</li>
+        <li><strong>Plowhorses:</strong> low margin, high popularity — consider price or portion tweaks.</li>
+        <li><strong>Puzzles:</strong> high margin, low popularity — improve naming, placement, or staff prompts.</li>
+        <li><strong>Dogs:</strong> low margin, low popularity — remove or rework.</li>
+      </ul>
+      <pre><code>// pseudo-flow
+// restaurant_ops_menu_engineering_matrix({ menuItems, salesByItem, marginThreshold, popularityThreshold })
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Suggested “agent prompt” (copy/paste)</h2>
+      <pre><code>You are a restaurant operations copilot.
+
+Goals:
+1) Generate next-week par levels and a suggested order sheet.
+2) Propose a shift coverage plan for Thu–Sun.
+3) Produce a menu engineering matrix with 3 recommended actions.
+
+Constraints:
+- Keep suggestions conservative when data is sparse.
+- Explain assumptions.
+- Output tables that can be pasted into a spreadsheet.
+
+Inputs:
+- menuItems: ...
+- salesHistory: ...
+- inventorySnapshot: ...
+- reservationsForecast: ...
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Common failure modes (and how to avoid them)</h2>
+      <ul>
+        <li><strong>Over-ordering perishables:</strong> cap par buffers for high-waste SKUs unless demand is certain.</li>
+        <li><strong>Ignoring prep capacity:</strong> for high prep-load items, add a kitchen throughput constraint.</li>
+        <li><strong>Staffing “thrash”:</strong> smooth staffing changes; prefer small adjustments over re-writing the entire schedule.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Next steps</h2>
+      <ul>
+        <li>Add a connector to your POS export format.</li>
+        <li>Track overrides (what humans changed) to improve future suggestions.</li>
+        <li>Introduce a daily “ops brief” summarizing waste risk, labor risk, and top menu actions.</li>
+      </ul>
+    </section>
+
+    <hr />
+    <p class="muted">Related: <a href="/tutorial-agentbay-service-module-pattern.html">Service module pattern + checklist</a> and <a href="/tutorial-mcp-tools-phases.html">MCP tools phases guide</a>.</p>
+  </main>
+</body>
+</html>
