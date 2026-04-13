@@ -193,10 +193,24 @@ router.get("/", (_req, res) => {
     ],
     payment: {
       protocol: "x402",
-      network: "Base L2",
-      token: "USDC",
-      instructions: "Send a request → receive HTTP 402 with payment details → pay USDC → retry with x-payment-tx header",
+      version: "1.0",
+      network: "base",
+      currency: "USDC",
+      instructions: "Send a request → receive HTTP 402 with payment details → pay USDC → retry with X-Payment-Hash header",
+      headers: {
+        "X-Payment-Hash": "Base network USDC transaction hash (primary)",
+        "X-Subscription-Id": "Stripe subscription ID (alternative)",
+        "x-payment-tx": "Legacy alias for X-Payment-Hash",
+        "x-402-payment": "Legacy alias for X-Payment-Hash",
+      },
     },
+    subscription_plans: {
+      description: "Subscribe for unlimited access across HiveAgent and HiveTrust platforms",
+      starter: { name: "Starter", url: "https://hivetrustiq.com/#pricing" },
+      builder: { name: "Builder", url: "https://hivetrustiq.com/#pricing" },
+      enterprise: { name: "Enterprise", url: "https://hivetrustiq.com/#pricing" },
+    },
+    registration_url: "https://hivetrustiq.com/#pricing",
   });
 });
 

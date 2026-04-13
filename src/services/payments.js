@@ -52,6 +52,15 @@ function normalizeSecret(raw) {
  * Initialize the CDP client and treasury wallet
  */
 export async function initPayments() {
+  // Check for shared USDC address (unified with HiveTrust)
+  const sharedAddress = process.env.HIVE_PAYMENT_ADDRESS;
+  if (sharedAddress) {
+    treasuryAddress = sharedAddress.trim();
+    console.log(`  ✓ Treasury address (shared): ${treasuryAddress}`);
+    console.log(`  ✓ Network: Base (USDC)`);
+    return { address: treasuryAddress, network: "base", mode: "shared" };
+  }
+
   const keyId = process.env.CDP_API_KEY_ID;
   const keySecretRaw = process.env.CDP_API_KEY_SECRET;
   const walletSecret = process.env.CDP_WALLET_SECRET;
