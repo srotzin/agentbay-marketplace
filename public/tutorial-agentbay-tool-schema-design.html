@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AgentBay Tutorial: MCP Tool Schema Design (Reliable Inputs + Outputs)</title>
+  <meta name="description" content="A practical guide to designing MCP tool schemas that are reliable for agents: tight inputs, predictable outputs, idempotency, pagination, and error conventions." />
+  <link rel="stylesheet" href="/assets/site.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="logo" href="/">AgentBay</a>
+      <nav class="nav">
+        <a href="/compare.html">Compare</a>
+        <a href="/pricing.html">Pricing</a>
+        <a href="/docs/">Docs</a>
+        <a href="/snippets.html">Snippets</a>
+        <a href="/live.html">Live</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" style="max-width: 920px;">
+    <h1>MCP Tool Schema Design: Reliable Inputs + Outputs</h1>
+    <p class="muted">If a tool schema is too loose, agents invent parameters. If it is too strict, it becomes hard to use. This guide focuses on the practical middle ground: schemas that are easy for agents to call correctly and easy for service modules to implement safely.</p>
+
+    <section>
+      <h2>Why schema design matters</h2>
+      <p>MCP tools are called by language models. That means your schema is both an API contract <em>and</em> part of the prompt. The best schemas minimize ambiguity by doing three things:</p>
+      <ol>
+        <li><strong>Constrain inputs</strong> so the model can’t easily guess wrong.</li>
+        <li><strong>Describe intent</strong> so the model knows what you want, not just the field names.</li>
+        <li><strong>Guarantee predictable outputs</strong> so downstream steps don’t break.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Input schema checklist (agent-friendly)</h2>
+      <ul>
+        <li><strong>Use explicit names.</strong> Prefer <code>facilityId</code> over <code>id</code>, <code>customerEmail</code> over <code>email</code>.</li>
+        <li><strong>Make critical fields required.</strong> If a call cannot succeed without it, put it in <code>required</code>.</li>
+        <li><strong>Add descriptions with constraints.</strong> Include formats, allowed units, max lengths, and examples.</li>
+        <li><strong>Keep unions rare.</strong> If a field can be “string or object”, agents often pick the wrong branch.</li>
+        <li><strong>Prefer enums for small sets.</strong> Use <code>enum</code> for fields like <code>priority</code>, <code>sortOrder</code>, <code>region</code>.</li>
+        <li><strong>Use structured filters.</strong> For search tools, prefer <code>filters: { status: 'open', createdAfter: '...' }</code> over a single free-text string.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Designing outputs: stable and composable</h2>
+      <p>Even if your tool returns “text”, you can still return structured JSON. A few patterns improve reliability:</p>
+      <ul>
+        <li><strong>Always include a top-level <code>ok</code> boolean</strong> and a short <code>summary</code> string.</li>
+        <li><strong>Separate metadata from results</strong>: <code>{ ok, summary, result: {...}, meta: {...} }</code>.</li>
+        <li><strong>Use arrays for lists</strong> and include a <code>total</code> count if known.</li>
+        <li><strong>Include a <code>warnings</code> array</strong> for partial success (missing fields, truncated results).</li>
+      </ul>
+
+      <pre><code>// Example tool result
+{
+  "ok": true,
+  "summary": "Found 12 work orders",
+  "result": {
+    "workOrders": [
+      { "id": "WO-1001", "status": "open", "site": "Plant A" }
+    ],
+    "nextCursor": "..."
+  },
+  "meta": { "generatedAt": "2026-04-13T00:00:00Z" },
+  "warnings": []
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Idempotency and safety (the overlooked part)</h2>
+      <p>When agents interact with tools, they may retry calls. Design inputs so a retry does not create duplicates:</p>
+      <ul>
+        <li><strong>Add <code>idempotencyKey</code></strong> to tools that create resources.</li>
+        <li><strong>Use <code>dryRun</code></strong> for actions that could have side effects.</li>
+        <li><strong>Return deterministic errors</strong>: include <code>errorCode</code> and <code>retryable</code>.</li>
+      </ul>
+
+      <pre><code>// Example error payload
+{
+  "ok": false,
+  "summary": "Missing required field: facilityId",
+  "error": {
+    "errorCode": "VALIDATION_ERROR",
+    "retryable": false,
+    "details": { "missing": ["facilityId"] }
+  }
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Pagination pattern for list/search tools</h2>
+      <p>If a tool can return many results, add pagination on day one:</p>
+      <ul>
+        <li><code>limit</code>: a reasonable max (e.g. 50 or 100).</li>
+        <li><code>cursor</code>: opaque token returned from the previous call.</li>
+        <li><code>sort</code>: explicit sort field + direction if applicable.</li>
+      </ul>
+
+      <pre><code>// Example list tool input
+{
+  "filters": { "status": "open" },
+  "limit": 50,
+  "cursor": null
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Common failure modes (and fixes)</h2>
+      <ul>
+        <li><strong>Ambiguous date fields.</strong> Use ISO timestamps and state timezone expectations in the description.</li>
+        <li><strong>Free-text “query” for everything.</strong> Split into structured filters plus an optional free-text query.</li>
+        <li><strong>Tools that return unstructured logs.</strong> Return JSON with a <code>logs</code> array if you need debugging.</li>
+        <li><strong>Too many optional fields.</strong> Agents omit them; then your service guesses. Make the core required.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Quick template you can copy</h2>
+      <pre><code>export const tools = [
+  {
+    name: 'my_prefix_action',
+    description: 'One sentence: what this does and what it returns.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        // required core
+        targetId: { type: 'string', description: '...' },
+        // optional modifiers
+        dryRun: { type: 'boolean', description: 'If true, do not persist changes.' },
+        idempotencyKey: { type: 'string', description: '...' }
+      },
+      required: ['targetId']
+    }
+  }
+];
+
+export async function handleTool(name, args, ctx) {
+  switch (name) {
+    case 'my_prefix_action':
+      return await doAction(args, ctx);
+    default:
+      return null;
+  }
+}
+</code></pre>
+    </section>
+
+    <hr />
+    <p class="muted">Related: <a href="/tutorial-agentbay-service-module-pattern.html">Service module pattern + checklist</a></p>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p class="muted">© AgentBay</p>
+    </div>
+  </footer>
+</body>
+</html>
