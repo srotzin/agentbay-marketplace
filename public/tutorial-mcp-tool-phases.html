@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tutorial: Adding a New Service Module (and Wiring It into MCP Tool Phases)</title>
+  <meta name="description" content="Step-by-step guide for adding a new service module under src/services and wiring its tools into an MCP tool phase + dispatcher." />
+  <style>
+    :root{--bg:#0b1020;--fg:#e9eefc;--muted:#a9b3d6;--card:#121a33;--border:#26305a;--code:#0f1630;--accent:#7aa2ff;--accent2:#68d391;}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;line-height:1.55;background:linear-gradient(180deg,var(--bg),#070a14);color:var(--fg)}
+    a{color:var(--accent)}
+    header{padding:48px 20px 12px;max-width:980px;margin:0 auto}
+    h1{font-size:32px;margin:0 0 10px}
+    p.lead{margin:0;color:var(--muted);max-width:70ch}
+    main{max-width:980px;margin:0 auto;padding:20px}
+    section{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin:14px 0}
+    h2{margin:0 0 10px;font-size:20px}
+    h3{margin:18px 0 8px;font-size:16px;color:var(--fg)}
+    ul{margin:8px 0 0 20px}
+    code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+    pre{background:var(--code);border:1px solid var(--border);border-radius:12px;padding:14px;overflow:auto}
+    .tip{border-left:4px solid var(--accent2);padding:10px 12px;background:rgba(104,211,145,.08);color:var(--fg);border-radius:10px;margin:10px 0}
+    .warn{border-left:4px solid #f6ad55;padding:10px 12px;background:rgba(246,173,85,.10);border-radius:10px;margin:10px 0}
+    .grid{display:grid;grid-template-columns:1fr;gap:14px}
+    @media (min-width: 900px){.grid{grid-template-columns:1fr 1fr}}
+    footer{max-width:980px;margin:0 auto;padding:30px 20px;color:var(--muted)}
+    .kbd{border:1px solid var(--border);background:#0c1226;border-bottom-width:3px;border-radius:8px;padding:1px 7px;color:var(--fg)}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Tutorial: Adding a New Service Module (and Wiring It into MCP Tool Phases)</h1>
+    <p class="lead">This guide walks through the pattern used in this repo: define tools in <code>src/services/&lt;vertical&gt;.js</code>, expose them from a phase file (<code>src/mcp-tools-phaseXX-*.js</code>), then wire them into <code>src/mcp-tools.js</code> (tools array + handler dispatch).</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>What you will build</h2>
+      <div class="grid">
+        <div>
+          <h3>Outputs</h3>
+          <ul>
+            <li>A new service module in <code>src/services/</code> exporting tool definitions and a handler.</li>
+            <li>A new MCP phase file in <code>src/</code> that re-exports those tools for registration.</li>
+            <li>Updates to <code>src/mcp-tools.js</code> to register tools and dispatch calls to the right handler.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Repository conventions</h3>
+          <ul>
+            <li>Each tool has a JSON schema (<code>inputSchema</code>) and a short description.</li>
+            <li>Handlers receive <code>(toolName, args)</code> and return a plain object.</li>
+            <li>Tool registration happens by concatenating arrays from phase files.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="tip"><strong>Tip:</strong> Keep the tool name stable. If you rename a tool, you may break downstream prompts that reference it.</div>
+    </section>
+
+    <section>
+      <h2>Step 1 — Create a service module</h2>
+      <p>Pick a vertical and create <code>src/services/my-vertical.js</code>. A typical module exports:</p>
+      <ul>
+        <li><code>myVerticalTools</code> — an array of tool definitions</li>
+        <li><code>handleMyVerticalTool</code> — the dispatcher for those tools</li>
+      </ul>
+
+      <pre><code>// src/services/my-vertical.js
+export const myVerticalTools = [
+  {
+    name: "my_tool_name",
+    description: "One-sentence description of what the tool does.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        example: { type: "string", description: "Example input" }
+      },
+      required: ["example"],
+      additionalProperties: false
+    }
+  }
+]
+
+export async function handleMyVerticalTool(toolName, args) {
+  switch (toolName) {
+    case "my_tool_name": {
+      // Do work here (validate args, call libs, etc.)
+      return { ok: true, echo: args.example }
+    }
+    default:
+      return null
+  }
+}
+</code></pre>
+
+      <div class="warn"><strong>Common bug:</strong> Forgetting <code>additionalProperties: false</code> can make inputs ambiguous and harder to validate.</div>
+    </section>
+
+    <section>
+      <h2>Step 2 — Add a new MCP tool phase file</h2>
+      <p>Create a new phase file that exports an array. This keeps <code>src/mcp-tools.js</code> from becoming a single huge tools list.</p>
+
+      <pre><code>// src/mcp-tools-phaseNN-my-vertical.js
+import { myVerticalTools } from "./services/my-vertical.js"
+
+export const tools = [
+  ...myVerticalTools,
+]
+</code></pre>
+
+      <div class="tip"><strong>Tip:</strong> Group related verticals in a single phase file when they are small; split into multiple phase files when the tools list grows.</div>
+    </section>
+
+    <section>
+      <h2>Step 3 — Wire into <code>src/mcp-tools.js</code></h2>
+      <p>There are two changes: register the tools and route tool calls to your handler.</p>
+
+      <h3>3A) Import the phase tools</h3>
+      <pre><code>import { tools as phaseNNTools } from "./mcp-tools-phaseNN-my-vertical.js"</code></pre>
+
+      <h3>3B) Add to the tools array</h3>
+      <pre><code>const toolsArray = [
+  // ...existing phases...
+  ...phaseNNTools,
+]</code></pre>
+
+      <h3>3C) Add handler dispatch</h3>
+      <p>Most implementations do a chain of handler calls until one returns a non-null response.</p>
+      <pre><code>import { handleMyVerticalTool } from "./services/my-vertical.js"
+
+// ...
+const result =
+  (await handleMyVerticalTool(toolName, args)) ??
+  (await handleOtherTool(toolName, args))
+
+if (result == null) throw new Error(`Unknown tool: ${toolName}`)
+return result</code></pre>
+
+      <div class="warn"><strong>Common bug:</strong> Exporting tools but forgetting dispatch means the tool registers fine, but will fail at runtime when called.</div>
+    </section>
+
+    <section>
+      <h2>Step 4 — Sanity checks</h2>
+      <ul>
+        <li>Run a syntax check: <span class="kbd">node</span> <span class="kbd">--check</span> <code>src/mcp-tools.js</code></li>
+        <li>Optionally, run your unit tests (if present).</li>
+      </ul>
+      <div class="tip"><strong>Tip:</strong> If you add many tools at once, you can quickly validate the registration list by grepping for the tool name in <code>src/mcp-tools.js</code>.</div>
+    </section>
+
+    <section>
+      <h2>FAQ</h2>
+      <h3>How do I choose a good tool boundary?</h3>
+      <p>Prefer tools that do one thing and are easy to describe in a prompt. If a tool needs multiple steps, build two tools (e.g., <code>plan_*</code> and <code>execute_*</code>).</p>
+
+      <h3>What should the handler return?</h3>
+      <p>Return a JSON-serializable object. Keep it stable over time (use versioned fields if you need to evolve it).</p>
+
+      <h3>Do I need a new phase file every time?</h3>
+      <p>No. If the vertical is closely related to an existing phase, add it there. Create a new phase when the phase would otherwise become too broad.</p>
+    </section>
+  </main>
+
+  <footer>
+    <div>Last updated: 2026-04-13</div>
+  </footer>
+</body>
+</html>
