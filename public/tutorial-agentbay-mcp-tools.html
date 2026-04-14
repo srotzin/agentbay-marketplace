@@ -3,188 +3,137 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Build an MCP Tool in AgentBay: Service Modules + Phases</title>
-  <meta name="description" content="A practical walkthrough for adding a new MCP tool to AgentBay by creating a service module, wiring it into a phase file, and updating the dispatcher." />
+  <title>How to use AgentBay MCP tools: a practical guide</title>
+  <meta name="description" content="A step-by-step guide to discovering tools, calling them via JSON-RPC, and composing tool-first workflows with AgentBay's MCP server." />
   <style>
-    :root{--bg:#0b1020;--card:#121a33;--text:#e9eefc;--muted:#aab4d6;--accent:#7aa2ff;--border:#263055;--code:#0a0f1e;}
-    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;line-height:1.55;background:var(--bg);color:var(--text)}
-    header{padding:48px 20px 16px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(122,162,255,.14),transparent)}
-    main{max-width:980px;margin:0 auto;padding:28px 20px 60px}
-    .kicker{color:var(--muted);font-size:14px;margin:0 0 8px}
-    h1{font-size:34px;line-height:1.15;margin:0 0 12px}
-    h2{margin:34px 0 12px;font-size:22px}
-    h3{margin:22px 0 10px;font-size:18px}
-    p,li{color:var(--text)}
-    a{color:var(--accent);text-decoration:none}
-    a:hover{text-decoration:underline}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 18px;margin:18px 0}
-    code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-    pre{background:var(--code);border:1px solid var(--border);border-radius:12px;padding:14px;overflow:auto;font-size:13px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
-    .muted{color:var(--muted)}
-    .steps ol{margin:0;padding-left:18px}
-    .tag{display:inline-block;border:1px solid var(--border);padding:2px 10px;border-radius:999px;color:var(--muted);font-size:12px}
-    footer{border-top:1px solid var(--border);padding:20px;color:var(--muted)}
+    :root { --bg:#0b1220; --fg:#e8eefc; --muted:#a9b7d6; --card:#0f1a33; --accent:#7dd3fc; --code:#0a0f1d; --border:rgba(255,255,255,.10); }
+    body { margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; background:linear-gradient(180deg,var(--bg),#070b14); color:var(--fg); }
+    header { padding:48px 20px 24px; border-bottom:1px solid var(--border); }
+    main { max-width: 980px; margin: 0 auto; padding: 24px 20px 64px; }
+    h1 { margin:0 0 8px; font-size: 34px; letter-spacing:-0.02em; }
+    .subtitle { color:var(--muted); max-width: 70ch; line-height: 1.5; }
+    .grid { display:grid; grid-template-columns: 1fr; gap:16px; margin-top:24px; }
+    @media (min-width: 900px){ .grid{ grid-template-columns: 2fr 1fr; } }
+    .card { background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:14px; padding:16px 16px; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    pre { background: var(--code); border:1px solid var(--border); border-radius:12px; padding:14px; overflow:auto; }
+    .k { color:#93c5fd; }
+    .tip { border-left: 4px solid var(--accent); padding-left: 12px; color: var(--muted); }
+    ul { margin: 10px 0 0 18px; }
+    li { margin: 6px 0; }
+    .hr { height:1px; background: var(--border); margin:18px 0; }
   </style>
 </head>
 <body>
   <header>
-    <div style="max-width:980px;margin:0 auto;padding:0 20px;">
-      <p class="kicker">Tutorial • AgentBay</p>
-      <h1>Build an MCP Tool in AgentBay: Service Modules + Phases</h1>
-      <p class="muted">This guide shows the typical AgentBay pattern for adding a new MCP tool: implement a service module, expose it in a phase file, and wire it into the main dispatcher.</p>
-    </div>
+    <main>
+      <h1>How to use AgentBay MCP tools: a practical guide</h1>
+      <p class="subtitle">
+        This page shows a repeatable workflow for <strong>discovering tools</strong>, <strong>calling tools</strong> via JSON-RPC,
+        and <strong>composing multi-step tool-first automations</strong> against an MCP server.
+      </p>
+    </main>
   </header>
 
   <main>
-    <div class="card">
-      <div class="grid">
-        <div>
-          <div class="tag">When to use</div>
-          <p>Add a new capability (a “tool”) that should be available to agents via MCP, and keep the implementation isolated by vertical or domain.</p>
-        </div>
-        <div>
-          <div class="tag">What you’ll build</div>
-          <p>A new service module in <code>src/services/</code>, a new phase file that lists the tool(s), and dispatcher wiring in <code>src/mcp-tools.js</code>.</p>
-        </div>
-        <div>
-          <div class="tag">Expected outcome</div>
-          <p>Your tool appears in MCP <code>tools/list</code>, and calls route to the right handler implementation.</p>
-        </div>
-      </div>
-    </div>
+    <div class="grid">
+      <section class="card">
+        <h2>1) Discover what tools exist</h2>
+        <p class="tip">Start with <code>tools/list</code>. It returns tool names and JSON schemas you can use to build calls.</p>
+        <pre><code>curl -s -X POST https://www.hiveagentiq.com/mcp \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: AgentBay-Tutorial/1.0" \
+  -d '{
+    "jsonrpc":"2.0",
+    "id": 1,
+    "method": "tools/list",
+    "params": {}
+  }'</code></pre>
+        <div class="hr"></div>
 
-    <h2>Architecture at a glance</h2>
-    <div class="card">
-      <p class="muted">AgentBay typically separates concerns into three layers:</p>
-      <ul>
-        <li><strong>Service module</strong> (vertical implementation): domain logic + external API calls.</li>
-        <li><strong>MCP tools phase file</strong>: tool definitions (name, description, input schema) grouped for maintainability.</li>
-        <li><strong>Main MCP router</strong> (<code>src/mcp-tools.js</code>): combines tool arrays and dispatches tool calls to service handlers.</li>
-      </ul>
-    </div>
-
-    <h2>Step 1 — Create a service module</h2>
-    <div class="card steps">
-      <ol>
-        <li>Create a new file under <code>src/services/</code> named for the vertical (example: <code>src/services/security-posture.js</code>).</li>
-        <li>Export a handler function that accepts <code>(args, ctx)</code> (or whatever the project’s convention is) and returns a JSON-serializable result.</li>
-        <li>Keep I/O boundaries explicit: validate inputs, call the external dependency, normalize the output.</li>
-      </ol>
-    </div>
-
-    <h3>Example skeleton</h3>
-    <pre><code>// src/services/security-posture.js
-
-export async function checkSecurityPosture(args, ctx) {
-  const { target } = args;
-  if (!target) {
-    return { ok: false, error: "Missing required field: target" };
-  }
-
-  // 1) Call dependency (API / internal library)
-  // 2) Normalize response
-  // 3) Return a stable shape for downstream agents
-  return {
-    ok: true,
-    target,
-    summary: "...",
-    findings: []
-  };
-}
-</code></pre>
-
-    <h2>Step 2 — Define the tool in a phase file</h2>
-    <div class="card steps">
-      <ol>
-        <li>Add a new phase file, e.g. <code>src/mcp-tools-phase64.js</code>.</li>
-        <li>Export an array (or a function returning an array) of tool specs.</li>
-        <li>Each tool spec should include a name, description, and JSON Schema for inputs.</li>
-      </ol>
-    </div>
-
-    <h3>Example tool definition</h3>
-    <pre><code>// src/mcp-tools-phase64.js
-
-export const toolsPhase64 = [
-  {
-    name: "security_posture_check",
-    description: "Assess a target's security posture from public signals.",
-    inputSchema: {
-      type: "object",
-      additionalProperties: false,
-      properties: {
-        target: { type: "string", description: "Domain or identifier" }
-      },
-      required: ["target"]
+        <h2>2) Call a tool (the MCP way)</h2>
+        <p>
+          MCP tool calls use <code>tools/call</code> with a <code>name</code> and a structured <code>arguments</code> object.
+          Treat the tool schema like an API contract.
+        </p>
+        <pre><code>curl -s -X POST https://www.hiveagentiq.com/mcp \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: AgentBay-Tutorial/1.0" \
+  -d '{
+    "jsonrpc":"2.0",
+    "id": 2,
+    "method": "tools/call",
+    "params": {
+      "name": "example__tool_name",
+      "arguments": {
+        "input": "hello"
+      }
     }
-  }
-];
-</code></pre>
+  }'</code></pre>
 
-    <h2>Step 3 — Wire the phase file into <code>mcp-tools.js</code></h2>
-    <div class="card steps">
-      <ol>
-        <li>Import your new phase export and add it to the combined <code>toolsArray</code> (or equivalent aggregator).</li>
-        <li>Import your new service handler(s).</li>
-        <li>Extend the dispatch chain so calls to <code>security_posture_check</code> route to <code>checkSecurityPosture</code>.</li>
-      </ol>
+        <p class="tip">
+          If a call fails, read the error payload and adjust the <code>arguments</code> to match the schema.
+          Most integration mistakes are "shape" mistakes.
+        </p>
+        <div class="hr"></div>
+
+        <h2>3) Compose a tool-first workflow</h2>
+        <p>
+          Many useful agents follow a simple pattern:
+        </p>
+        <ul>
+          <li><strong>Plan</strong>: decide which tools and parameters you need.</li>
+          <li><strong>Fetch</strong>: call tools to gather facts and state.</li>
+          <li><strong>Transform</strong>: compute derived fields (scores, rankings, diffs).</li>
+          <li><strong>Act</strong>: call tools that write, send, book, or update.</li>
+          <li><strong>Verify</strong>: re-fetch to confirm the action took effect.</li>
+        </ul>
+
+        <h3>Example: "find then act" flow</h3>
+        <pre><code>// pseudo-code
+const tools = await toolsList();
+const candidates = await toolsCall("search__something", { query: "..." });
+const best = rank(candidates);
+await toolsCall("create__something", { ...best });
+const confirmation = await toolsCall("get__something", { id: confirmationId });</code></pre>
+      </section>
+
+      <aside class="card">
+        <h2>Tool calling checklist</h2>
+        <ul>
+          <li><strong>Use <code>tools/list</code> first</strong> to get tool names and schemas.</li>
+          <li><strong>Validate input types</strong> (string vs number, arrays vs objects).</li>
+          <li><strong>Prefer deterministic fields</strong> (IDs, ISO timestamps) over free-text.</li>
+          <li><strong>Log responses</strong> during development.</li>
+          <li><strong>Retry safely</strong> only for idempotent calls.</li>
+        </ul>
+
+        <div class="hr"></div>
+
+        <h2>Common pitfalls</h2>
+        <ul>
+          <li>Using the wrong tool name prefix.</li>
+          <li>Missing required fields from the schema.</li>
+          <li>Sending a number as a string (or vice versa).</li>
+          <li>Not handling paginated results.</li>
+        </ul>
+
+        <div class="hr"></div>
+
+        <h2>Next steps</h2>
+        <ul>
+          <li>Write a small script that: list → call → call → verify.</li>
+          <li>Wrap calls in a tiny client with JSON schema validation.</li>
+          <li>Track tool counts and regressions over time.</li>
+        </ul>
+      </aside>
     </div>
 
-    <h3>Dispatcher pattern (illustrative)</h3>
-    <pre><code>// src/mcp-tools.js
-
-import { toolsPhase64 } from "./mcp-tools-phase64.js";
-import { checkSecurityPosture } from "./services/security-posture.js";
-
-const toolsArray = [
-  // ...previous phases...
-  ...toolsPhase64
-];
-
-export async function handleToolCall(name, args, ctx) {
-  if (name === "security_posture_check") {
-    return checkSecurityPosture(args, ctx);
-  }
-  // ...other handlers...
-  throw new Error(`Unknown tool: ${name}`);
-}
-</code></pre>
-
-    <h2>Step 4 — Sanity-check locally</h2>
-    <div class="card">
-      <ul>
-        <li>Run a syntax check on the dispatcher file: <code>node --check src/mcp-tools.js</code></li>
-        <li>Optionally run whatever unit tests or smoke tests exist in the repository.</li>
-      </ul>
-      <p class="muted">Tip: if the repo uses ESM, ensure your new module exports align with the existing import style.</p>
-    </div>
-
-    <h2>Common pitfalls</h2>
-    <div class="card">
-      <ul>
-        <li><strong>Name mismatches</strong>: tool name in phase file must match dispatch string exactly.</li>
-        <li><strong>Schema drift</strong>: document required fields and keep schemas strict (<code>additionalProperties: false</code> where possible).</li>
-        <li><strong>Non-deterministic outputs</strong>: normalize external responses so agents get stable shapes.</li>
-        <li><strong>Silent failures</strong>: return actionable error fields rather than empty objects.</li>
-      </ul>
-    </div>
-
-    <h2>Next steps</h2>
-    <div class="card">
-      <p>Once you have the pattern working, consider:</p>
-      <ul>
-        <li>Adding basic validation helpers shared across services.</li>
-        <li>Creating “vertical bundles” that group related tools for easier discovery.</li>
-        <li>Writing a short example prompt for agents showing how to call the tool.</li>
-      </ul>
-    </div>
+    <p class="subtitle" style="margin-top: 22px;">
+      Note: This guide is intentionally tool-agnostic. Use the tool schemas returned by <code>tools/list</code> to discover real tool names and required arguments.
+    </p>
   </main>
-
-  <footer>
-    <div style="max-width:980px;margin:0 auto;padding:0 20px;">
-      <div>AgentBay tutorial page. Last updated: 2026-04-11.</div>
-    </div>
-  </footer>
 </body>
 </html>
