@@ -112,6 +112,7 @@ import { phase71Tools, handlePhase71Tool } from "./mcp-tools-phase71-lab-shippin
 import { phase72Tools, handlePhase72Tool } from "./mcp-tools-phase72-hospitality-mobility.js";
 import { phase73Tools, handlePhase73Tool } from "./mcp-tools-phase73-waste-deathcare.js";
 import { phase74Tools, handlePhase74Tool } from "./mcp-tools-phase74-forestry-water.js";
+import { phase75Tools, handlePhase75Tool } from "./mcp-tools-phase75-ports-outages.js";
 import { onboardingTools, handleOnboardingTool } from "./mcp-tools-onboarding.js";
 import { welcomeTools, handleWelcomeTool } from "./mcp-tools-welcome.js";
 // THE AGENT HIGHWAY — enter with a task, exit with a result (7 tools)
@@ -1098,7 +1099,7 @@ export function handleBrokerTool(name, args = {}) {
 
 
 export const tools = [...discoveryInfraTools, ...atomicLoopTools, ...retentionTools, ...agentRecruiterTools, ...marketingEngineTools, ...networkEffectTools, ...highwayTools, ...originalsTools, ...anthropicTools, ...baitTools, ...welcomeTools, ...coreTools, ...newTools, ...verticalTools, ...workflowTools, ...moneyTools, ...internalTools, ...shoulderTapTools, ...lifecycleTools, ...loaderPaymentTools, ...phase10Tools, ...phase11Tools, ...phase12Tools, ...phase13Tools, ...phase14Tools, ...phase15Tools, ...phase16Tools, ...phase17Tools, ...phase18Tools, ...phase19Tools, ...phase20Tools, ...phase21Tools, ...phase22Tools, ...phase23Tools, ...phase24Tools, ...phase25Tools, ...pharmaTxTools, ...railsTools, ...brokerTools, ...custodyTools, ...phase2730Tools, ...phase3133Tools, ...phase3436Tools, ...phase3739Tools, ...phase4042Tools, ...phase4345Tools, ...phase46Tools, ...phase47Tools, ...phase4849Tools, ...phase48Tools, ...phase4951Tools, ...phase5254Tools, ...phase55Tools, ...phase63Tools, ...phase64Tools, ...phase65EmailOpsTools, ...phase66Tools, ...phase67Tools,
-  ...phase6869Tools, ...phase70Tools, ...phase71Tools, ...phase72Tools, ...phase73Tools, ...phase74Tools, ...phase5562Tools, ...onboardingTools, ...arcCommerceTools, ...plaidBankrTools, ...circleRouterTools, ...x402UptoTools, ...exchangeErc8183Tools, ...geminiImprovementTools, ...swarmVerticalTools, ...constructionTools, ...zkDelegationTools, ...microStakingTools, ...pheromoneTools];
+  ...phase6869Tools, ...phase70Tools, ...phase71Tools, ...phase72Tools, ...phase73Tools, ...phase74Tools, ...phase75Tools, ...phase5562Tools, ...onboardingTools, ...arcCommerceTools, ...plaidBankrTools, ...circleRouterTools, ...x402UptoTools, ...exchangeErc8183Tools, ...geminiImprovementTools, ...swarmVerticalTools, ...constructionTools, ...zkDelegationTools, ...microStakingTools, ...pheromoneTools];
 
 // Post-process: ensure all tools have annotations and parameter descriptions
 const paramDescMap = {
@@ -2073,6 +2074,7 @@ export async function handleTool(name, args) {
   if (name.startsWith("restaurant_") || name.startsWith("mobility_")) return await handlePhase72Tool(name, args);
   if (name.startsWith("waste_") || name.startsWith("recycling_") || name.startsWith("funeral_") || name.startsWith("obituary_")) return await handlePhase73Tool(name, args);
   if (name.startsWith("forestry_") || name.startsWith("water_")) return await handlePhase74Tool(name, args);
+  if (name.startsWith("port_") || name.startsWith("outage_")) return await handlePhase75Tool(name, args);
     case "spaceweather_register_asset":        return await handlePhase67Tool(name, args);
     case "spaceweather_assess_risk":           return await handlePhase67Tool(name, args);
     case "spaceweather_dashboard":             return await handlePhase67Tool(name, args);
