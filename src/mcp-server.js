@@ -1,15 +1,23 @@
 /**
  * HiveAgent MCP Server
  *
- * Implements Model Context Protocol over HTTP+SSE for agent connectivity.
+ * Implements Model Context Protocol over Streamable HTTP for agent connectivity.
  * Agents connect to this server to discover and use HiveAgent tools.
  *
- * Protocol: JSON-RPC 2.0 over HTTP (simplified MCP)
- * Endpoint: POST /mcp
+ * Protocol: JSON-RPC 2.0 over Streamable HTTP (MCP 2025-03-26)
+ * Endpoint: POST /mcp (required), GET /mcp (SSE stream), DELETE /mcp (session close)
  *
  * Supports:
+ * - initialize → protocol handshake
+ * - notifications/initialized → client ready ack
  * - tools/list → returns available tools (with cost annotations)
  * - tools/call → executes a tool (sandbox-aware)
+ * - resources/list, prompts/list, prompts/get
+ *
+ * Transport: Streamable HTTP
+ * - POST returns application/json or text/event-stream based on Accept header
+ * - GET opens an SSE stream for server-initiated messages
+ * - Mcp-Session-Id header for session tracking
  */
 
 import { Router } from "express";
@@ -21,6 +29,9 @@ import { getToolsForVertical } from "./services/dynamic-loader.js";
 import { getToolFee, toolFee } from "./tool-fees.js";
 
 const router = Router();
+
+// ─── Session tracking for Streamable HTTP ────────────────────────────────────
+const sessions = new Map(); // sessionId → { created, sseRes (if GET /mcp is open) }
 
 // ─── In-memory agent registry (persists for server lifetime) ─────────────────
 const registeredAgents = new Set();
@@ -135,22 +146,96 @@ function generateMockResult(toolName, args) {
   };
 }
 
+// ─── Helper: send JSON-RPC response (plain JSON or SSE based on Accept header) ───
+function sendJsonRpcResponse(req, res, response, sessionId) {
+  const acceptsSSE = (req.headers.accept || "").includes("text/event-stream");
+  if (acceptsSSE) {
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    if (sessionId) res.setHeader("Mcp-Session-Id", sessionId);
+    res.write(`event: message\ndata: ${JSON.stringify(response)}\n\n`);
+    res.end();
+  } else {
+    if (sessionId) res.setHeader("Mcp-Session-Id", sessionId);
+    res.json(response);
+  }
+}
+
+// ─── GET /mcp — SSE stream + info endpoint for Streamable HTTP ───────────────
+router.get("/", (req, res) => {
+  const acceptsSSE = (req.headers.accept || "").includes("text/event-stream");
+  if (!acceptsSSE) {
+    // Non-SSE GET: return server info (existing behavior)
+    return res.json({
+      name: "HiveAgent MCP Server",
+      version: "1.0.0",
+      description: `HiveAgent — ${tools.length} tools, 45+ verticals. The operating system for the agentic economy. hiveagentiq.com`,
+      protocol: "MCP (JSON-RPC 2.0 over Streamable HTTP)",
+      tools: tools.length,
+      endpoint: "POST /mcp",
+      sandbox: "Add ?sandbox=true or X-HiveAgent-Sandbox: true header for free mock testing",
+    });
+  }
+
+  // SSE stream for server-initiated messages
+  const sessionId = req.headers["mcp-session-id"];
+  if (!sessionId || !sessions.has(sessionId)) {
+    return res.status(400).json({ error: "Invalid or missing Mcp-Session-Id" });
+  }
+
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("Mcp-Session-Id", sessionId);
+  res.flushHeaders();
+
+  const session = sessions.get(sessionId);
+  session.sseRes = res;
+
+  const keepAlive = setInterval(() => { try { res.write(": ping\n\n"); } catch {} }, 30000);
+
+  req.on("close", () => {
+    clearInterval(keepAlive);
+    if (session && session.sseRes === res) session.sseRes = null;
+  });
+});
+
+// ─── DELETE /mcp — Session termination ─────────────────────────────────
+router.delete("/", (req, res) => {
+  const sessionId = req.headers["mcp-session-id"];
+  if (sessionId && sessions.has(sessionId)) {
+    const session = sessions.get(sessionId);
+    if (session.sseRes) { try { session.sseRes.end(); } catch {} }
+    sessions.delete(sessionId);
+  }
+  res.status(200).json({ status: "session_closed" });
+});
+
 // ─── MCP JSON-RPC endpoint ─────────────────────────────────────────────────
 router.post("/", async (req, res) => {
   const { jsonrpc, method, params, id } = req.body;
 
   if (jsonrpc !== "2.0") {
-    return res.json({ jsonrpc: "2.0", error: { code: -32600, message: "Invalid Request — must be JSON-RPC 2.0" }, id });
+    return sendJsonRpcResponse(req, res, { jsonrpc: "2.0", error: { code: -32600, message: "Invalid Request — must be JSON-RPC 2.0" }, id });
   }
 
   try {
     switch (method) {
       // ─── Initialize ─────────────────────────────────
       case "initialize": {
-        return res.json({
+        // Create a new session for Streamable HTTP
+        sessionId = crypto.randomUUID();
+        sessions.set(sessionId, { created: Date.now(), sseRes: null });
+        // Clean up old sessions (>1h)
+        const cutoff = Date.now() - 3600000;
+        for (const [sid, s] of sessions) {
+          if (s.created < cutoff) { if (s.sseRes) { try { s.sseRes.end(); } catch {} } sessions.delete(sid); }
+        }
+        return sendJsonRpcResponse(req, res, {
           jsonrpc: "2.0",
           result: {
-            protocolVersion: "2024-11-05",
+            protocolVersion: "2025-03-26",
             capabilities: { tools: { listChanged: false }, prompts: { listChanged: false }, resources: { listChanged: false } },
             serverInfo: {
               name: "HiveAgent",
@@ -164,7 +249,14 @@ router.post("/", async (req, res) => {
             },
           },
           id,
-        });
+        }, sessionId);
+      }
+
+      // ─── Notifications (no response for JSON-RPC notifications) ───
+      case "notifications/initialized":
+      case "notifications/cancelled": {
+        if (!id) return res.status(202).end();
+        return sendJsonRpcResponse(req, res, { jsonrpc: "2.0", result: {}, id }, sessionId);
       }
 
       // ─── List Tools ─────────────────────────────────
@@ -438,25 +530,14 @@ router.post("/", async (req, res) => {
         });
     }
   } catch (e) {
-    return res.json({
+    return sendJsonRpcResponse(req, res, {
       jsonrpc: "2.0",
       error: { code: -32000, message: e.message },
       id,
-    });
+    }, sessionId);
   }
 });
 
-// Health/info endpoint
-router.get("/", (_req, res) => {
-  res.json({
-    name: "HiveAgent MCP Server",
-    version: "1.0.0",
-    description: `HiveAgent — ${tools.length} tools, 45+ verticals. The operating system for the agentic economy. hiveagentiq.com`,
-    protocol: "MCP (JSON-RPC 2.0 over HTTP)",
-    tools: tools.length,
-    endpoint: "POST /mcp",
-    sandbox: "Add ?sandbox=true or X-HiveAgent-Sandbox: true header for free mock testing",
-  });
-});
+
 
 export default router;
