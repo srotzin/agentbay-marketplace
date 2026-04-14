@@ -2,6 +2,22 @@ import { v4 as uuid } from "uuid";
 import db from "../db.js";
 
 // ─── Schema Initialization ────────────────────────────────────────────────────
+// Migration-safe: if audit_log exists with incompatible schema, recreate it.
+
+try {
+  // Check if existing audit_log has tenant_id column
+  const hasCorrectSchema = (() => {
+    try {
+      db.prepare("SELECT tenant_id FROM audit_log LIMIT 0").run();
+      return true;
+    } catch { return false; }
+  })();
+
+  if (!hasCorrectSchema) {
+    // Drop old incompatible table (from simple request_log migration)
+    db.exec("DROP TABLE IF EXISTS audit_log");
+  }
+} catch { /* table doesn't exist yet — fine */ }
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS audit_log (

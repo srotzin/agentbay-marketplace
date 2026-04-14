@@ -20,11 +20,11 @@ const RETENTION_DAYS = 7;
 export function initAuditLogger(database) {
   db = database;
   stmtInsert = db.prepare(
-    `INSERT INTO audit_log (endpoint, method, agent_id, ip, status_code, success, duration_ms, created_at)
+    `INSERT INTO request_log (endpoint, method, agent_id, ip, status_code, success, duration_ms, created_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))`
   );
   stmtCleanup = db.prepare(
-    `DELETE FROM audit_log WHERE created_at < datetime('now', ?)`
+    `DELETE FROM request_log WHERE created_at < datetime('now', ?)`
   );
 
   // Auto-cleanup logs older than RETENTION_DAYS, every hour

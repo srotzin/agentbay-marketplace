@@ -127,8 +127,8 @@ db.exec(`
     PRIMARY KEY (key, window_start)
   );
 
-  -- Request audit trail
-  CREATE TABLE IF NOT EXISTS audit_log (
+  -- HTTP request audit trail (separate from services/audit.js business audit_log)
+  CREATE TABLE IF NOT EXISTS request_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     endpoint TEXT NOT NULL,
     method TEXT NOT NULL,
@@ -140,7 +140,7 @@ db.exec(`
     created_at TEXT DEFAULT (datetime('now'))
   );
 
-  CREATE INDEX IF NOT EXISTS idx_audit_log_created ON audit_log(created_at);
+  CREATE INDEX IF NOT EXISTS idx_request_log_created ON request_log(created_at);
   CREATE INDEX IF NOT EXISTS idx_rate_limits_window ON rate_limits(window_start);
 `);
 
