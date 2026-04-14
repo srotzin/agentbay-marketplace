@@ -216,6 +216,9 @@ router.delete("/", (req, res) => {
 router.post("/", async (req, res) => {
   const { jsonrpc, method, params, id } = req.body;
 
+  // Track session via header (mutable — initialize assigns a new one)
+  let sessionId = req.headers["mcp-session-id"] || null;
+
   if (jsonrpc !== "2.0") {
     return sendJsonRpcResponse(req, res, { jsonrpc: "2.0", error: { code: -32600, message: "Invalid Request — must be JSON-RPC 2.0" }, id });
   }
