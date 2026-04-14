@@ -7,9 +7,13 @@ import apiRoutes from "./routes/api.js";
 import mcpServer from "./mcp-server.js";
 import x402Services from "./routes/x402-services.js";
 import settlementApi from "./routes/settlement-api.js";
-import { initPayments } from "./services/payments.js";
+import { initPayments, initPaymentDb } from "./services/payments.js";
 import * as agentBroker from "./services/agent-broker.js";
 import { routeIntent } from "./services/intent-router.js";
+import { initRateLimiter, rateLimitMiddleware } from "./middleware/rate-limiter.js";
+import { initAuditLogger, auditLogMiddleware } from "./middleware/audit-logger.js";
+import { ipAllowlistMiddleware } from "./middleware/ip-allowlist.js";
+import db from "./db.js";
 import { getRailsStats, getTokenRegistry, settleAgentTransaction } from "./services/agent-token-rails.js";
 import {
   createSmartWallet,
@@ -47,11 +51,16 @@ app.use((req, res, next) => {
   next();
 });
 
-// ─── Rate Limit Tracking (in-memory; upgrade to Redis in production) ─────────
-const rateLimits = new Map();
+// ─── Security: Service Key (no hardcoded fallback) ────────────────────────────
+const INTERNAL_TOKEN = process.env.HIVEAGENT_SERVICE_KEY || process.env.INTERNAL_API_TOKEN || "";
 
-// Internal API token for cron/automation access
-const INTERNAL_TOKEN = process.env.INTERNAL_API_TOKEN || "hiveagent-internal-2026";
+// ─── Initialize security middleware ───────────────────────────────────────────
+initRateLimiter(db);
+initAuditLogger(db);
+initPaymentDb(db);
+
+// ─── Global audit logging (after express.json) ───────────────────────────────
+app.use(auditLogMiddleware);
 
 // ─── A2A Agent Card (/.well-known/agent-card.json) ──────────────────────────
 app.get("/.well-known/agent-card.json", (req, res) => {
@@ -154,40 +163,11 @@ app.get("/tools-sitemap.json", (_req, res) => {
   });
 });
 
-app.use("/mcp", (req, res, next) => {
-  // Allow internal cron/automation requests with token
-  if (req.headers["x-internal-token"] === INTERNAL_TOKEN) {
-    return next();
-  }
-  const agentId = req.headers["x-agent-id"] || req.ip;
-  const now = Date.now();
-  const window = 60000; // 1 minute
-
-  if (!rateLimits.has(agentId)) rateLimits.set(agentId, []);
-  const calls = rateLimits.get(agentId).filter(t => now - t < window);
-  calls.push(now);
-  rateLimits.set(agentId, calls);
-
-  const limit = 1000; // 1000 calls/minute
-  const remaining = Math.max(0, limit - calls.length);
-
-  res.set({
-    "X-RateLimit-Limit":     String(limit),
-    "X-RateLimit-Remaining": String(remaining),
-    "X-RateLimit-Reset":     String(Math.ceil((now + window) / 1000)),
-    "X-RateLimit-Window":    "60s",
-  });
-
-  if (calls.length > limit) {
-    return res.status(429).json({
-      error:       "Rate limit exceeded",
-      retry_after: 60,
-      limit,
-      window:      "60s",
-    });
-  }
-  next();
-});
+// ─── Rate Limiting (SQLite-backed, tier-aware, all routes) ───────────────────
+app.use("/mcp", rateLimitMiddleware);
+app.use("/v1", rateLimitMiddleware);
+app.use("/api/v1", rateLimitMiddleware);
+app.use("/x402", rateLimitMiddleware);
 
 // ─── Async Job Queue (in-memory) ──────────────────────
 const jobs = new Map();
@@ -607,8 +587,8 @@ app.use("/mcp", mcpServer);
 // x402 Direct Service Endpoints — agents pay per-request in USDC
 app.use("/x402", x402Services);
 
-// Settlement & Escrow API — agent-to-agent transactions
-app.use("/api/v1/settlement", settlementApi);
+// Settlement & Escrow API — agent-to-agent transactions (IP allowlist + auth)
+app.use("/api/v1/settlement", ipAllowlistMiddleware, settlementApi);
 
 // ─── A2A Tokenization Rails — REST Endpoints ─────────────────────────────────
 
@@ -931,10 +911,10 @@ app.get("/", (req, res) => {
 
 // ─── Internal MCP endpoint (bypasses Cloudflare bot challenge) ───────────────
 // Add Cloudflare Page Rule: hiveagentiq.com/internal/* → Security Level: Essentially Off
-app.post("/internal/mcp", express.json(), async (req, res) => {
+app.post("/internal/mcp", ipAllowlistMiddleware, express.json(), async (req, res) => {
   const token = req.headers["x-internal-token"] || req.query.token;
-  const validToken = process.env.INTERNAL_API_TOKEN || "hiveagent-internal-2026";
-  if (token !== validToken) {
+  const validToken = process.env.HIVEAGENT_SERVICE_KEY || process.env.INTERNAL_API_TOKEN || "";
+  if (!validToken || token !== validToken) {
     return res.status(401).json({ error: "Unauthorized" });
   }
   // Forward to the same MCP handler
@@ -955,10 +935,10 @@ app.post("/internal/mcp", express.json(), async (req, res) => {
 });
 
 // ─── Internal stats endpoint (bypasses Cloudflare) ───────────────────────────
-app.get("/internal/stats", async (req, res) => {
+app.get("/internal/stats", ipAllowlistMiddleware, async (req, res) => {
   const token = req.headers["x-internal-token"] || req.query.token;
-  const validToken = process.env.INTERNAL_API_TOKEN || "hiveagent-internal-2026";
-  if (token !== validToken) return res.status(401).json({ error: "Unauthorized" });
+  const validToken = process.env.HIVEAGENT_SERVICE_KEY || process.env.INTERNAL_API_TOKEN || "";
+  if (!validToken || token !== validToken) return res.status(401).json({ error: "Unauthorized" });
   try {
     const { getStats } = await import("./services/analytics-telemetry.js");
     res.json(getStats({ period: "24h" }));

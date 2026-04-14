@@ -109,6 +109,39 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_bids_auction ON bids(auction_id);
   CREATE INDEX IF NOT EXISTS idx_transactions_provider ON transactions(provider_id);
   CREATE INDEX IF NOT EXISTS idx_transactions_agent ON transactions(agent_id);
+
+  -- ─── Security Sprint Tables ────────────────────────────
+
+  -- Replay protection: track spent payment tx hashes
+  CREATE TABLE IF NOT EXISTS spent_payments (
+    tx_hash TEXT PRIMARY KEY,
+    amount_usd REAL,
+    verified_at TEXT DEFAULT (datetime('now'))
+  );
+
+  -- Persistent rate limit counters (key = IP:agent-id, window = 15min epoch)
+  CREATE TABLE IF NOT EXISTS rate_limits (
+    key TEXT NOT NULL,
+    window_start INTEGER NOT NULL,
+    count INTEGER DEFAULT 0,
+    PRIMARY KEY (key, window_start)
+  );
+
+  -- Request audit trail
+  CREATE TABLE IF NOT EXISTS audit_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    endpoint TEXT NOT NULL,
+    method TEXT NOT NULL,
+    agent_id TEXT,
+    ip TEXT,
+    status_code INTEGER,
+    success INTEGER,
+    duration_ms INTEGER,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_audit_log_created ON audit_log(created_at);
+  CREATE INDEX IF NOT EXISTS idx_rate_limits_window ON rate_limits(window_start);
 `);
 
 export default db;

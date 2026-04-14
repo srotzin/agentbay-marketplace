@@ -9,6 +9,17 @@ import { getOrCreateAgentWallet, getOnChainStats, getAgentOnChainHistory, proces
 
 const router = Router();
 
+// ─── Auth Middleware (all settlement routes) ────────────────────────────
+router.use((req, res, next) => {
+  const serviceKey = process.env.HIVEAGENT_SERVICE_KEY || process.env.INTERNAL_API_TOKEN || "";
+  const token = req.headers["x-hive-internal-key"] || req.headers["x-api-key"];
+
+  if (!serviceKey || token !== serviceKey) {
+    return res.status(401).json({ error: "Unauthorized: valid service key required for settlement operations" });
+  }
+  next();
+});
+
 // ─── Escrow ──────────────────────────────────────
 
 router.post("/escrow/lock", (req, res) => {
