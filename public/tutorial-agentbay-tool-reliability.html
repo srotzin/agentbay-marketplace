@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reliable MCP Tools in Production: Idempotency, Timeouts, Retries, and Observability</title>
+  <meta name="description" content="A practical guide to building reliable MCP tools: idempotency keys, timeouts, retries with backoff, circuit breakers, rate limits, and observability." />
+  <link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body>
+  <header class="container">
+    <nav class="nav">
+      <a href="/">Home</a>
+      <a href="/docs/">Docs</a>
+      <a href="/compare.html">Compare</a>
+      <a href="/snippets.html">Snippets</a>
+      <a href="/pricing.html">Pricing</a>
+      <a href="/status.html">Status</a>
+    </nav>
+    <h1>Reliable MCP Tools in Production</h1>
+    <p class="muted">Idempotency, timeouts, retries, rate limits, circuit breakers, and observability — with copy/paste patterns.</p>
+  </header>
+
+  <main class="container prose">
+    <section>
+      <h2>Why reliability is different for agent tools</h2>
+      <p>
+        Agent tools are invoked programmatically, often in parallel, sometimes repeatedly, and frequently under partial context.
+        The tool layer is where you want to be strict: it should be safe to retry, predictable under load, and measurable.
+      </p>
+      <ul>
+        <li><strong>Retries happen</strong>: the agent runtime may retry on network errors or timeouts.</li>
+        <li><strong>Inputs drift</strong>: tools get called with imperfect data; validation is not optional.</li>
+        <li><strong>Costs matter</strong>: APIs can be expensive; you need budget-aware guardrails.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>1) Make writes idempotent</h2>
+      <p>
+        Any tool that creates, updates, or sends something (tickets, emails, payments, database rows) should accept an
+        <code>idempotencyKey</code> and treat repeated calls as safe.
+      </p>
+      <h3>Minimal contract</h3>
+      <pre><code>{
+  "idempotencyKey": "string",
+  "request": { "...": "..." }
+}</code></pre>
+      <h3>Behavior</h3>
+      <ul>
+        <li>If a request with the same <code>idempotencyKey</code> already succeeded, return the original success response.</li>
+        <li>If it is currently in-progress, return a deterministic “in progress” response or block until completion.</li>
+        <li>If the previous attempt failed, either allow retry (recommended) or return a stable failure.</li>
+      </ul>
+      <p class="muted">
+        Tip: keep an idempotency store keyed by <code>(toolName, idempotencyKey)</code> with a TTL.
+      </p>
+    </section>
+
+    <section>
+      <h2>2) Use explicit timeouts everywhere</h2>
+      <p>
+        A tool should fail quickly and clearly when downstream calls stall.
+        Prefer multiple short timeouts (DNS/connect/read) over one long “overall” timeout.
+      </p>
+      <ul>
+        <li><strong>Connect timeout</strong>: 2–5s</li>
+        <li><strong>Read timeout</strong>: 15–30s (depends on API)</li>
+        <li><strong>Overall timeout</strong>: 30–60s for most tools</li>
+      </ul>
+      <p>
+        If a workflow may take minutes, consider a pattern with <em>start</em> + <em>poll</em> tools instead of a single long call.
+      </p>
+    </section>
+
+    <section>
+      <h2>3) Retries: only for safe failures, with backoff + jitter</h2>
+      <p>
+        Retries are good for transient failures (HTTP 429/503, network resets), not for validation errors or 4xx.
+      </p>
+      <h3>Recommended policy</h3>
+      <ul>
+        <li>Max retries: 2–3</li>
+        <li>Backoff: exponential (e.g. 250ms, 1s, 4s)</li>
+        <li>Jitter: randomize delays to avoid thundering herds</li>
+        <li>Retry budget: cap total time spent retrying (e.g. 8–10s)</li>
+      </ul>
+      <h3>Retry decision table</h3>
+      <table>
+        <thead>
+          <tr><th>Failure</th><th>Retry?</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Timeout</td><td>Yes</td><td>Only if the operation is idempotent or read-only.</td></tr>
+          <tr><td>429</td><td>Yes</td><td>Respect <code>Retry-After</code> when provided.</td></tr>
+          <tr><td>502/503/504</td><td>Yes</td><td>Classic transient gateway/API issues.</td></tr>
+          <tr><td>400/401/403/404</td><td>No</td><td>Fix input/auth; retries waste tokens and money.</td></tr>
+          <tr><td>Validation error</td><td>No</td><td>Return a precise error and stop.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>4) Rate limiting and concurrency control</h2>
+      <p>
+        Tools should protect downstream systems and prevent accidental fan-out.
+        Implement both per-user rate limits and global concurrency caps.
+      </p>
+      <ul>
+        <li><strong>Per-user limits</strong>: protect you from runaway agents and unexpected loops.</li>
+        <li><strong>Global limits</strong>: keep the whole service stable under bursty traffic.</li>
+        <li><strong>Concurrency caps per tool</strong>: expensive tools should have stricter limits than cheap ones.</li>
+      </ul>
+      <p class="muted">
+        If you can return a partial response (e.g., first 20 results) do it — it often avoids retries.
+      </p>
+    </section>
+
+    <section>
+      <h2>5) Circuit breakers and graceful degradation</h2>
+      <p>
+        If a dependency is failing, stop hammering it.
+        A circuit breaker flips “open” after repeated failures and returns a fast error for a cooling period.
+      </p>
+      <h3>What to return when open</h3>
+      <ul>
+        <li>A stable error code (e.g. <code>DEPENDENCY_UNAVAILABLE</code>)</li>
+        <li>A short message describing what to do next (retry later, use alternative tool, reduce scope)</li>
+        <li>Optional: a fallback path (cached response, reduced fidelity)</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>6) Validation: reject early, return structured errors</h2>
+      <p>
+        Tool inputs should be strictly validated and errors should be actionable.
+        Prefer machine-parseable errors so an agent can correct itself.
+      </p>
+      <pre><code>{
+  "error": {
+    "code": "INVALID_ARGUMENT",
+    "message": "startDate must be ISO-8601 (YYYY-MM-DD)",
+    "field": "startDate"
+  }
+}</code></pre>
+      <p>
+        For enumerations (country codes, currencies, statuses), normalize and validate.
+        If the agent sends close-but-not-valid values, return the allowed set.
+      </p>
+    </section>
+
+    <section>
+      <h2>7) Observability: logs, metrics, traces</h2>
+      <p>
+        Reliability is invisible until it breaks.
+        Instrument tools so you can answer: what failed, why, for whom, and how often.
+      </p>
+      <h3>Minimum metrics</h3>
+      <ul>
+        <li>Requests: count by <code>toolName</code>, status, and error code</li>
+        <li>Latency: p50/p95/p99 by <code>toolName</code></li>
+        <li>Retries: count + reasons</li>
+        <li>Rate-limited: count of 429 returned (internal or downstream)</li>
+        <li>Cost: per-call and per-user (if you pay per API call)</li>
+      </ul>
+      <h3>Structured logs</h3>
+      <ul>
+        <li>Always include: request id, tool name, user/tenant id (if available), idempotency key, duration, result status.</li>
+        <li>Never log secrets or raw PII; hash or redact.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>8) Cost guards (token/API budget)</h2>
+      <p>
+        Agents can accidentally call tools in loops.
+        Add budget checks: per-run, per-user/day, and per-tool.
+      </p>
+      <ul>
+        <li>Reject or downscope if the estimated cost exceeds the caller’s budget.</li>
+        <li>Expose a separate “estimate” tool for expensive actions (search, enrichment, extraction).</li>
+        <li>Cache aggressively for read-only endpoints.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Checklist</h2>
+      <ul>
+        <li>All write tools accept an idempotency key.</li>
+        <li>Timeouts set at every HTTP boundary.</li>
+        <li>Retries only for safe, transient failure modes.</li>
+        <li>Rate limits and concurrency caps in place.</li>
+        <li>Circuit breaker for flaky dependencies.</li>
+        <li>Strict input validation with structured errors.</li>
+        <li>Metrics + structured logs + traces (where possible).</li>
+        <li>Budget guards for expensive calls.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Related guides</h2>
+      <ul>
+        <li><a href="/tutorial-agentbay-observability.html">AgentBay observability guide</a></li>
+        <li><a href="/tutorial-agentbay-service-module-pattern.html">Service module pattern</a></li>
+        <li><a href="/tutorial-mcp-tools-local-dev.html">Local development for MCP tools</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="container">
+    <hr />
+    <p class="muted">© AgentBay • Tutorial</p>
+  </footer>
+</body>
+</html>
